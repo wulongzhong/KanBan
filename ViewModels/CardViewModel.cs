@@ -21,10 +21,8 @@ public sealed class CardViewModel : ViewModelBase
     private readonly Action<CardViewModel, int>? _onMove;
     private string _title;
     private string _description;
-    private bool _isComplete;
     private DateTime? _dueDate;
     private TimeSpan? _dueTime;
-    private bool _showCheckbox = true;
     private DateTimeOffset _updatedAt;
     private DateTimeOffset? _archivedAt;
     private string? _swimlaneId;
@@ -45,7 +43,6 @@ public sealed class CardViewModel : ViewModelBase
         _archivedAt = card.ArchivedAt;
         _title = card.Title;
         _description = card.Description;
-        _isComplete = card.IsComplete;
         _dueDate = card.DueDate?.LocalDateTime.Date;
         _dueTime = card.DueTime;
         _imagePaths.AddRange(card.Images);
@@ -129,18 +126,6 @@ public sealed class CardViewModel : ViewModelBase
 
     public bool HasPreviewImages => PreviewImages.Count > 0;
 
-    public bool IsComplete
-    {
-        get => _isComplete;
-        set
-        {
-            if (SetProperty(ref _isComplete, value))
-            {
-                Touch();
-            }
-        }
-    }
-
     public DateTime? DueDate => _dueDate;
 
     public TimeSpan? DueTime => _dueTime;
@@ -167,7 +152,7 @@ public sealed class CardViewModel : ViewModelBase
     public string TimeDisplayText =>
         HasDueTime ? DateTime.Today.Add(_dueTime!.Value).ToString("HH:mm", CultureInfo.CurrentCulture) : string.Empty;
 
-    public bool IsOverdue => HasDueDate && _dueDate!.Value < DateTime.Today && !IsComplete;
+    public bool IsOverdue => HasDueDate && _dueDate!.Value < DateTime.Today;
 
     public string DueBadge
     {
@@ -204,12 +189,6 @@ public sealed class CardViewModel : ViewModelBase
 
             return days > 0 ? $"{days}天后" : $"{Math.Abs(days)}天前";
         }
-    }
-
-    public bool ShowCheckbox
-    {
-        get => _showCheckbox;
-        set => SetProperty(ref _showCheckbox, value);
     }
 
     public bool IsEditing
@@ -320,8 +299,6 @@ public sealed class CardViewModel : ViewModelBase
             Title = string.IsNullOrWhiteSpace(Title) ? "Untitled card" : Title.Trim(),
             Description = Description.Trim(),
             Images = _imagePaths.ToList(),
-            IsComplete = IsComplete,
-            CheckChar = IsComplete ? "x" : " ",
             DueDate = _dueDate is null ? null : new DateTimeOffset(_dueDate.Value),
             DueTime = _dueTime,
             CreatedAt = CreatedAt,

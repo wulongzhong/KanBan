@@ -5,7 +5,7 @@ using KanBan.Services;
 
 var tests = new (string Name, Action Run)[]
 {
-    ("MoveCard moves cards across lanes and honors completion lanes", MoveCardAcrossLanes),
+    ("MoveCard moves cards across lanes", MoveCardAcrossLanes),
     ("ArchiveCard trims archive to configured size", ArchiveCardTrimsArchive),
     ("JsonBoardStorage round-trips board data", JsonStorageRoundTrips),
     ("EnsureSwimlanes migrates legacy boards", EnsureSwimlanesMigratesLegacyBoards),
@@ -34,7 +34,6 @@ static void MoveCardAcrossLanes()
             {
                 Id = "done",
                 Title = "Done",
-                ShouldMarkItemsComplete = true,
                 Cards = [new KanbanCard { Id = "b", Title = "B" }],
             },
         ],
@@ -45,7 +44,6 @@ static void MoveCardAcrossLanes()
     Assert(moved, "Expected move to succeed.");
     Assert(board.Lanes[0].Cards.Count == 0, "Expected source lane to be empty.");
     Assert(board.Lanes[1].Cards[0].Id == "a", "Expected moved card before target card.");
-    Assert(board.Lanes[1].Cards[0].IsComplete, "Expected completion lane to mark card complete.");
 }
 
 static void ArchiveCardTrimsArchive()

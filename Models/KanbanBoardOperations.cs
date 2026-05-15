@@ -39,11 +39,6 @@ public static class KanbanBoardOperations
             card.SwimlaneId = targetSwimlaneId;
         }
 
-        if (targetLane.ShouldMarkItemsComplete)
-        {
-            card.IsComplete = true;
-        }
-
         card.UpdatedAt = DateTimeOffset.UtcNow;
         targetLane.Cards.Insert(targetIndex, card);
         board.UpdatedAt = DateTimeOffset.UtcNow;

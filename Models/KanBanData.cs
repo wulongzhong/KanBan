@@ -89,7 +89,6 @@ public sealed class KanbanBoard
                             SwimlaneId = defaultSwimlaneId,
                             Title = "Create project shell",
                             Description = "#setup",
-                            IsComplete = true,
                             CreatedAt = now,
                             UpdatedAt = now,
                         },
@@ -134,10 +133,6 @@ public sealed partial class KanbanCard
 
     public List<string> Images { get; set; } = [];
 
-    public bool IsComplete { get; set; }
-
-    public string CheckChar { get; set; } = " ";
-
     public DateTimeOffset? DueDate { get; set; }
 
     public TimeSpan? DueTime { get; set; }
@@ -151,8 +146,6 @@ public sealed partial class KanbanCard
 
 public sealed class BoardSettings
 {
-    public bool ShowCardCheckbox { get; set; } = true;
-
     public bool HideDatesInTitles { get; set; }
 
     public bool ShowRelativeDates { get; set; } = true;

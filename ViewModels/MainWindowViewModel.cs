@@ -18,7 +18,6 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _showArchive;
     private bool _showSettings;
     private BoardViewMode _currentViewMode = BoardViewMode.Board;
-    private bool _showCardCheckbox = true;
     private bool _showRelativeDates = true;
     private bool _prependNewCards;
     private string _maxArchiveSizeText = "200";
@@ -123,19 +122,6 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsListView => CurrentViewMode == BoardViewMode.List;
 
     public bool IsTableView => CurrentViewMode == BoardViewMode.Table;
-
-    public bool ShowCardCheckbox
-    {
-        get => _showCardCheckbox;
-        set
-        {
-            if (SetProperty(ref _showCardCheckbox, value))
-            {
-                ApplyCardSettings();
-                Save();
-            }
-        }
-    }
 
     public bool ShowRelativeDates
     {
@@ -291,7 +277,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
         _boardTitle = board.Title;
         _currentViewMode = board.ViewMode;
-        _showCardCheckbox = board.Settings.ShowCardCheckbox;
         _showRelativeDates = board.Settings.ShowRelativeDates;
         _prependNewCards = board.Settings.PrependNewCards;
         _maxArchiveSizeText = board.Settings.MaxArchiveSize.ToString();
@@ -312,7 +297,6 @@ public partial class MainWindowViewModel : ViewModelBase
             ArchiveCards.Add(CreateCard(card, isArchived: true));
         }
 
-        ApplyCardSettings();
         RefreshFilters();
         NotifyBoardProperties();
     }
@@ -395,7 +379,6 @@ public partial class MainWindowViewModel : ViewModelBase
             RestoreCard,
             MoveCard);
 
-        cardViewModel.ShowCheckbox = ShowCardCheckbox;
         cardViewModel.LoadPreviewImages(_attachments);
         return cardViewModel;
     }
@@ -664,11 +647,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
         sourceLane.RemoveCard(card);
 
-        if (targetLane.ShouldMarkItemsComplete)
-        {
-            card.IsComplete = true;
-        }
-
         card.SwimlaneId = targetLane.SwimlaneId;
         var targetIndex = Math.Clamp(index, 0, targetLane.Cards.Count);
         targetLane.AddCard(card, targetIndex);
@@ -776,7 +754,6 @@ public partial class MainWindowViewModel : ViewModelBase
             ViewMode = CurrentViewMode,
             Settings = new BoardSettings
             {
-                ShowCardCheckbox = ShowCardCheckbox,
                 ShowRelativeDates = ShowRelativeDates,
                 PrependNewCards = PrependNewCards,
                 MaxArchiveSize = maxArchiveSize,
@@ -820,17 +797,6 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         NotifyBoardProperties();
-    }
-
-    private void ApplyCardSettings()
-    {
-        foreach (var card in Swimlanes
-                     .SelectMany(swimlane => swimlane.Lanes)
-                     .SelectMany(lane => lane.Cards)
-                     .Concat(ArchiveCards))
-        {
-            card.ShowCheckbox = ShowCardCheckbox;
-        }
     }
 
     private void TrimArchive()
@@ -882,7 +848,6 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsBoardView));
         OnPropertyChanged(nameof(IsListView));
         OnPropertyChanged(nameof(IsTableView));
-        OnPropertyChanged(nameof(ShowCardCheckbox));
         OnPropertyChanged(nameof(ShowRelativeDates));
         OnPropertyChanged(nameof(PrependNewCards));
         OnPropertyChanged(nameof(MaxArchiveSizeText));
