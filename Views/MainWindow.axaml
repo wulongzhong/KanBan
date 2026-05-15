@@ -54,20 +54,39 @@
 
     <Grid RowDefinitions="40,*"
           IsEnabled="{Binding IsWorkspaceReady}">
+        <!-- Single full-width row: title left, toolbar right, search + badge centered on the bar (overlapping layers, intrinsic widths). -->
         <Grid Grid.Row="0"
               Classes="titleBarHost"
-              ColumnDefinitions="Auto,*,Auto"
-              ColumnSpacing="12"
               Margin="8,0,152,0"
               WindowDecorationProperties.ElementRole="User"
               PointerPressed="TitleBar_PointerPressed">
-            <TextBox Grid.Column="0"
-                     Classes="ghost boardTitle"
+            <TextBox Classes="ghost boardTitle"
                      Text="{Binding BoardTitle}"
+                     HorizontalAlignment="Left"
                      VerticalAlignment="Center"/>
 
-            <StackPanel Grid.Column="1"
-                        Orientation="Horizontal"
+            <StackPanel Orientation="Horizontal"
+                        Spacing="2"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center">
+                <Button Classes="toolbarGhost"
+                        Classes.active="{Binding ShowArchive}"
+                        Content="Archive"
+                        Command="{Binding ToggleArchiveCommand}"/>
+                <Button Classes="toolbarGhost"
+                        Classes.active="{Binding ShowSettings}"
+                        Content="Settings"
+                        Command="{Binding ToggleSettingsCommand}"/>
+                <Button Classes="toolbarLink"
+                        Content="Swimlane"
+                        Command="{Binding AddSwimlaneCommand}"
+                        ToolTip.Tip="Add swimlane"/>
+                <Button Classes="toolbarLink"
+                        Content="Create list"
+                        Command="{Binding AddLaneCommand}"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal"
                         Spacing="8"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center">
@@ -86,27 +105,6 @@
                 <Border Classes="statBadge" VerticalAlignment="Center">
                     <TextBlock Text="{Binding TotalCards, StringFormat='{}{0} cards'}"/>
                 </Border>
-            </StackPanel>
-
-            <StackPanel Grid.Column="2"
-                        Orientation="Horizontal"
-                        Spacing="2"
-                        VerticalAlignment="Center">
-                <Button Classes="toolbarGhost"
-                        Classes.active="{Binding ShowArchive}"
-                        Content="Archive"
-                        Command="{Binding ToggleArchiveCommand}"/>
-                <Button Classes="toolbarGhost"
-                        Classes.active="{Binding ShowSettings}"
-                        Content="Settings"
-                        Command="{Binding ToggleSettingsCommand}"/>
-                <Button Classes="toolbarLink"
-                        Content="Swimlane"
-                        Command="{Binding AddSwimlaneCommand}"
-                        ToolTip.Tip="Add swimlane"/>
-                <Button Classes="toolbarLink"
-                        Content="Create list"
-                        Command="{Binding AddLaneCommand}"/>
             </StackPanel>
         </Grid>
 
