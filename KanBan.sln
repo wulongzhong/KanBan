@@ -5,6 +5,10 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KanBan", "KanBan.csproj", "{CB0A1554-914B-4AB2-9E67-6D09B046E116}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KanBan.LogicTests", "tests\KanBan.LogicTests\KanBan.LogicTests.csproj", "{153AE469-A9D4-48CD-AF58-CEE78451C756}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,8 +31,23 @@ Global
 		{CB0A1554-914B-4AB2-9E67-6D09B046E116}.Release|x64.Build.0 = Release|Any CPU
 		{CB0A1554-914B-4AB2-9E67-6D09B046E116}.Release|x86.ActiveCfg = Release|Any CPU
 		{CB0A1554-914B-4AB2-9E67-6D09B046E116}.Release|x86.Build.0 = Release|Any CPU
+		{153AE469-A9D4-48CD-AF58-CEE78451C756}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{153AE469-A9D4-48CD-AF58-CEE78451C756}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{153AE469-A9D4-48CD-AF58-CEE78451C756}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{153AE469-A9D4-48CD-AF58-CEE78451C756}.Debug|x64.Build.0 = Debug|Any CPU
+		{153AE469-A9D4-48CD-AF58-CEE78451C756}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{153AE469-A9D4-48CD-AF58-CEE78451C756}.Debug|x86.Build.0 = Debug|Any CPU
+		{153AE469-A9D4-48CD-AF58-CEE78451C756}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{153AE469-A9D4-48CD-AF58-CEE78451C756}.Release|Any CPU.Build.0 = Release|Any CPU
+		{153AE469-A9D4-48CD-AF58-CEE78451C756}.Release|x64.ActiveCfg = Release|Any CPU
+		{153AE469-A9D4-48CD-AF58-CEE78451C756}.Release|x64.Build.0 = Release|Any CPU
+		{153AE469-A9D4-48CD-AF58-CEE78451C756}.Release|x86.ActiveCfg = Release|Any CPU
+		{153AE469-A9D4-48CD-AF58-CEE78451C756}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{153AE469-A9D4-48CD-AF58-CEE78451C756} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal

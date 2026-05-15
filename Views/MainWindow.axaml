@@ -3,18 +3,442 @@
         xmlns:vm="using:KanBan.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="780"
         x:Class="KanBan.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="KanBan">
+        Title="KanBan"
+        Width="1280"
+        Height="780"
+        MinWidth="980"
+        MinHeight="620"
+        Background="#1e1e1e">
 
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="#dcddde"/>
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="#252525"/>
+            <Setter Property="Foreground" Value="#dcddde"/>
+            <Setter Property="BorderBrush" Value="#3f3f46"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="7,5"/>
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#b9bbbe"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8,6"/>
+        </Style>
+        <Style Selector="Button:pointerover">
+            <Setter Property="Background" Value="#363636"/>
+            <Setter Property="Foreground" Value="#ffffff"/>
+        </Style>
+        <Style Selector="Button.accent">
+            <Setter Property="Background" Value="#4f6df5"/>
+            <Setter Property="Foreground" Value="#ffffff"/>
+            <Setter Property="BorderBrush" Value="#4f6df5"/>
+        </Style>
+        <Style Selector="Border.toolbar">
+            <Setter Property="Background" Value="#1e1e1e"/>
+            <Setter Property="BorderBrush" Value="#343434"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        </Style>
+        <Style Selector="Border.searchbar">
+            <Setter Property="Background" Value="#1e1e1e"/>
+            <Setter Property="BorderBrush" Value="#343434"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        </Style>
+        <Style Selector="Border.lane">
+            <Setter Property="Background" Value="#262626"/>
+            <Setter Property="BorderBrush" Value="#3a3a3a"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+        </Style>
+        <Style Selector="Border.laneHeader">
+            <Setter Property="Background" Value="#262626"/>
+            <Setter Property="BorderBrush" Value="#3a3a3a"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="Padding" Value="8,8,8,7"/>
+        </Style>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="#1f1f1f"/>
+            <Setter Property="BorderBrush" Value="#3a3a3a"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Margin" Value="4,4,4,6"/>
+        </Style>
+        <Style Selector="Border.card:pointerover">
+            <Setter Property="BorderBrush" Value="#565656"/>
+        </Style>
+        <Style Selector="Border.drawer">
+            <Setter Property="Background" Value="#252525"/>
+            <Setter Property="BorderBrush" Value="#3a3a3a"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+        </Style>
+        <Style Selector="Border.tag">
+            <Setter Property="Background" Value="#2c3b58"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="6,1"/>
+            <Setter Property="Margin" Value="0,0,4,4"/>
+        </Style>
+        <Style Selector="TextBlock.muted">
+            <Setter Property="Foreground" Value="#9ca3af"/>
+        </Style>
+        <Style Selector="TextBlock.faint">
+            <Setter Property="Foreground" Value="#737373"/>
+        </Style>
+        <Style Selector="TextBlock.danger">
+            <Setter Property="Foreground" Value="#ff9b9b"/>
+        </Style>
+    </Window.Styles>
 
+    <Grid RowDefinitions="Auto,Auto,*">
+        <Border Grid.Row="0" Classes="toolbar" Padding="10,7">
+            <Grid ColumnDefinitions="260,*,Auto" ColumnSpacing="10">
+                <TextBox Text="{Binding BoardTitle}"
+                         FontSize="16"
+                         FontWeight="SemiBold"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Padding="2"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
+                    <Button Content="Board" Command="{Binding SetBoardViewCommand}"/>
+                    <Button Content="List" Command="{Binding SetListViewCommand}"/>
+                    <Button Content="Table" Command="{Binding SetTableViewCommand}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
+                    <Button Content="Archive" Command="{Binding ToggleArchiveCommand}"/>
+                    <Button Content="Settings" Command="{Binding ToggleSettingsCommand}"/>
+                    <Button Content="+ Add list" Command="{Binding AddLaneCommand}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Classes="searchbar" Padding="13,10">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <TextBox Text="{Binding SearchQuery}"
+                         PlaceholderText="Search cards..."
+                         HorizontalAlignment="Right"
+                         Width="320"/>
+                <TextBlock Grid.Column="1"
+                           Text="{Binding TotalCards, StringFormat='{}{0} cards'}"
+                           Classes="muted"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Disabled"
+                          Padding="8"
+                          IsVisible="{Binding IsBoardView}">
+                <ItemsControl ItemsSource="{Binding Lanes}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:LaneViewModel">
+                            <Border Classes="lane"
+                                    Width="272"
+                                    Margin="0,0,8,0"
+                                    DragDrop.AllowDrop="True"
+                                    DragDrop.DragOver="Lane_DragOver"
+                                    DragDrop.Drop="Lane_Drop">
+                                <Grid RowDefinitions="Auto,*,Auto">
+                                    <Border Grid.Row="0"
+                                            Classes="laneHeader"
+                                            PointerPressed="LaneHeader_PointerPressed"
+                                            PointerMoved="LaneHeader_PointerMoved"
+                                            DoubleTapped="LaneHeader_DoubleTapped">
+                                        <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto" ColumnSpacing="5">
+                                            <TextBlock Text="⋮⋮" Classes="faint" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1" Text="⌄" Classes="faint" VerticalAlignment="Center"/>
+
+                                            <Grid Grid.Column="2">
+                                                <TextBlock Text="{Binding Title}"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="13"
+                                                           VerticalAlignment="Center"
+                                                           IsVisible="{Binding IsDisplayMode}"/>
+                                                <TextBox Text="{Binding Title}"
+                                                         FontWeight="SemiBold"
+                                                         KeyDown="LaneEdit_KeyDown"
+                                                         LostFocus="LaneEdit_LostFocus"
+                                                         IsVisible="{Binding IsEditing}"/>
+                                            </Grid>
+
+                                            <TextBlock Grid.Column="3"
+                                                       Text="{Binding WipText}"
+                                                       Classes="muted"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"/>
+
+                                            <Button Grid.Column="4" Content="⋮" Padding="4">
+                                                <Button.Flyout>
+                                                    <MenuFlyout>
+                                                        <MenuItem Header="Add a card" Command="{Binding AddCardCommand}"/>
+                                                        <MenuItem Header="Move left" Command="{Binding MoveLeftCommand}"/>
+                                                        <MenuItem Header="Move right" Command="{Binding MoveRightCommand}"/>
+                                                        <MenuItem Header="Sort now" Command="{Binding SortCommand}"/>
+                                                        <MenuItem Header="Delete list" Command="{Binding DeleteLaneCommand}"/>
+                                                    </MenuFlyout>
+                                                </Button.Flyout>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+
+                                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,4">
+                                        <ItemsControl ItemsSource="{Binding FilteredCards}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:CardViewModel">
+                                                    <Border Classes="card"
+                                                            PointerPressed="Card_PointerPressed"
+                                                            PointerMoved="Card_PointerMoved"
+                                                            DoubleTapped="Card_DoubleTapped"
+                                                            DragDrop.AllowDrop="True"
+                                                            DragDrop.DragOver="Card_DragOver"
+                                                            DragDrop.Drop="Card_Drop">
+                                                        <Grid>
+                                                            <StackPanel Spacing="5" IsVisible="{Binding IsDisplayMode}">
+                                                                <Grid ColumnDefinitions="Auto,*,Auto" Margin="8,8,6,0">
+                                                                    <CheckBox IsChecked="{Binding IsComplete}"
+                                                                              IsVisible="{Binding ShowCheckbox}"
+                                                                              VerticalAlignment="Top"/>
+                                                                    <TextBlock Grid.Column="1"
+                                                                               Text="{Binding Title}"
+                                                                               TextWrapping="Wrap"
+                                                                               FontSize="13"
+                                                                               Margin="6,1,4,0"/>
+                                                                    <Button Grid.Column="2" Content="⋮" Padding="3">
+                                                                        <Button.Flyout>
+                                                                            <MenuFlyout>
+                                                                                <MenuItem Header="Edit" Command="{Binding BeginEditCommand}"/>
+                                                                                <MenuItem Header="Move up" Command="{Binding MoveUpCommand}"/>
+                                                                                <MenuItem Header="Move down" Command="{Binding MoveDownCommand}"/>
+                                                                                <MenuItem Header="Archive" Command="{Binding ArchiveCommand}"/>
+                                                                                <MenuItem Header="Delete" Command="{Binding DeleteCommand}"/>
+                                                                            </MenuFlyout>
+                                                                        </Button.Flyout>
+                                                                    </Button>
+                                                                </Grid>
+
+                                                                <TextBlock Text="{Binding Description}"
+                                                                           Classes="muted"
+                                                                           TextWrapping="Wrap"
+                                                                           Margin="34,0,10,0"
+                                                                           FontSize="12"
+                                                                           IsVisible="{Binding HasDescription}"/>
+
+                                                                <WrapPanel Margin="34,0,8,7">
+                                                                    <ItemsControl ItemsSource="{Binding Tags}">
+                                                                        <ItemsControl.ItemsPanel>
+                                                                            <ItemsPanelTemplate>
+                                                                                <WrapPanel/>
+                                                                            </ItemsPanelTemplate>
+                                                                        </ItemsControl.ItemsPanel>
+                                                                        <ItemsControl.ItemTemplate>
+                                                                            <DataTemplate>
+                                                                                <Border Classes="tag">
+                                                                                    <TextBlock Text="{Binding}" FontSize="11"/>
+                                                                                </Border>
+                                                                            </DataTemplate>
+                                                                        </ItemsControl.ItemTemplate>
+                                                                    </ItemsControl>
+                                                                    <Border Classes="tag" IsVisible="{Binding HasDueDate}">
+                                                                        <TextBlock Text="{Binding DueBadge}" FontSize="11"/>
+                                                                    </Border>
+                                                                </WrapPanel>
+                                                            </StackPanel>
+
+                                                            <StackPanel Spacing="6" Margin="8" IsVisible="{Binding IsEditing}">
+                                                                <TextBox Text="{Binding Title}"
+                                                                         FontWeight="SemiBold"
+                                                                         KeyDown="CardEdit_KeyDown"/>
+                                                                <TextBox Text="{Binding Description}"
+                                                                         AcceptsReturn="True"
+                                                                         MinHeight="68"
+                                                                         PlaceholderText="Card details..."/>
+                                                                <Grid ColumnDefinitions="*,100" ColumnSpacing="6">
+                                                                    <TextBox Text="{Binding TagsText}" PlaceholderText="#tag"/>
+                                                                    <TextBox Grid.Column="1" Text="{Binding DueDateText}" PlaceholderText="yyyy-MM-dd"/>
+                                                                </Grid>
+                                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                    <Button Classes="accent" Content="Done" Command="{Binding EndEditCommand}"/>
+                                                                    <Button Content="Archive" Command="{Binding ArchiveCommand}"/>
+                                                                    <Button Content="Delete" Command="{Binding DeleteCommand}"/>
+                                                                </StackPanel>
+                                                            </StackPanel>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+
+                                    <StackPanel Grid.Row="2">
+                                        <Border BorderBrush="#3a3a3a"
+                                                BorderThickness="0,1,0,0"
+                                                Padding="8"
+                                                IsVisible="{Binding IsAddingCard}">
+                                            <StackPanel Spacing="6">
+                                                <TextBox Text="{Binding NewCardTitle}" PlaceholderText="Card title..."/>
+                                                <TextBox Text="{Binding NewCardDetails}" PlaceholderText="Details..." AcceptsReturn="True" MinHeight="52"/>
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <Button Classes="accent" Content="Add card" Command="{Binding CommitAddCardCommand}"/>
+                                                    <Button Content="Cancel" Command="{Binding CancelAddCardCommand}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <Button Content="+ Add a card"
+                                                HorizontalContentAlignment="Left"
+                                                Command="{Binding AddCardCommand}"
+                                                IsVisible="{Binding IsAddCardButtonVisible}"
+                                                Margin="4"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          Padding="24"
+                          IsVisible="{Binding IsListView}">
+                <StackPanel Spacing="8">
+                    <ItemsControl ItemsSource="{Binding Lanes}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:LaneViewModel">
+                                <Border Classes="lane" Padding="0" Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <Border Classes="laneHeader">
+                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                                        </Border>
+                                        <ItemsControl ItemsSource="{Binding FilteredCards}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:CardViewModel">
+                                                    <Border BorderBrush="#3a3a3a" BorderThickness="0,1,0,0" Padding="8">
+                                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                                            <CheckBox IsChecked="{Binding IsComplete}" IsVisible="{Binding ShowCheckbox}"/>
+                                                            <StackPanel Grid.Column="1">
+                                                                <TextBlock Text="{Binding Title}" TextWrapping="Wrap"/>
+                                                                <TextBlock Text="{Binding Description}" Classes="muted" TextWrapping="Wrap" IsVisible="{Binding HasDescription}"/>
+                                                            </StackPanel>
+                                                            <TextBlock Grid.Column="2" Text="{Binding DueBadge}" Classes="muted"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24" IsVisible="{Binding IsTableView}">
+                <Border Classes="drawer" Padding="0">
+                    <StackPanel>
+                        <Border Background="#262626" Padding="10">
+                            <Grid ColumnDefinitions="2*,3*,*,*" ColumnSpacing="12">
+                                <TextBlock Text="Title" FontWeight="SemiBold"/>
+                                <TextBlock Grid.Column="1" Text="Description" FontWeight="SemiBold"/>
+                                <TextBlock Grid.Column="2" Text="Tags" FontWeight="SemiBold"/>
+                                <TextBlock Grid.Column="3" Text="Due" FontWeight="SemiBold"/>
+                            </Grid>
+                        </Border>
+                        <ItemsControl ItemsSource="{Binding TableCards}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CardViewModel">
+                                    <Border BorderBrush="#3a3a3a" BorderThickness="0,1,0,0" Padding="10">
+                                        <Grid ColumnDefinitions="2*,3*,*,*" ColumnSpacing="12">
+                                            <TextBlock Text="{Binding Title}" TextWrapping="Wrap"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Description}" Classes="muted" TextWrapping="Wrap"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding TagsText}" Classes="muted"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding DueDateText}" Classes="muted"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </ScrollViewer>
+
+            <Border Classes="drawer"
+                    Width="360"
+                    Padding="14"
+                    Margin="0,12,12,12"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Stretch"
+                    IsVisible="{Binding ShowArchive}">
+                <Grid RowDefinitions="Auto,*">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel>
+                            <TextBlock Text="Archive" FontSize="18" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding ArchiveCount, StringFormat='{}{0} archived cards'}" Classes="muted"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="×" Command="{Binding ToggleArchiveCommand}"/>
+                    </Grid>
+                    <ScrollViewer Grid.Row="1" Margin="0,12,0,0">
+                        <ItemsControl ItemsSource="{Binding ArchiveCards}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CardViewModel">
+                                    <Border Classes="card" Padding="9">
+                                        <StackPanel Spacing="6">
+                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding Description}" Classes="muted" TextWrapping="Wrap" IsVisible="{Binding HasDescription}"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <Button Content="Restore" Command="{Binding RestoreCommand}"/>
+                                                <Button Content="Delete" Command="{Binding DeleteCommand}"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <Border Classes="drawer"
+                    Width="360"
+                    Padding="14"
+                    Margin="0,12,12,12"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    IsVisible="{Binding ShowSettings}">
+                <StackPanel Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Board settings" FontSize="18" FontWeight="SemiBold"/>
+                        <Button Grid.Column="1" Content="×" Command="{Binding ToggleSettingsCommand}"/>
+                    </Grid>
+                    <CheckBox Content="Display card checkbox" IsChecked="{Binding ShowCardCheckbox}"/>
+                    <CheckBox Content="Show relative dates" IsChecked="{Binding ShowRelativeDates}"/>
+                    <CheckBox Content="Prepend new cards" IsChecked="{Binding PrependNewCards}"/>
+                    <TextBlock Text="Maximum archive size" Classes="muted"/>
+                    <TextBox Text="{Binding MaxArchiveSizeText}"/>
+                    <TextBlock Text="Date format" Classes="muted"/>
+                    <TextBox Text="{Binding DateFormat}"/>
+                    <Button Content="Reset sample board" Command="{Binding NewBoardCommand}"/>
+                    <TextBlock Text="{Binding StatusMessage}" Classes="muted" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
 </Window>
