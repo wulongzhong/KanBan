@@ -97,7 +97,7 @@
             <Setter Property="CornerRadius" Value="0"/>
             <Setter Property="Width" Value="272"/>
             <Setter Property="Margin" Value="0,0,12,0"/>
-            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
         </Style>
         <Style Selector="Border.laneCellFooter">
             <Setter Property="Background" Value="#262626"/>
@@ -107,10 +107,6 @@
             <Setter Property="Padding" Value="8"/>
             <Setter Property="Width" Value="272"/>
             <Setter Property="Margin" Value="0,0,12,0"/>
-        </Style>
-        <Style Selector="ScrollViewer.laneCards">
-            <Setter Property="MaxHeight" Value="380"/>
-            <Setter Property="MinHeight" Value="96"/>
         </Style>
         <Style Selector="TextBlock.swimlaneTitle">
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -342,7 +338,9 @@
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="vm:LaneViewModel">
-                                <StackPanel Width="272" Margin="0,0,12,0">
+                                <StackPanel Width="272"
+                                            Margin="0,0,12,0"
+                                            VerticalAlignment="Top">
                                     <Border Classes="laneCell">
                                         <Grid RowDefinitions="Auto,Auto">
                                             <Border Grid.Row="0" Padding="10,8" BorderBrush="#3a3a3a" BorderThickness="0,0,0,1">
@@ -362,11 +360,8 @@
                                                 </Grid>
                                             </Border>
 
-                                            <ScrollViewer Grid.Row="1"
-                                                          Classes="laneCards"
-                                                          VerticalScrollBarVisibility="Auto"
-                                                          HorizontalScrollBarVisibility="Disabled">
-                                        <ItemsControl ItemsSource="{Binding FilteredCards}">
+                                            <ItemsControl Grid.Row="1"
+                                                          ItemsSource="{Binding FilteredCards}">
                                             <ItemsControl.ItemsPanel>
                                                 <ItemsPanelTemplate>
                                                     <StackPanel Spacing="4"/>
@@ -490,7 +485,6 @@
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
-                                            </ScrollViewer>
                                         </Grid>
                                     </Border>
                                     <Border Classes="laneCellFooter">
