@@ -275,7 +275,7 @@
         <Setter Property="Opacity" Value="1"/>
     </Style>
     <Style Selector="Button.cardMenu:pointerover">
-        <Setter Property="Background" Value="#E3E0D8"/>
+        <Setter Property="Background" Value="#D5D0C5"/>
         <Setter Property="Foreground" Value="#3D4A5C"/>
         <Setter Property="Opacity" Value="1"/>
     </Style>
@@ -579,17 +579,18 @@
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
     </Style>
+    <!-- Card surface: warm mid-tone parchment (avoid near-white glare) -->
     <Style Selector="Border.card">
-        <Setter Property="Background" Value="#FDFCFA"/>
-        <Setter Property="BorderBrush" Value="#D8D4CC"/>
+        <Setter Property="Background" Value="#E6E1D7"/>
+        <Setter Property="BorderBrush" Value="#C9C4BA"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="6"/>
         <Setter Property="Margin" Value="0,0,0,8"/>
-        <Setter Property="BoxShadow" Value="0 2 4 0 #3D4A5C14"/>
+        <Setter Property="BoxShadow" Value="0 2 5 0 #3D4A5C18"/>
     </Style>
     <Style Selector="Border.card:pointerover">
-        <Setter Property="Background" Value="#FAF8F5"/>
-        <Setter Property="BorderBrush" Value="#C4BFB5"/>
+        <Setter Property="Background" Value="#DDD7CB"/>
+        <Setter Property="BorderBrush" Value="#B8B3A8"/>
     </Style>
     <Style Selector="Border.drawer">
         <Setter Property="Background" Value="#FDFCFA"/>
@@ -663,9 +664,9 @@
         <Setter Property="Height" Value="24"/>
         <Setter Property="MinWidth" Value="24"/>
         <Setter Property="MinHeight" Value="24"/>
-        <Setter Property="Background" Value="#FDFCFA"/>
+        <Setter Property="Background" Value="#E6E1D7"/>
         <Setter Property="Foreground" Value="#556575"/>
-        <Setter Property="BorderBrush" Value="#D8D4CC"/>
+        <Setter Property="BorderBrush" Value="#C9C4BA"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="12"/>
         <Setter Property="HorizontalAlignment" Value="Right"/>
@@ -695,7 +696,7 @@
         <Setter Property="Background" Value="#E3E0D8"/>
     </Style>
     <Style Selector="Border.dragPreview">
-        <Setter Property="Background" Value="#FDFCFA"/>
+        <Setter Property="Background" Value="#E6E1D7"/>
         <Setter Property="BorderBrush" Value="#8BA4BD"/>
         <Setter Property="BoxShadow" Value="0 4 12 0 #3D4A5C22"/>
     </Style>
