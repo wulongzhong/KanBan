@@ -1,0 +1,157 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Base -->
+    <Style Selector="Window">
+        <Setter Property="Background" Value="#1e1e1e"/>
+        <Setter Property="Foreground" Value="#dcddde"/>
+    </Style>
+
+    <Style Selector="TextBlock">
+        <Setter Property="Foreground" Value="#dcddde"/>
+    </Style>
+
+    <!-- TextBox -->
+    <Style Selector="TextBox">
+        <Setter Property="Background" Value="#2a2a2a"/>
+        <Setter Property="Foreground" Value="#dcddde"/>
+        <Setter Property="BorderBrush" Value="#404040"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CaretBrush" Value="#dcddde"/>
+        <Setter Property="SelectionBrush" Value="#4f6df5"/>
+        <Setter Property="SelectionForegroundBrush" Value="#ffffff"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="7,5"/>
+    </Style>
+    <Style Selector="TextBox.ghost">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="TextBox /template/ Border">
+        <Setter Property="Background" Value="#2a2a2a"/>
+        <Setter Property="BorderBrush" Value="#404040"/>
+    </Style>
+    <Style Selector="TextBox.ghost /template/ Border">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="TextBox:pointerover /template/ Border">
+        <Setter Property="Background" Value="#333333"/>
+        <Setter Property="BorderBrush" Value="#505050"/>
+    </Style>
+    <Style Selector="TextBox.ghost:pointerover /template/ Border">
+        <Setter Property="Background" Value="#2a2a2a"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+    </Style>
+    <Style Selector="TextBox:focus /template/ Border, TextBox:focus-within /template/ Border">
+        <Setter Property="Background" Value="#2a2a2a"/>
+        <Setter Property="BorderBrush" Value="#5b6ee8"/>
+    </Style>
+    <Style Selector="TextBox.ghost:focus /template/ Border, TextBox.ghost:focus-within /template/ Border">
+        <Setter Property="Background" Value="#262626"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+    </Style>
+
+    <!-- Button -->
+    <Style Selector="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="#b9bbbe"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="8,6"/>
+    </Style>
+    <Style Selector="Button:pointerover">
+        <Setter Property="Background" Value="#363636"/>
+        <Setter Property="Foreground" Value="#ffffff"/>
+    </Style>
+    <Style Selector="Button:pressed">
+        <Setter Property="Background" Value="#2d2d2d"/>
+    </Style>
+    <Style Selector="Button.accent">
+        <Setter Property="Background" Value="#4f6df5"/>
+        <Setter Property="Foreground" Value="#ffffff"/>
+        <Setter Property="BorderBrush" Value="#4f6df5"/>
+    </Style>
+    <Style Selector="Button.accent:pointerover">
+        <Setter Property="Background" Value="#5a7cff"/>
+        <Setter Property="BorderBrush" Value="#5a7cff"/>
+        <Setter Property="Foreground" Value="#ffffff"/>
+    </Style>
+    <Style Selector="Button.accent:pressed">
+        <Setter Property="Background" Value="#3f56c9"/>
+        <Setter Property="BorderBrush" Value="#3f56c9"/>
+    </Style>
+    <Style Selector="Button.laneAddCard">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="#9ca3af"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="Button.laneAddCard:pointerover">
+        <Setter Property="Background" Value="#363636"/>
+        <Setter Property="Foreground" Value="#ffffff"/>
+    </Style>
+    <Style Selector="Button.tagButton">
+        <Setter Property="Background" Value="#2c3b58"/>
+        <Setter Property="Foreground" Value="#d7e6ff"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="Button.tagButton:pointerover">
+        <Setter Property="Background" Value="#354766"/>
+        <Setter Property="Foreground" Value="#ffffff"/>
+    </Style>
+    <Style Selector="Button.cardMenu">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="#9ca3af"/>
+    </Style>
+    <Style Selector="Button.cardMenu:pointerover">
+        <Setter Property="Background" Value="#363636"/>
+        <Setter Property="Foreground" Value="#ffffff"/>
+    </Style>
+
+    <!-- CheckBox -->
+    <Style Selector="CheckBox">
+        <Setter Property="Foreground" Value="#dcddde"/>
+    </Style>
+    <Style Selector="CheckBox /template/ Border">
+        <Setter Property="Background" Value="#2a2a2a"/>
+        <Setter Property="BorderBrush" Value="#505050"/>
+    </Style>
+    <Style Selector="CheckBox:checked /template/ Border">
+        <Setter Property="Background" Value="#4f6df5"/>
+        <Setter Property="BorderBrush" Value="#4f6df5"/>
+    </Style>
+    <Style Selector="CheckBox:pointerover /template/ Border">
+        <Setter Property="BorderBrush" Value="#6b6ee8"/>
+    </Style>
+
+    <!-- Menu -->
+    <Style Selector="MenuItem">
+        <Setter Property="Foreground" Value="#dcddde"/>
+    </Style>
+    <Style Selector="MenuItem:pointerover /template/ Border">
+        <Setter Property="Background" Value="#363636"/>
+    </Style>
+    <Style Selector="Separator">
+        <Setter Property="Background" Value="#404040"/>
+        <Setter Property="Height" Value="1"/>
+    </Style>
+
+    <!-- ScrollBar -->
+    <Style Selector="ScrollBar">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="ScrollBar:vertical /template/ Thumb">
+        <Setter Property="Background" Value="#4a4a4a"/>
+    </Style>
+    <Style Selector="ScrollBar:vertical /template/ Thumb:pointerover">
+        <Setter Property="Background" Value="#5a5a5a"/>
+    </Style>
+    <Style Selector="ScrollBar:horizontal /template/ Thumb">
+        <Setter Property="Background" Value="#4a4a4a"/>
+    </Style>
+    <Style Selector="ScrollBar:horizontal /template/ Thumb:pointerover">
+        <Setter Property="Background" Value="#5a5a5a"/>
+    </Style>
+
+</Styles>

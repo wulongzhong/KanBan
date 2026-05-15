@@ -13,7 +13,8 @@
         Height="780"
         MinWidth="980"
         MinHeight="620"
-        Background="#1e1e1e">
+        Background="#1e1e1e"
+        RequestedThemeVariant="Dark">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -32,32 +33,6 @@
         </Style>
         <Style Selector="Border.imageLightbox">
             <Setter Property="Background" Value="#D9000000"/>
-        </Style>
-        <Style Selector="TextBlock">
-            <Setter Property="Foreground" Value="#dcddde"/>
-        </Style>
-        <Style Selector="TextBox">
-            <Setter Property="Background" Value="#252525"/>
-            <Setter Property="Foreground" Value="#dcddde"/>
-            <Setter Property="BorderBrush" Value="#3f3f46"/>
-            <Setter Property="CornerRadius" Value="4"/>
-            <Setter Property="Padding" Value="7,5"/>
-        </Style>
-        <Style Selector="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#b9bbbe"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="CornerRadius" Value="4"/>
-            <Setter Property="Padding" Value="8,6"/>
-        </Style>
-        <Style Selector="Button:pointerover">
-            <Setter Property="Background" Value="#363636"/>
-            <Setter Property="Foreground" Value="#ffffff"/>
-        </Style>
-        <Style Selector="Button.accent">
-            <Setter Property="Background" Value="#4f6df5"/>
-            <Setter Property="Foreground" Value="#ffffff"/>
-            <Setter Property="BorderBrush" Value="#4f6df5"/>
         </Style>
         <Style Selector="Border.toolbar">
             <Setter Property="Background" Value="#1e1e1e"/>
@@ -91,16 +66,9 @@
             <Setter Property="Padding" Value="8"/>
         </Style>
         <Style Selector="Button.laneAddCard">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#9ca3af"/>
-            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="8,10"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
-        </Style>
-        <Style Selector="Button.laneAddCard:pointerover">
-            <Setter Property="Background" Value="#4f6df5"/>
-            <Setter Property="Foreground" Value="#ffffff"/>
         </Style>
         <Style Selector="Border.card">
             <Setter Property="Background" Value="#1f1f1f"/>
@@ -125,9 +93,6 @@
             <Setter Property="Margin" Value="0,0,4,4"/>
         </Style>
         <Style Selector="Button.tagButton">
-            <Setter Property="Background" Value="#2c3b58"/>
-            <Setter Property="Foreground" Value="#d7e6ff"/>
-            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="Padding" Value="6,2"/>
             <Setter Property="Margin" Value="0,0,4,4"/>
@@ -182,11 +147,10 @@
     <Grid RowDefinitions="Auto,Auto,*">
         <Border Grid.Row="0" Classes="toolbar" Padding="10,7">
             <Grid ColumnDefinitions="260,*,Auto" ColumnSpacing="10">
-                <TextBox Text="{Binding BoardTitle}"
+                <TextBox Classes="ghost"
+                         Text="{Binding BoardTitle}"
                          FontSize="16"
                          FontWeight="SemiBold"
-                         Background="Transparent"
-                         BorderThickness="0"
                          Padding="2"/>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
@@ -264,7 +228,7 @@
                                                        FontSize="12"
                                                        VerticalAlignment="Center"/>
 
-                                            <Button Grid.Column="4" Content="⋮" Padding="4">
+                                            <Button Grid.Column="4" Classes="cardMenu" Content="⋮" Padding="4">
                                                 <Button.Flyout>
                                                     <MenuFlyout>
                                                         <MenuItem Header="Add a card" Command="{Binding AddCardCommand}"/>
