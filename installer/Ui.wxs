@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <Fragment>
+    <UI Id="KanBanUI">
+      <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+
+      <Dialog Id="KanBanFinishDlg" Width="370" Height="270" Title="KanBan 安装完成">
+        <Control Id="Title" Type="Text" X="20" Y="20" Width="330" Height="30"
+                 Text="{\WixUI_Font_Bigger}KanBan 已成功安装" />
+        <Control Id="Description" Type="Text" X="20" Y="55" Width="330" Height="30"
+                 Text="{\WixUI_Font_Normal}请选择后续操作：" />
+        <Control Id="DesktopShortcutCheckbox"
+                 Type="CheckBox"
+                 X="20"
+                 Y="100"
+                 Width="330"
+                 Height="17"
+                 Property="INSTALLDESKTOPSHORTCUT"
+                 CheckBoxValue="1"
+                 Text="创建桌面快捷方式" />
+        <Control Id="LaunchCheckbox"
+                 Type="CheckBox"
+                 X="20"
+                 Y="122"
+                 Width="330"
+                 Height="17"
+                 Property="LAUNCHAPP"
+                 CheckBoxValue="1"
+                 Text="立即启动 KanBan" />
+        <Control Id="Finish"
+                 Type="PushButton"
+                 X="236"
+                 Y="243"
+                 Width="56"
+                 Height="17"
+                 Default="yes"
+                 Text="完成" />
+      </Dialog>
+
+      <Publish Dialog="KanBanFinishDlg"
+               Control="Finish"
+               Event="DoAction"
+               Value="RemoveDesktopShortcut"
+               Order="1"
+               Condition="NOT INSTALLDESKTOPSHORTCUT = 1" />
+      <Publish Dialog="KanBanFinishDlg"
+               Control="Finish"
+               Event="DoAction"
+               Value="SetLaunchTarget"
+               Order="2"
+               Condition="LAUNCHAPP = 1" />
+      <Publish Dialog="KanBanFinishDlg"
+               Control="Finish"
+               Event="DoAction"
+               Value="LaunchApplication"
+               Order="3"
+               Condition="LAUNCHAPP = 1" />
+      <Publish Dialog="KanBanFinishDlg"
+               Control="Finish"
+               Event="EndDialog"
+               Value="Return"
+               Order="4" />
+    </UI>
+
+    <Property Id="INSTALLDESKTOPSHORTCUT" Value="1" />
+    <Property Id="LAUNCHAPP" Value="1" />
+
+    <CustomAction Id="SetLaunchTarget"
+                  Property="WixShellExecTarget"
+                  Value="[INSTALLFOLDER]KanBan.exe"
+                  Execute="immediate"
+                  Impersonate="yes" />
+
+    <CustomAction Id="RemoveDesktopShortcut"
+                  Script="jscript"
+                  ScriptSourceFile="RemoveDesktopShortcut.js"
+                  Execute="immediate"
+                  Impersonate="yes"
+                  Return="ignore" />
+
+    <CustomAction Id="LaunchApplication"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)"
+                  DllEntry="WixShellExec"
+                  Impersonate="yes" />
+  </Fragment>
+</Wix>

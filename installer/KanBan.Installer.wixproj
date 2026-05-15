@@ -5,11 +5,13 @@
     <Platform>x64</Platform>
     <ProductVersion>1.0.0.0</ProductVersion>
     <DefineConstants>ProductVersion=$(ProductVersion)</DefineConstants>
+    <SuppressIces>ICE82</SuppressIces>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="WixToolset.Heat" Version="6.0.2" />
     <PackageReference Include="WixToolset.UI.wixext" Version="6.0.2" />
+    <PackageReference Include="WixToolset.Util.wixext" Version="6.0.2" />
   </ItemGroup>
 
   <PropertyGroup>

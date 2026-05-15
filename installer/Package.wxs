@@ -17,10 +17,23 @@
 
     <Feature Id="Main" Title="KanBan" Level="1">
       <ComponentGroupRef Id="PublishedApp" />
-      <ComponentRef Id="Shortcuts" />
+      <ComponentRef Id="StartMenuShortcuts" />
+      <ComponentRef Id="DesktopShortcut" />
     </Feature>
 
-    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    <UI>
+      <UIRef Id="KanBanUI" />
+    </UI>
+
+    <InstallUISequence>
+      <Show Dialog="KanBanFinishDlg" OnExit="success" />
+      <Show Dialog="override ExitDialog" OnExit="success" Condition="0" />
+    </InstallUISequence>
+
+    <AdminUISequence>
+      <Show Dialog="KanBanFinishDlg" OnExit="success" />
+      <Show Dialog="override ExitDialog" OnExit="success" Condition="0" />
+    </AdminUISequence>
 
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLFOLDER" Name="KanBan" />
@@ -32,14 +45,8 @@
 
     <StandardDirectory Id="DesktopFolder" />
 
-    <Component Id="Shortcuts" Directory="ApplicationProgramsFolder" Guid="*">
+    <Component Id="StartMenuShortcuts" Directory="ApplicationProgramsFolder" Guid="*">
       <Shortcut Id="StartMenuShortcut"
-                Name="KanBan"
-                Description="KanBan"
-                Target="[INSTALLFOLDER]KanBan.exe"
-                WorkingDirectory="INSTALLFOLDER" />
-      <Shortcut Id="DesktopShortcut"
-                Directory="DesktopFolder"
                 Name="KanBan"
                 Description="KanBan"
                 Target="[INSTALLFOLDER]KanBan.exe"
@@ -53,6 +60,20 @@
       <RemoveFolder Id="RemoveAppProgramsFolder"
                     Directory="ApplicationProgramsFolder"
                     On="uninstall" />
+    </Component>
+
+    <Component Id="DesktopShortcut" Directory="DesktopFolder" Guid="*">
+      <Shortcut Id="DesktopShortcut"
+                Name="KanBan"
+                Description="KanBan"
+                Target="[INSTALLFOLDER]KanBan.exe"
+                WorkingDirectory="INSTALLFOLDER" />
+      <RegistryValue Root="HKCU"
+                     Key="Software\KanBan"
+                     Name="DesktopShortcut"
+                     Type="integer"
+                     Value="1"
+                     KeyPath="yes" />
     </Component>
   </Package>
 </Wix>

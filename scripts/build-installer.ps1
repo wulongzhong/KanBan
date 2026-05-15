@@ -43,6 +43,9 @@ dotnet build $WixProj -c Release `
     -p:ProductVersion=$MsiVersion `
     -p:BindPath=$PublishDir `
     -p:HarvestDirectory=$PublishDir
+if ($LASTEXITCODE -ne 0) {
+    throw "MSI build failed."
+}
 
 $msi = Get-ChildItem -Path (Join-Path $Root "installer\bin\x64\Release") -Filter "*.msi" -Recurse |
     Select-Object -First 1
@@ -56,4 +59,4 @@ $sizeMb = [math]::Round((Get-Item (Join-Path $InstallerDir "KanBan.msi")).Length
 Write-Host ""
 Write-Host "Done:" -ForegroundColor Green
 Write-Host "  $(Join-Path $InstallerDir 'KanBan.msi')  ($sizeMb MB)" -ForegroundColor Cyan
-Write-Host "  Wizard includes install directory selection (WixUI_InstallDir)." -ForegroundColor DarkGray
+Write-Host "  Finish page: desktop shortcut + launch app (both checked by default)." -ForegroundColor DarkGray
