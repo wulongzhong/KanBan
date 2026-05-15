@@ -79,7 +79,28 @@
             <Setter Property="Background" Value="#262626"/>
             <Setter Property="BorderBrush" Value="#3a3a3a"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
-            <Setter Property="Padding" Value="8,8,8,7"/>
+            <Setter Property="Padding" Value="8,8,12,8"/>
+        </Style>
+        <Style Selector="Border.laneBody">
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Margin" Value="4,0,4,0"/>
+        </Style>
+        <Style Selector="Border.laneFooter">
+            <Setter Property="BorderBrush" Value="#3a3a3a"/>
+            <Setter Property="BorderThickness" Value="1,0,0,0"/>
+            <Setter Property="Padding" Value="8"/>
+        </Style>
+        <Style Selector="Button.laneAddCard">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#9ca3af"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="8,10"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+        <Style Selector="Button.laneAddCard:pointerover">
+            <Setter Property="Background" Value="#4f6df5"/>
+            <Setter Property="Foreground" Value="#ffffff"/>
         </Style>
         <Style Selector="Border.card">
             <Setter Property="Background" Value="#1f1f1f"/>
@@ -196,21 +217,24 @@
         </Border>
 
         <Grid Grid.Row="2">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                          VerticalScrollBarVisibility="Disabled"
-                          Padding="8"
+            <ScrollViewer x:Name="BoardScrollViewer"
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto"
+                          Padding="16"
                           IsVisible="{Binding IsBoardView}">
                 <ItemsControl ItemsSource="{Binding Lanes}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top"/>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:LaneViewModel">
                             <Border Classes="lane"
                                     Width="272"
-                                    Margin="0,0,8,0">
+                                    Margin="0,0,10,0"
+                                    VerticalAlignment="Top"
+                                    MaxHeight="{Binding Bounds.Height, ElementName=BoardScrollViewer}">
                                 <Grid RowDefinitions="Auto,*,Auto">
                                     <Border Grid.Row="0"
                                             Classes="laneHeader"
@@ -254,8 +278,15 @@
                                         </Grid>
                                     </Border>
 
-                                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,4">
+                                    <ScrollViewer Grid.Row="1"
+                                                  VerticalScrollBarVisibility="Auto"
+                                                  HorizontalScrollBarVisibility="Disabled">
                                         <ItemsControl ItemsSource="{Binding FilteredCards}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Spacing="4"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="vm:CardViewModel">
                                                     <Border Classes="card"
@@ -376,27 +407,27 @@
                                         </ItemsControl>
                                     </ScrollViewer>
 
-                                    <StackPanel Grid.Row="2">
-                                        <Border BorderBrush="#3a3a3a"
-                                                BorderThickness="0,1,0,0"
-                                                Padding="8"
-                                                IsVisible="{Binding IsAddingCard}">
-                                            <StackPanel Spacing="6">
-                                                <TextBox Text="{Binding NewCardTitle}" PlaceholderText="Card title..."/>
-                                                <TextBox Text="{Binding NewCardDetails}" PlaceholderText="Details..." AcceptsReturn="True" MinHeight="52"/>
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <Button Classes="accent" Content="Add card" Command="{Binding CommitAddCardCommand}"/>
-                                                    <Button Content="Cancel" Command="{Binding CancelAddCardCommand}"/>
+                                    <Border Grid.Row="2" Classes="laneFooter">
+                                        <StackPanel Spacing="0">
+                                            <Border Padding="0,0,0,8" IsVisible="{Binding IsAddingCard}">
+                                                <StackPanel Spacing="6">
+                                                    <TextBox Text="{Binding NewCardTitle}" PlaceholderText="卡片标题..."/>
+                                                    <TextBox Text="{Binding NewCardDetails}"
+                                                             PlaceholderText="详情..."
+                                                             AcceptsReturn="True"
+                                                             MinHeight="52"/>
+                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <Button Classes="accent" Content="添加" Command="{Binding CommitAddCardCommand}"/>
+                                                        <Button Content="取消" Command="{Binding CancelAddCardCommand}"/>
+                                                    </StackPanel>
                                                 </StackPanel>
-                                            </StackPanel>
-                                        </Border>
-
-                                        <Button Content="+ Add a card"
-                                                HorizontalContentAlignment="Left"
-                                                Command="{Binding AddCardCommand}"
-                                                IsVisible="{Binding IsAddCardButtonVisible}"
-                                                Margin="4"/>
-                                    </StackPanel>
+                                            </Border>
+                                            <Button Classes="laneAddCard"
+                                                    Content="+ 添加卡片"
+                                                    Command="{Binding AddCardCommand}"
+                                                    IsVisible="{Binding IsAddCardButtonVisible}"/>
+                                        </StackPanel>
+                                    </Border>
                                 </Grid>
                             </Border>
                         </DataTemplate>
