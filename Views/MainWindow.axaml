@@ -643,30 +643,42 @@
                 Classes="imageLightbox"
                 IsVisible="False"
                 Focusable="True"
-                KeyDown="ImageLightbox_KeyDown"
-                PointerPressed="ImageLightbox_Background_PointerPressed">
-            <Grid RowDefinitions="Auto,*">
-                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="16,12,16,8">
-                    <TextBlock x:Name="ImageLightboxTitle"
-                               Classes="muted"
-                               VerticalAlignment="Center"
-                               TextTrimming="CharacterEllipsis"/>
-                    <Button Grid.Column="1"
-                            Content="×"
-                            Padding="10,4"
-                            Click="ImageLightbox_Close_Click"/>
-                </Grid>
-                <ScrollViewer Grid.Row="1"
-                              Margin="16,0,16,16"
-                              HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto"
-                              PointerPressed="ImageLightbox_Scroll_PointerPressed">
-                    <Image x:Name="ImageLightboxImage"
-                           Stretch="None"
-                           HorizontalAlignment="Center"
+                KeyDown="ImageLightbox_KeyDown">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <TextBlock x:Name="ImageLightboxTitle"
+                           Grid.Row="0"
+                           Classes="imageLightboxTitle"
+                           Margin="16,12,16,8"
                            VerticalAlignment="Center"
-                           DoubleTapped="ImageLightbox_Image_DoubleTapped"/>
-                </ScrollViewer>
+                           TextTrimming="CharacterEllipsis"
+                           HorizontalAlignment="Center"/>
+                <Grid x:Name="ImageLightboxContentArea"
+                      Grid.Row="1"
+                      Margin="16,0,16,8"
+                      ClipToBounds="True"
+                      PointerWheelChanged="ImageLightbox_ContentArea_WheelChanged">
+                    <Panel x:Name="ImageLightboxBackdrop"
+                           Background="Transparent"
+                           PointerPressed="ImageLightbox_Backdrop_PointerPressed"/>
+                    <Border x:Name="ImageLightboxImageHost"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            PointerPressed="ImageLightbox_Host_PointerPressed"
+                            PointerMoved="ImageLightbox_Host_PointerMoved"
+                            PointerReleased="ImageLightbox_Host_PointerReleased"
+                            PointerCaptureLost="ImageLightbox_Host_CaptureLost">
+                        <Image x:Name="ImageLightboxImage"
+                               Stretch="None"
+                               DoubleTapped="ImageLightbox_Image_DoubleTapped"/>
+                    </Border>
+                </Grid>
+                <Button Grid.Row="2"
+                        Classes="imageLightboxClose"
+                        Content="关闭"
+                        HorizontalAlignment="Center"
+                        Margin="0,4,0,20"
+                        Click="ImageLightbox_Close_Click"/>
             </Grid>
         </Border>
     </Grid>

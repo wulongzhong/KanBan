@@ -7,6 +7,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -40,9 +41,25 @@ public partial class MainWindow : Window
 
     private bool _isBoardScrollSyncing;
 
+    private const double LightboxMinZoom = 0.25;
+    private const double LightboxMaxZoom = 8.0;
+    private const double LightboxWheelFactor = 1.1;
+    private double _lightboxZoom = 1;
+    private Vector _lightboxPan;
+    private bool _lightboxPanning;
+    private Point _lightboxPanStart;
+    private Vector _lightboxPanAtStart;
+    private readonly ScaleTransform _lightboxScale = new(1, 1);
+    private readonly TranslateTransform _lightboxTranslate = new();
+
     public MainWindow()
     {
         InitializeComponent();
+        ImageLightboxImageHost.RenderTransform = new TransformGroup
+        {
+            Children = { _lightboxScale, _lightboxTranslate },
+        };
+        ImageLightboxImageHost.RenderTransformOrigin = new RelativePoint(0.5, 0.5, RelativeUnit.Relative);
         Opened += MainWindow_Opened;
     }
 
@@ -174,8 +191,10 @@ public partial class MainWindow : Window
 
     private void ShowImageLightbox(CardImageViewModel image)
     {
+        ReleaseLightboxBitmap();
         ImageLightboxImage.Source = new Bitmap(image.AbsolutePath);
         ImageLightboxTitle.Text = System.IO.Path.GetFileName(image.AbsolutePath);
+        ResetLightboxTransform();
         ImageLightbox.IsVisible = true;
         ImageLightbox.Focus();
     }
@@ -183,8 +202,122 @@ public partial class MainWindow : Window
     private void CloseImageLightbox()
     {
         ImageLightbox.IsVisible = false;
-        ImageLightboxImage.Source = null;
+        ReleaseLightboxBitmap();
         ImageLightboxTitle.Text = string.Empty;
+        EndLightboxPan();
+        ResetLightboxTransform();
+    }
+
+    private void ReleaseLightboxBitmap()
+    {
+        if (ImageLightboxImage.Source is Bitmap bitmap)
+        {
+            ImageLightboxImage.Source = null;
+            bitmap.Dispose();
+        }
+    }
+
+    private void ResetLightboxTransform()
+    {
+        _lightboxZoom = 1;
+        _lightboxPan = default;
+        ApplyLightboxTransform();
+    }
+
+    private void ApplyLightboxTransform()
+    {
+        _lightboxScale.ScaleX = _lightboxZoom;
+        _lightboxScale.ScaleY = _lightboxZoom;
+        _lightboxTranslate.X = _lightboxPan.X;
+        _lightboxTranslate.Y = _lightboxPan.Y;
+    }
+
+    private void EndLightboxPan()
+    {
+        _lightboxPanning = false;
+        ImageLightboxImageHost.Cursor = Cursor.Default;
+    }
+
+    private void ImageLightbox_ContentArea_WheelChanged(object? sender, PointerWheelEventArgs e)
+    {
+        if (!ImageLightbox.IsVisible)
+        {
+            return;
+        }
+
+        var delta = e.Delta.Y;
+        if (delta == 0)
+        {
+            return;
+        }
+
+        var factor = delta > 0 ? LightboxWheelFactor : 1 / LightboxWheelFactor;
+        var zoom = Math.Clamp(_lightboxZoom * factor, LightboxMinZoom, LightboxMaxZoom);
+        if (Math.Abs(zoom - _lightboxZoom) < double.Epsilon)
+        {
+            e.Handled = true;
+            return;
+        }
+
+        _lightboxZoom = zoom;
+        ApplyLightboxTransform();
+        e.Handled = true;
+    }
+
+    private void ImageLightbox_Backdrop_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (!e.GetCurrentPoint(ImageLightboxBackdrop).Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+
+        CloseImageLightbox();
+        e.Handled = true;
+    }
+
+    private void ImageLightbox_Host_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (!e.GetCurrentPoint(ImageLightboxImageHost).Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+
+        _lightboxPanning = true;
+        _lightboxPanStart = e.GetPosition(ImageLightboxContentArea);
+        _lightboxPanAtStart = _lightboxPan;
+        e.Pointer.Capture(ImageLightboxImageHost);
+        ImageLightboxImageHost.Cursor = new Cursor(StandardCursorType.SizeAll);
+        e.Handled = true;
+    }
+
+    private void ImageLightbox_Host_PointerMoved(object? sender, PointerEventArgs e)
+    {
+        if (!_lightboxPanning)
+        {
+            return;
+        }
+
+        var now = e.GetPosition(ImageLightboxContentArea);
+        var delta = now - _lightboxPanStart;
+        _lightboxPan = _lightboxPanAtStart + new Vector(delta.X, delta.Y);
+        ApplyLightboxTransform();
+        e.Handled = true;
+    }
+
+    private void ImageLightbox_Host_PointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (!_lightboxPanning)
+        {
+            return;
+        }
+
+        EndLightboxPan();
+        e.Handled = true;
+    }
+
+    private void ImageLightbox_Host_CaptureLost(object? sender, PointerCaptureLostEventArgs e)
+    {
+        EndLightboxPan();
     }
 
     private void ImageLightbox_Close_Click(object? sender, RoutedEventArgs e)
@@ -202,26 +335,9 @@ public partial class MainWindow : Window
         }
     }
 
-    private void ImageLightbox_Background_PointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        if (e.Source == sender)
-        {
-            CloseImageLightbox();
-            e.Handled = true;
-        }
-    }
-
-    private void ImageLightbox_Scroll_PointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        if (e.Source is ScrollViewer)
-        {
-            CloseImageLightbox();
-            e.Handled = true;
-        }
-    }
-
     private void ImageLightbox_Image_DoubleTapped(object? sender, TappedEventArgs e)
     {
+        ResetLightboxTransform();
         e.Handled = true;
     }
 

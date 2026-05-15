@@ -633,6 +633,31 @@
     <Style Selector="Border.imageLightbox">
         <Setter Property="Background" Value="#3D4A5C66"/>
     </Style>
+    <Style Selector="TextBlock.imageLightboxTitle">
+        <Setter Property="Foreground" Value="#E8EDF2"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+    </Style>
+    <Style Selector="Button.imageLightboxClose">
+        <Setter Property="Background" Value="#5B7C99"/>
+        <Setter Property="Foreground" Value="#FFFFFF"/>
+        <Setter Property="BorderBrush" Value="#5B7C99"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="CornerRadius" Value="999"/>
+        <Setter Property="Padding" Value="36,11"/>
+    </Style>
+    <Style Selector="Button.imageLightboxClose:pointerover">
+        <Setter Property="Background" Value="#6A8AAD"/>
+        <Setter Property="BorderBrush" Value="#6A8AAD"/>
+        <Setter Property="Foreground" Value="#FFFFFF"/>
+    </Style>
+    <Style Selector="Button.imageLightboxClose:pressed">
+        <Setter Property="Background" Value="#4D6B85"/>
+        <Setter Property="BorderBrush" Value="#4D6B85"/>
+        <Setter Property="Foreground" Value="#FFFFFF"/>
+    </Style>
     <Style Selector="Button.cardImageRemove">
         <Setter Property="Width" Value="24"/>
         <Setter Property="Height" Value="24"/>
