@@ -144,11 +144,13 @@
                                         <Grid VerticalAlignment="Center">
                                             <Grid ColumnDefinitions="*,Auto,Auto"
                                                   IsVisible="{Binding IsExpanded}">
-                                            <StackPanel Grid.Column="0"
-                                                        Orientation="Horizontal"
-                                                        Spacing="6"
-                                                        VerticalAlignment="Center">
-                                                <Button Classes="collapseToggle column"
+                                            <Grid Grid.Column="0"
+                                                  ColumnDefinitions="Auto,*"
+                                                  ColumnSpacing="6"
+                                                  VerticalAlignment="Center">
+                                                <Button Grid.Column="0"
+                                                        VerticalAlignment="Center"
+                                                        Classes="collapseToggle column"
                                                         Command="{Binding ToggleCollapseCommand}"
                                                         ToolTip.Tip="{Binding CollapseToolTip}">
                                                     <Viewbox Classes="collapseIconHost">
@@ -157,7 +159,8 @@
                                                         </Panel>
                                                     </Viewbox>
                                                 </Button>
-                                                <Grid VerticalAlignment="Center">
+                                                <Grid Grid.Column="1"
+                                                      VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding HeaderTitle}"
                                                                Classes="columnTitleName"
                                                                VerticalAlignment="Center"
@@ -170,7 +173,7 @@
                                                              LostFocus="LaneEdit_LostFocus"
                                                              IsVisible="{Binding IsEditing}"/>
                                                 </Grid>
-                                            </StackPanel>
+                                            </Grid>
                                             <TextBlock Grid.Column="1"
                                                        Text="{Binding WipText}"
                                                        Classes="columnTitle"
@@ -203,6 +206,7 @@
                                                   ColumnSpacing="4"
                                                   VerticalAlignment="Center">
                                                 <Button Grid.Column="0"
+                                                        VerticalAlignment="Center"
                                                         Classes="collapseToggle column collapsedHeader"
                                                         Command="{Binding ToggleCollapseCommand}"
                                                         ToolTip.Tip="{Binding CollapseToolTip}">

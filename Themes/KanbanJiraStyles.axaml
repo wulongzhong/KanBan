@@ -380,8 +380,9 @@
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="#3D4A5C"/>
         <Setter Property="LetterSpacing" Value="0.35"/>
-        <Setter Property="LineHeight" Value="18"/>
+        <!-- Let line metrics come from the font so centering matches the glyph row -->
         <Setter Property="Padding" Value="0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
     <Style Selector="TextBlock.columnTitleName.ellipsis">
         <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -425,7 +426,7 @@
     <Style Selector="Button.collapseToggle.column">
         <Setter Property="MinWidth" Value="32"/>
         <Setter Property="MinHeight" Value="28"/>
-        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="Padding" Value="10,5"/>
         <Setter Property="Margin" Value="0,0,2,0"/>
     </Style>
     <Style Selector="Button.collapseToggle.column:pointerover /template/ Border#CollapseRootBorder">
@@ -456,7 +457,7 @@
         <Setter Property="Width" Value="14"/>
         <Setter Property="Height" Value="14"/>
         <Setter Property="Stretch" Value="Uniform"/>
-        <Setter Property="StretchDirection" Value="DownOnly"/>
+        <Setter Property="StretchDirection" Value="Both"/>
         <Setter Property="HorizontalAlignment" Value="Center"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
