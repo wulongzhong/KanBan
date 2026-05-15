@@ -375,41 +375,10 @@
                                                                         </DataTemplate>
                                                                     </ItemsControl.ItemTemplate>
                                                                 </ItemsControl>
-                                                                <Grid Margin="8,0,8,0">
-                                                                    <TextBlock Text="{Binding SummaryText}"
-                                                                               Classes="cardBody"
-                                                                               Margin="0,0,26,0"
-                                                                               IsVisible="{Binding HasDescription}"/>
-                                                                    <Button Classes="cardMenu"
-                                                                            Content="⋮"
-                                                                            Padding="3"
-                                                                            HorizontalAlignment="Right"
-                                                                            VerticalAlignment="Top"
-                                                                            Tag="{Binding}"
-                                                                            PointerPressed="CardMenu_PointerPressed">
-                                                                        <Button.Flyout>
-                                                                            <MenuFlyout>
-                                                                                <MenuItem Header="编辑卡片" Command="{Binding BeginEditCommand}"/>
-                                                                                <MenuItem Header="Move up" Command="{Binding MoveUpCommand}"/>
-                                                                                <MenuItem Header="Move down" Command="{Binding MoveDownCommand}"/>
-                                                                                <MenuItem Header="归档卡片" Command="{Binding ArchiveCommand}"/>
-                                                                                <MenuItem Header="删除卡片" Command="{Binding DeleteCommand}"/>
-                                                                                <Separator/>
-                                                                                <MenuItem Header="{Binding DateMenuHeader}"
-                                                                                          Click="CardMenu_Date_Click"/>
-                                                                                <MenuItem Header="移除日期"
-                                                                                          Command="{Binding ClearDueDateCommand}"
-                                                                                          IsVisible="{Binding ShowRemoveDateMenu}"/>
-                                                                                <MenuItem Header="{Binding TimeMenuHeader}"
-                                                                                          Click="CardMenu_Time_Click"
-                                                                                          IsVisible="{Binding ShowTimeMenuSection}"/>
-                                                                                <MenuItem Header="移除时间"
-                                                                                          Command="{Binding ClearDueTimeCommand}"
-                                                                                          IsVisible="{Binding ShowRemoveTimeMenu}"/>
-                                                                            </MenuFlyout>
-                                                                        </Button.Flyout>
-                                                                    </Button>
-                                                                </Grid>
+                                                                <TextBlock Text="{Binding SummaryText}"
+                                                                           Classes="cardBody"
+                                                                           Margin="8,8,28,0"
+                                                                           IsVisible="{Binding HasDescription}"/>
 
                                                                 <ItemsControl ItemsSource="{Binding PreviewImages}"
                                                                               IsVisible="{Binding HasPreviewImages}"
@@ -437,6 +406,34 @@
                                                                     </Border>
                                                                 </WrapPanel>
                                                             </StackPanel>
+
+                                                            <Button Classes="cardMenu overlay"
+                                                                    Content="⋮"
+                                                                    IsVisible="{Binding IsDisplayMode}"
+                                                                    Tag="{Binding}"
+                                                                    PointerPressed="CardMenu_PointerPressed">
+                                                                <Button.Flyout>
+                                                                    <MenuFlyout>
+                                                                        <MenuItem Header="编辑卡片" Command="{Binding BeginEditCommand}"/>
+                                                                        <MenuItem Header="Move up" Command="{Binding MoveUpCommand}"/>
+                                                                        <MenuItem Header="Move down" Command="{Binding MoveDownCommand}"/>
+                                                                        <MenuItem Header="归档卡片" Command="{Binding ArchiveCommand}"/>
+                                                                        <MenuItem Header="删除卡片" Command="{Binding DeleteCommand}"/>
+                                                                        <Separator/>
+                                                                        <MenuItem Header="{Binding DateMenuHeader}"
+                                                                                  Click="CardMenu_Date_Click"/>
+                                                                        <MenuItem Header="移除日期"
+                                                                                  Command="{Binding ClearDueDateCommand}"
+                                                                                  IsVisible="{Binding ShowRemoveDateMenu}"/>
+                                                                        <MenuItem Header="{Binding TimeMenuHeader}"
+                                                                                  Click="CardMenu_Time_Click"
+                                                                                  IsVisible="{Binding ShowTimeMenuSection}"/>
+                                                                        <MenuItem Header="移除时间"
+                                                                                  Command="{Binding ClearDueTimeCommand}"
+                                                                                  IsVisible="{Binding ShowRemoveTimeMenu}"/>
+                                                                    </MenuFlyout>
+                                                                </Button.Flyout>
+                                                            </Button>
 
                                                             <StackPanel Spacing="6" Margin="8" IsVisible="{Binding IsEditing}">
                                                                 <ItemsControl ItemsSource="{Binding PreviewImages}"

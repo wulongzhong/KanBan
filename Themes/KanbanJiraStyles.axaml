@@ -254,6 +254,22 @@
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="#7A8799"/>
         <Setter Property="Opacity" Value="0"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <!-- Kebab pinned to card top-right; do not reuse sizing on lane/column menus -->
+    <Style Selector="Button.cardMenu.overlay">
+        <Setter Property="Width" Value="28"/>
+        <Setter Property="Height" Value="28"/>
+        <Setter Property="MinWidth" Value="28"/>
+        <Setter Property="MinHeight" Value="28"/>
+        <Setter Property="Padding" Value="4"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="VerticalAlignment" Value="Top"/>
+        <Setter Property="ZIndex" Value="2"/>
     </Style>
     <Style Selector="Border.card:pointerover Button.cardMenu">
         <Setter Property="Opacity" Value="1"/>
