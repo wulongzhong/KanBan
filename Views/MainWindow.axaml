@@ -152,10 +152,7 @@
                         <DataTemplate x:DataType="vm:LaneViewModel">
                             <Border Classes="lane"
                                     Width="272"
-                                    Margin="0,0,8,0"
-                                    DragDrop.AllowDrop="True"
-                                    DragDrop.DragOver="Lane_DragOver"
-                                    DragDrop.Drop="Lane_Drop">
+                                    Margin="0,0,8,0">
                                 <Grid RowDefinitions="Auto,*,Auto">
                                     <Border Grid.Row="0"
                                             Classes="laneHeader"
@@ -206,10 +203,7 @@
                                                     <Border Classes="card"
                                                             PointerPressed="Card_PointerPressed"
                                                             PointerMoved="Card_PointerMoved"
-                                                            DoubleTapped="Card_DoubleTapped"
-                                                            DragDrop.AllowDrop="True"
-                                                            DragDrop.DragOver="Card_DragOver"
-                                                            DragDrop.Drop="Card_Drop">
+                                                            DoubleTapped="Card_DoubleTapped">
                                                         <Grid>
                                                             <StackPanel Spacing="5" IsVisible="{Binding IsDisplayMode}">
                                                                 <Grid ColumnDefinitions="Auto,*,Auto" Margin="8,8,6,0">
@@ -440,5 +434,22 @@
                 </StackPanel>
             </Border>
         </Grid>
+
+        <Canvas Grid.RowSpan="3" IsHitTestVisible="False">
+            <Border x:Name="DragPreview"
+                    IsVisible="False"
+                    Width="244"
+                    Background="#2d2d2d"
+                    BorderBrush="#7f8cff"
+                    BorderThickness="1"
+                    CornerRadius="5"
+                    Padding="10"
+                    Opacity="0.92">
+                <TextBlock x:Name="DragPreviewText"
+                           TextWrapping="Wrap"
+                           FontSize="13"
+                           FontWeight="SemiBold"/>
+            </Border>
+        </Canvas>
     </Grid>
 </Window>

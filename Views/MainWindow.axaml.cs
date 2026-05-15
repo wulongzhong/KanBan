@@ -1,20 +1,29 @@
 using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using KanBan.ViewModels;
 
 namespace KanBan.Views;
 
 public partial class MainWindow : Window
 {
-    private static readonly DataFormat<string> CardDragFormat = DataFormat.CreateInProcessFormat<string>("KanBan.Card");
-    private static readonly DataFormat<string> LaneDragFormat = DataFormat.CreateInProcessFormat<string>("KanBan.Lane");
+    private enum DragKind
+    {
+        None,
+        Card,
+        Lane,
+    }
+
     private Point _dragStart;
     private string? _pressedCardId;
     private string? _pressedLaneId;
-    private PointerPressedEventArgs? _pressedEventArgs;
+    private string? _pressedTitle;
+    private string? _draggingId;
+    private DragKind _dragKind;
 
     public MainWindow()
     {
@@ -28,57 +37,31 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (IsInteractiveSource(e.Source))
+        {
+            return;
+        }
+
         _pressedCardId = card.Id;
         _pressedLaneId = null;
-        _pressedEventArgs = e;
-        _dragStart = e.GetPosition(control);
+        _pressedTitle = card.Title;
+        _dragStart = e.GetPosition(this);
     }
 
-    private async void Card_PointerMoved(object? sender, PointerEventArgs e)
+    private void Card_PointerMoved(object? sender, PointerEventArgs e)
     {
-        if (_pressedCardId is null || sender is not Control control)
+        if (_pressedCardId is null)
         {
             return;
         }
 
-        var point = e.GetCurrentPoint(control);
-        if (!point.Properties.IsLeftButtonPressed || !HasDragThreshold(e.GetPosition(control)))
+        var point = e.GetCurrentPoint(this);
+        if (!point.Properties.IsLeftButtonPressed || !HasDragThreshold(e.GetPosition(this)))
         {
             return;
         }
 
-        var cardId = _pressedCardId;
-        _pressedCardId = null;
-
-        if (_pressedEventArgs is null)
-        {
-            return;
-        }
-
-        var data = CreateDragData(CardDragFormat, cardId);
-        await DragDrop.DoDragDropAsync(_pressedEventArgs, data, DragDropEffects.Move);
-        _pressedEventArgs = null;
-    }
-
-    private void Card_DragOver(object? sender, DragEventArgs e)
-    {
-        if (e.DataTransfer.Contains(CardDragFormat))
-        {
-            e.DragEffects = DragDropEffects.Move;
-            e.Handled = true;
-        }
-    }
-
-    private void Card_Drop(object? sender, DragEventArgs e)
-    {
-        if (DataContext is not MainWindowViewModel viewModel ||
-            sender is not Control { DataContext: CardViewModel targetCard } ||
-            e.DataTransfer.TryGetValue(CardDragFormat) is not string cardId)
-        {
-            return;
-        }
-
-        viewModel.MoveCardBefore(cardId, targetCard.Id);
+        BeginPointerDrag(DragKind.Card, _pressedCardId, _pressedTitle ?? "Card", e);
         e.Handled = true;
     }
 
@@ -107,67 +90,32 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (IsInteractiveSource(e.Source))
+        {
+            return;
+        }
+
         _pressedLaneId = lane.Id;
         _pressedCardId = null;
-        _pressedEventArgs = e;
-        _dragStart = e.GetPosition(control);
+        _pressedTitle = lane.Title;
+        _dragStart = e.GetPosition(this);
     }
 
-    private async void LaneHeader_PointerMoved(object? sender, PointerEventArgs e)
+    private void LaneHeader_PointerMoved(object? sender, PointerEventArgs e)
     {
-        if (_pressedLaneId is null || sender is not Control control)
+        if (_pressedLaneId is null)
         {
             return;
         }
 
-        var point = e.GetCurrentPoint(control);
-        if (!point.Properties.IsLeftButtonPressed || !HasDragThreshold(e.GetPosition(control)))
+        var point = e.GetCurrentPoint(this);
+        if (!point.Properties.IsLeftButtonPressed || !HasDragThreshold(e.GetPosition(this)))
         {
             return;
         }
 
-        var laneId = _pressedLaneId;
-        _pressedLaneId = null;
-
-        if (_pressedEventArgs is null)
-        {
-            return;
-        }
-
-        var data = CreateDragData(LaneDragFormat, laneId);
-        await DragDrop.DoDragDropAsync(_pressedEventArgs, data, DragDropEffects.Move);
-        _pressedEventArgs = null;
-    }
-
-    private void Lane_DragOver(object? sender, DragEventArgs e)
-    {
-        if (e.DataTransfer.Contains(CardDragFormat) || e.DataTransfer.Contains(LaneDragFormat))
-        {
-            e.DragEffects = DragDropEffects.Move;
-            e.Handled = true;
-        }
-    }
-
-    private void Lane_Drop(object? sender, DragEventArgs e)
-    {
-        if (DataContext is not MainWindowViewModel viewModel ||
-            sender is not Control { DataContext: LaneViewModel targetLane })
-        {
-            return;
-        }
-
-        if (e.DataTransfer.TryGetValue(CardDragFormat) is string cardId)
-        {
-            viewModel.MoveCardToLane(cardId, targetLane.Id);
-            e.Handled = true;
-            return;
-        }
-
-        if (e.DataTransfer.TryGetValue(LaneDragFormat) is string laneId)
-        {
-            viewModel.MoveLaneBefore(laneId, targetLane.Id);
-            e.Handled = true;
-        }
+        BeginPointerDrag(DragKind.Lane, _pressedLaneId, _pressedTitle ?? "List", e);
+        e.Handled = true;
     }
 
     private void LaneHeader_DoubleTapped(object? sender, TappedEventArgs e)
@@ -202,13 +150,128 @@ public partial class MainWindow : Window
                Math.Abs(currentPosition.Y - _dragStart.Y) > 6;
     }
 
-    private static DataTransfer CreateDragData(DataFormat<string> format, string value)
+    protected override void OnPointerMoved(PointerEventArgs e)
     {
-        var item = new DataTransferItem();
-        item.Set(format, value);
+        base.OnPointerMoved(e);
 
-        var transfer = new DataTransfer();
-        transfer.Add(item);
-        return transfer;
+        if (_dragKind == DragKind.None)
+        {
+            return;
+        }
+
+        MoveDragPreview(e.GetPosition(this));
+        e.Handled = true;
+    }
+
+    protected override void OnPointerReleased(PointerReleasedEventArgs e)
+    {
+        base.OnPointerReleased(e);
+
+        if (_dragKind == DragKind.None)
+        {
+            ClearPressedState();
+            return;
+        }
+
+        CompletePointerDrag(e.GetPosition(this));
+        e.Pointer.Capture(null);
+        e.Handled = true;
+    }
+
+    private void BeginPointerDrag(DragKind kind, string id, string title, PointerEventArgs e)
+    {
+        _dragKind = kind;
+        _draggingId = id;
+        _pressedCardId = null;
+        _pressedLaneId = null;
+        _pressedTitle = null;
+
+        DragPreview.Width = kind == DragKind.Lane ? 244 : 232;
+        DragPreviewText.Text = kind == DragKind.Lane ? $"List: {title}" : title;
+        DragPreview.IsVisible = true;
+        MoveDragPreview(e.GetPosition(this));
+
+        e.Pointer.Capture(this);
+    }
+
+    private void MoveDragPreview(Point point)
+    {
+        Canvas.SetLeft(DragPreview, point.X + 14);
+        Canvas.SetTop(DragPreview, point.Y + 14);
+    }
+
+    private void CompletePointerDrag(Point point)
+    {
+        if (DataContext is not MainWindowViewModel viewModel || _draggingId is null)
+        {
+            ResetDragState();
+            return;
+        }
+
+        var elements = this.GetInputElementsAt(point, enabledElementsOnly: false)
+            .OfType<Control>()
+            .ToList();
+
+        if (_dragKind == DragKind.Card)
+        {
+            var targetCard = elements
+                .Select(control => control.DataContext)
+                .OfType<CardViewModel>()
+                .FirstOrDefault(card => card.Id != _draggingId);
+
+            if (targetCard is not null)
+            {
+                viewModel.MoveCardBefore(_draggingId, targetCard.Id);
+                ResetDragState();
+                return;
+            }
+
+            var targetLane = elements
+                .Select(control => control.DataContext)
+                .OfType<LaneViewModel>()
+                .FirstOrDefault();
+
+            if (targetLane is not null)
+            {
+                viewModel.MoveCardToLane(_draggingId, targetLane.Id);
+            }
+        }
+        else if (_dragKind == DragKind.Lane)
+        {
+            var targetLane = elements
+                .Select(control => control.DataContext)
+                .OfType<LaneViewModel>()
+                .FirstOrDefault(lane => lane.Id != _draggingId);
+
+            if (targetLane is not null)
+            {
+                viewModel.MoveLaneBefore(_draggingId, targetLane.Id);
+            }
+        }
+
+        ResetDragState();
+    }
+
+    private void ResetDragState()
+    {
+        DragPreview.IsVisible = false;
+        _dragKind = DragKind.None;
+        _draggingId = null;
+        ClearPressedState();
+    }
+
+    private void ClearPressedState()
+    {
+        _pressedCardId = null;
+        _pressedLaneId = null;
+        _pressedTitle = null;
+    }
+
+    private static bool IsInteractiveSource(object? source)
+    {
+        return source is Visual visual &&
+               visual.GetSelfAndVisualAncestors()
+                   .OfType<Control>()
+                   .Any(control => control is Button or TextBox or CheckBox or ComboBox);
     }
 }
