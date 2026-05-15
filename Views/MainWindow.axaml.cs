@@ -59,6 +59,28 @@ public partial class MainWindow : Window
         }
     }
 
+    private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+
+        if (e.Source is TextBox or Button)
+        {
+            return;
+        }
+
+        if (e.Source is Visual visual &&
+            (visual.FindAncestorOfType<Button>() is not null ||
+             visual.FindAncestorOfType<TextBox>() is not null))
+        {
+            return;
+        }
+
+        BeginMoveDrag(e);
+    }
+
     private void ColumnHeaderScrollViewer_ScrollChanged(object? sender, ScrollChangedEventArgs e)
     {
         if (_isBoardScrollSyncing || e.OffsetDelta.X == 0)

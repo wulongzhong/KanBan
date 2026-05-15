@@ -14,7 +14,10 @@
         MinWidth="980"
         MinHeight="620"
         Background="#FFFFFF"
-        RequestedThemeVariant="Light">
+        RequestedThemeVariant="Light"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="40"
+        WindowDecorations="Full">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -25,6 +28,15 @@
     </Window.Resources>
 
     <Window.Styles>
+        <Style Selector="WindowDrawnDecorations /template/ Panel#PART_TitleTextPanel > TextBlock">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+        <Style Selector="WindowDrawnDecorations /template/ Button#PART_FullScreenButton">
+            <Setter Property="IsVisible" Value="False"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+            <Setter Property="Width" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+        </Style>
         <Style Selector="Image.cardPreview">
             <Setter Property="MaxHeight" Value="180"/>
             <Setter Property="Stretch" Value="Uniform"/>
@@ -37,60 +49,64 @@
         </Style>
     </Window.Styles>
 
-    <Grid RowDefinitions="Auto,*"
+    <Grid RowDefinitions="40,*"
           IsEnabled="{Binding IsWorkspaceReady}">
-        <Border Grid.Row="0" Classes="toolbar" Padding="16,8,16,8">
-            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="16">
-                <TextBox Grid.Column="0"
-                         Classes="ghost boardTitle"
-                         Text="{Binding BoardTitle}"
-                         VerticalAlignment="Center"/>
+        <Grid Grid.Row="0"
+              Classes="titleBarHost"
+              ColumnDefinitions="Auto,*,Auto"
+              ColumnSpacing="12"
+              Margin="8,0,152,0"
+              WindowDecorationProperties.ElementRole="User"
+              PointerPressed="TitleBar_PointerPressed">
+            <TextBox Grid.Column="0"
+                     Classes="ghost boardTitle"
+                     Text="{Binding BoardTitle}"
+                     VerticalAlignment="Center"/>
 
-                <StackPanel Grid.Column="1"
-                            Orientation="Horizontal"
-                            Spacing="10"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
-                    <Border Classes="searchShell">
-                        <Grid ColumnDefinitions="Auto,*">
-                            <Path Grid.Column="0"
-                                  Classes="searchIcon"
-                                  Margin="10,0,2,0"
-                                  VerticalAlignment="Center"/>
-                            <TextBox Grid.Column="1"
-                                     Classes="searchInline"
-                                     Text="{Binding SearchQuery}"
-                                     PlaceholderText="Search cards"/>
-                        </Grid>
-                    </Border>
-                    <Border Classes="statBadge" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding TotalCards, StringFormat='{}{0} cards'}"/>
-                    </Border>
-                </StackPanel>
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="8"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                <Border Classes="searchShell">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Path Grid.Column="0"
+                              Classes="searchIcon"
+                              Margin="10,0,2,0"
+                              VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="1"
+                                 Classes="searchInline"
+                                 Text="{Binding SearchQuery}"
+                                 PlaceholderText="Search cards"/>
+                    </Grid>
+                </Border>
+                <Border Classes="statBadge" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding TotalCards, StringFormat='{}{0} cards'}"/>
+                </Border>
+            </StackPanel>
 
-                <StackPanel Grid.Column="2"
-                            Orientation="Horizontal"
-                            Spacing="2"
-                            VerticalAlignment="Center">
-                    <Button Classes="toolbarGhost"
-                            Classes.active="{Binding ShowArchive}"
-                            Content="Archive"
-                            Command="{Binding ToggleArchiveCommand}"/>
-                    <Button Classes="toolbarGhost"
-                            Classes.active="{Binding ShowSettings}"
-                            Content="Settings"
-                            Command="{Binding ToggleSettingsCommand}"/>
-                    <Button Classes="toolbarLink"
-                            Content="Swimlane"
-                            Command="{Binding AddSwimlaneCommand}"
-                            ToolTip.Tip="Add swimlane"/>
-                    <Button Classes="createList"
-                            Content="Create list"
-                            Command="{Binding AddLaneCommand}"
-                            Margin="4,0,0,0"/>
-                </StackPanel>
-            </Grid>
-        </Border>
+            <StackPanel Grid.Column="2"
+                        Orientation="Horizontal"
+                        Spacing="2"
+                        VerticalAlignment="Center">
+                <Button Classes="toolbarGhost"
+                        Classes.active="{Binding ShowArchive}"
+                        Content="Archive"
+                        Command="{Binding ToggleArchiveCommand}"/>
+                <Button Classes="toolbarGhost"
+                        Classes.active="{Binding ShowSettings}"
+                        Content="Settings"
+                        Command="{Binding ToggleSettingsCommand}"/>
+                <Button Classes="toolbarLink"
+                        Content="Swimlane"
+                        Command="{Binding AddSwimlaneCommand}"
+                        ToolTip.Tip="Add swimlane"/>
+                <Button Classes="createList"
+                        Content="Create list"
+                        Command="{Binding AddLaneCommand}"
+                        Margin="4,0,6,0"/>
+            </StackPanel>
+        </Grid>
 
         <Grid Grid.Row="1">
             <Grid RowDefinitions="Auto,*">

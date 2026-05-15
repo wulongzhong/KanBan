@@ -32,11 +32,11 @@
         <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
     <Style Selector="TextBox.ghost.boardTitle">
-        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="MinWidth" Value="72"/>
-        <Setter Property="MaxWidth" Value="200"/>
-        <Setter Property="Padding" Value="4,2"/>
+        <Setter Property="MaxWidth" Value="180"/>
+        <Setter Property="Padding" Value="2,0"/>
         <Setter Property="Foreground" Value="#172B4D"/>
     </Style>
     <Style Selector="Border.navSegmented">
@@ -68,8 +68,8 @@
     <Style Selector="Border.searchShell">
         <Setter Property="Background" Value="#F4F5F7"/>
         <Setter Property="CornerRadius" Value="6"/>
-        <Setter Property="MinWidth" Value="200"/>
-        <Setter Property="MaxWidth" Value="300"/>
+        <Setter Property="MinWidth" Value="160"/>
+        <Setter Property="MaxWidth" Value="240"/>
         <Setter Property="Padding" Value="0"/>
     </Style>
     <Style Selector="Border.searchShell:pointerover">
@@ -78,10 +78,10 @@
     <Style Selector="Border.searchShell TextBox.searchInline">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="4,6,10,6"/>
+        <Setter Property="Padding" Value="2,4,8,4"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="Foreground" Value="#172B4D"/>
-        <Setter Property="MinHeight" Value="28"/>
+        <Setter Property="MinHeight" Value="24"/>
     </Style>
     <Style Selector="Border.searchShell TextBox.searchInline /template/ Border">
         <Setter Property="Background" Value="Transparent"/>
@@ -110,8 +110,8 @@
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="#5E6C84"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="8,5"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Padding" Value="6,3"/>
+        <Setter Property="FontSize" Value="12"/>
         <Setter Property="CornerRadius" Value="4"/>
     </Style>
     <Style Selector="Button.toolbarGhost:pointerover">
@@ -131,8 +131,8 @@
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="#42526E"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="8,5"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Padding" Value="6,3"/>
+        <Setter Property="FontSize" Value="12"/>
         <Setter Property="CornerRadius" Value="4"/>
     </Style>
     <Style Selector="Button.toolbarLink:pointerover">
@@ -143,11 +143,11 @@
         <Setter Property="Background" Value="#0052CC"/>
         <Setter Property="Foreground" Value="#FFFFFF"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="12,6"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Padding" Value="10,4"/>
+        <Setter Property="FontSize" Value="12"/>
         <Setter Property="FontWeight" Value="Medium"/>
         <Setter Property="CornerRadius" Value="4"/>
-        <Setter Property="MinHeight" Value="28"/>
+        <Setter Property="MinHeight" Value="26"/>
     </Style>
     <Style Selector="Button.createList:pointerover">
         <Setter Property="Background" Value="#0065FF"/>
@@ -344,10 +344,9 @@
     </Style>
 
     <!-- Layout -->
-    <Style Selector="Border.toolbar">
-        <Setter Property="Background" Value="#FFFFFF"/>
-        <Setter Property="BorderBrush" Value="#EBECF0"/>
-        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+    <Style Selector="Grid.titleBarHost">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Height" Value="40"/>
     </Style>
     <Style Selector="Border.boardSurface">
         <Setter Property="Background" Value="#F4F5F7"/>
