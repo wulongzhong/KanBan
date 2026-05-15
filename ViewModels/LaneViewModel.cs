@@ -78,10 +78,13 @@ public sealed class LaneViewModel : ViewModelBase
         {
             if (SetProperty(ref _title, value))
             {
+                OnPropertyChanged(nameof(HeaderTitle));
                 NotifyChanged();
             }
         }
     }
+
+    public string HeaderTitle => Title.ToUpperInvariant();
 
     public string MaxItemsText
     {

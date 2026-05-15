@@ -20,6 +20,7 @@ public sealed class CardViewModel : ViewModelBase
     private readonly Action<CardViewModel>? _onRestore;
     private readonly Action<CardViewModel, int>? _onMove;
     private string _description;
+    private readonly ObservableCollection<CardTagViewModel> _tags = [];
     private DateTime? _dueDate;
     private TimeSpan? _dueTime;
     private DateTimeOffset _updatedAt;
@@ -41,6 +42,7 @@ public sealed class CardViewModel : ViewModelBase
         _updatedAt = card.UpdatedAt;
         _archivedAt = card.ArchivedAt;
         _description = NormalizeDescription(card);
+        RefreshTags();
         _dueDate = card.DueDate?.LocalDateTime.Date;
         _dueTime = card.DueTime;
         _imagePaths.AddRange(card.Images);
@@ -100,13 +102,34 @@ public sealed class CardViewModel : ViewModelBase
         {
             if (SetProperty(ref _description, value))
             {
+                RefreshTags();
                 OnPropertyChanged(nameof(HasDescription));
+                OnPropertyChanged(nameof(SummaryText));
                 Touch();
             }
         }
     }
 
-    public bool HasDescription => !string.IsNullOrWhiteSpace(Description);
+    public bool HasDescription => !string.IsNullOrWhiteSpace(SummaryText);
+
+    public string SummaryText
+    {
+        get
+        {
+            var stripped = CardTagHelper.StripTags(Description);
+            if (string.IsNullOrWhiteSpace(stripped))
+            {
+                return string.Empty;
+            }
+
+            var line = stripped.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)[0].Trim();
+            return line;
+        }
+    }
+
+    public ObservableCollection<CardTagViewModel> Tags => _tags;
+
+    public bool HasTags => _tags.Count > 0;
 
     public string DragLabel
     {
@@ -387,6 +410,24 @@ public sealed class CardViewModel : ViewModelBase
         _imagePaths.Add(relativePath);
         LoadPreviewImages(attachments);
         Touch();
+    }
+
+    private void RefreshTags()
+    {
+        _tags.Clear();
+        foreach (var tag in CardTagHelper.ParseTags(Description))
+        {
+            var label = tag.TrimStart('#');
+            if (string.IsNullOrWhiteSpace(label))
+            {
+                continue;
+            }
+
+            var background = JiraTagColors.GetBackground(label);
+            _tags.Add(new CardTagViewModel(label, background, JiraTagColors.GetForeground(background)));
+        }
+
+        OnPropertyChanged(nameof(HasTags));
     }
 
     private void Touch()

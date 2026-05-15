@@ -6,16 +6,17 @@
         SizeToContent="Height"
         CanResize="False"
         WindowStartupLocation="CenterOwner"
-        Background="#1e1e1e"
-        RequestedThemeVariant="Dark">
+        Background="#FFFFFF"
+        RequestedThemeVariant="Light">
     <StackPanel Margin="24" Spacing="16">
         <TextBlock Text="使用 KanBan 前请先选择工作区文件夹。"
                    FontSize="15"
                    FontWeight="SemiBold"
+                   Foreground="#172B4D"
                    TextWrapping="Wrap"/>
         <TextBlock Text="看板数据与卡片附件将保存在该目录中。未设置工作区前无法使用应用。"
                    TextWrapping="Wrap"
-                   Foreground="#9ca3af"
+                   Foreground="#5E6C84"
                    LineHeight="20"/>
         <StackPanel Orientation="Horizontal"
                     HorizontalAlignment="Right"

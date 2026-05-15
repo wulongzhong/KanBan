@@ -24,7 +24,6 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _statusMessage = string.Empty;
     private bool _showArchive;
     private bool _showSettings;
-    private BoardViewMode _currentViewMode = BoardViewMode.Board;
     private bool _showRelativeDates = true;
     private bool _prependNewCards;
     private string _maxArchiveSizeText = "200";
@@ -41,15 +40,11 @@ public partial class MainWindowViewModel : ViewModelBase
         ColumnLanes = [];
         Swimlanes = [];
         ArchiveCards = [];
-        TableCards = [];
 
         AddLaneCommand = new RelayCommand(AddLane);
         AddSwimlaneCommand = new RelayCommand(AddSwimlane);
         ToggleArchiveCommand = new RelayCommand(() => ShowArchive = !ShowArchive);
         ToggleSettingsCommand = new RelayCommand(() => ShowSettings = !ShowSettings);
-        SetBoardViewCommand = new RelayCommand(() => CurrentViewMode = BoardViewMode.Board);
-        SetListViewCommand = new RelayCommand(() => CurrentViewMode = BoardViewMode.List);
-        SetTableViewCommand = new RelayCommand(() => CurrentViewMode = BoardViewMode.Table);
         SaveCommand = new RelayCommand(Save);
         NewBoardCommand = new RelayCommand(NewBoard);
         SelectWorkspaceFolderCommand = new AsyncRelayCommand(SelectWorkspaceFolderAsync);
@@ -69,8 +64,6 @@ public partial class MainWindowViewModel : ViewModelBase
     public ObservableCollection<SwimlaneViewModel> Swimlanes { get; }
 
     public ObservableCollection<CardViewModel> ArchiveCards { get; }
-
-    public ObservableCollection<CardViewModel> TableCards { get; }
 
     public string BoardTitle
     {
@@ -122,27 +115,6 @@ public partial class MainWindowViewModel : ViewModelBase
         get => _showSettings;
         set => SetProperty(ref _showSettings, value);
     }
-
-    public BoardViewMode CurrentViewMode
-    {
-        get => _currentViewMode;
-        set
-        {
-            if (SetProperty(ref _currentViewMode, value))
-            {
-                OnPropertyChanged(nameof(IsBoardView));
-                OnPropertyChanged(nameof(IsListView));
-                OnPropertyChanged(nameof(IsTableView));
-                Save();
-            }
-        }
-    }
-
-    public bool IsBoardView => CurrentViewMode == BoardViewMode.Board;
-
-    public bool IsListView => CurrentViewMode == BoardViewMode.List;
-
-    public bool IsTableView => CurrentViewMode == BoardViewMode.Table;
 
     public bool ShowRelativeDates
     {
@@ -209,12 +181,6 @@ public partial class MainWindowViewModel : ViewModelBase
     public RelayCommand ToggleArchiveCommand { get; }
 
     public RelayCommand ToggleSettingsCommand { get; }
-
-    public RelayCommand SetBoardViewCommand { get; }
-
-    public RelayCommand SetListViewCommand { get; }
-
-    public RelayCommand SetTableViewCommand { get; }
 
     public RelayCommand SaveCommand { get; }
 
@@ -344,7 +310,6 @@ public partial class MainWindowViewModel : ViewModelBase
         KanbanBoardMigration.EnsureSwimlanes(board);
 
         _boardTitle = board.Title;
-        _currentViewMode = board.ViewMode;
         _showRelativeDates = board.Settings.ShowRelativeDates;
         _prependNewCards = board.Settings.PrependNewCards;
         _maxArchiveSizeText = board.Settings.MaxArchiveSize.ToString();
@@ -898,7 +863,7 @@ public partial class MainWindowViewModel : ViewModelBase
         var board = new KanbanBoard
         {
             Title = string.IsNullOrWhiteSpace(BoardTitle) ? "KanBan" : BoardTitle.Trim(),
-            ViewMode = CurrentViewMode,
+            ViewMode = BoardViewMode.Board,
             Settings = new BoardSettings
             {
                 ShowRelativeDates = ShowRelativeDates,
@@ -932,15 +897,6 @@ public partial class MainWindowViewModel : ViewModelBase
                 .Where(lane => lane.Id == header.Id)
                 .Sum(lane => lane.Cards.Count);
             header.SetAggregateCardCount(aggregateCount);
-        }
-
-        TableCards.Clear();
-        foreach (var card in Swimlanes
-                     .SelectMany(swimlane => swimlane.Lanes)
-                     .SelectMany(lane => lane.Cards)
-                     .Where(card => card.Matches(SearchQuery)))
-        {
-            TableCards.Add(card);
         }
 
         NotifyBoardProperties();
@@ -991,10 +947,6 @@ public partial class MainWindowViewModel : ViewModelBase
     private void NotifyBoardProperties()
     {
         OnPropertyChanged(nameof(BoardTitle));
-        OnPropertyChanged(nameof(CurrentViewMode));
-        OnPropertyChanged(nameof(IsBoardView));
-        OnPropertyChanged(nameof(IsListView));
-        OnPropertyChanged(nameof(IsTableView));
         OnPropertyChanged(nameof(ShowRelativeDates));
         OnPropertyChanged(nameof(PrependNewCards));
         OnPropertyChanged(nameof(MaxArchiveSizeText));

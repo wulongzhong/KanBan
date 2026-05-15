@@ -25,4 +25,7 @@ public static partial class CardTagHelper
     }
 
     public static string GetSortKey(string? text) => string.Join(' ', ParseTags(text));
+
+    public static string StripTags(string? text) =>
+        string.IsNullOrWhiteSpace(text) ? string.Empty : TagPattern().Replace(text, string.Empty).Trim();
 }
