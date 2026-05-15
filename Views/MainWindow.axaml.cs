@@ -19,6 +19,7 @@ public partial class MainWindow : Window
     }
 
     private Point _dragStart;
+    private Point _dragGrabOffset;
     private string? _pressedCardId;
     private string? _pressedLaneId;
     private string? _pressedTitle;
@@ -45,6 +46,7 @@ public partial class MainWindow : Window
         _pressedCardId = card.Id;
         _pressedLaneId = null;
         _pressedTitle = card.Title;
+        _dragGrabOffset = e.GetPosition(control);
         _dragStart = e.GetPosition(this);
     }
 
@@ -98,6 +100,7 @@ public partial class MainWindow : Window
         _pressedLaneId = lane.Id;
         _pressedCardId = null;
         _pressedTitle = lane.Title;
+        _dragGrabOffset = e.GetPosition(control);
         _dragStart = e.GetPosition(this);
     }
 
@@ -159,7 +162,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        MoveDragPreview(e.GetPosition(this));
+        MoveDragPreview(e);
         e.Handled = true;
     }
 
@@ -189,15 +192,21 @@ public partial class MainWindow : Window
         DragPreview.Width = kind == DragKind.Lane ? 244 : 232;
         DragPreviewText.Text = kind == DragKind.Lane ? $"List: {title}" : title;
         DragPreview.IsVisible = true;
-        MoveDragPreview(e.GetPosition(this));
+        MoveDragPreview(e);
 
         e.Pointer.Capture(this);
     }
 
-    private void MoveDragPreview(Point point)
+    private void MoveDragPreview(PointerEventArgs e)
     {
-        Canvas.SetLeft(DragPreview, point.X + 14);
-        Canvas.SetTop(DragPreview, point.Y + 14);
+        if (DragPreview.Parent is not Canvas canvas)
+        {
+            return;
+        }
+
+        var position = e.GetPosition(canvas);
+        Canvas.SetLeft(DragPreview, position.X - _dragGrabOffset.X);
+        Canvas.SetTop(DragPreview, position.Y - _dragGrabOffset.Y);
     }
 
     private void CompletePointerDrag(Point point)
