@@ -137,11 +137,13 @@
                                                 IsVisible="{Binding ShowLeadingSeparator}"/>
                                         <Border Grid.Column="1"
                                                 Classes="columnHeader"
+                                                Classes.collapsed="{Binding IsCollapsed}"
                                                 PointerPressed="LaneHeader_PointerPressed"
                                                 PointerMoved="LaneHeader_PointerMoved"
                                                 DoubleTapped="LaneHeader_DoubleTapped">
-                                        <Grid ColumnDefinitions="*,Auto,Auto"
-                                              VerticalAlignment="Center">
+                                        <Grid VerticalAlignment="Center">
+                                            <Grid ColumnDefinitions="*,Auto,Auto"
+                                                  IsVisible="{Binding IsExpanded}">
                                             <StackPanel Grid.Column="0"
                                                         Orientation="Horizontal"
                                                         Spacing="6"
@@ -151,15 +153,11 @@
                                                         ToolTip.Tip="{Binding CollapseToolTip}">
                                                     <Viewbox Classes="collapseIconHost">
                                                         <Panel Width="16" Height="16">
-                                                            <Path Classes="collapseIcon collapseIconLeft"
-                                                                  IsVisible="{Binding IsExpanded}"/>
-                                                            <Path Classes="collapseIcon collapseIconRight"
-                                                                  IsVisible="{Binding IsCollapsed}"/>
+                                                            <Path Classes="collapseIcon collapseIconLeft"/>
                                                         </Panel>
                                                     </Viewbox>
                                                 </Button>
-                                                <Grid VerticalAlignment="Center"
-                                                      IsVisible="{Binding IsExpanded}">
+                                                <Grid VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding HeaderTitle}"
                                                                Classes="columnTitle"
                                                                VerticalAlignment="Center"
@@ -171,23 +169,17 @@
                                                              LostFocus="LaneEdit_LostFocus"
                                                              IsVisible="{Binding IsEditing}"/>
                                                 </Grid>
-                                                <TextBlock Text="{Binding HeaderTitle}"
-                                                           Classes="columnTitleCollapsed"
-                                                           VerticalAlignment="Center"
-                                                           IsVisible="{Binding IsCollapsed}"/>
                                             </StackPanel>
                                             <TextBlock Grid.Column="1"
                                                        Text="{Binding WipText}"
                                                        Classes="columnTitle"
                                                        VerticalAlignment="Center"
-                                                       Margin="0,0,2,0"
-                                                       IsVisible="{Binding IsExpanded}"/>
+                                                       Margin="0,0,2,0"/>
                                             <Button Grid.Column="2"
                                                     Classes="cardMenu"
                                                     Content="⋮"
                                                     Padding="4"
-                                                    VerticalAlignment="Center"
-                                                    IsVisible="{Binding IsExpanded}">
+                                                    VerticalAlignment="Center">
                                                 <Button.Flyout>
                                                     <MenuFlyout>
                                                         <MenuItem Header="折叠列"
@@ -204,6 +196,26 @@
                                                     </MenuFlyout>
                                                 </Button.Flyout>
                                             </Button>
+                                            </Grid>
+                                            <Grid IsVisible="{Binding IsCollapsed}"
+                                                  ColumnDefinitions="Auto,*"
+                                                  ColumnSpacing="4"
+                                                  VerticalAlignment="Center">
+                                                <Button Grid.Column="0"
+                                                        Classes="collapseToggle column collapsedHeader"
+                                                        Command="{Binding ToggleCollapseCommand}"
+                                                        ToolTip.Tip="{Binding CollapseToolTip}">
+                                                    <Viewbox Classes="collapseIconHost">
+                                                        <Panel Width="16" Height="16">
+                                                            <Path Classes="collapseIcon collapseIconRight"/>
+                                                        </Panel>
+                                                    </Viewbox>
+                                                </Button>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding HeaderTitle}"
+                                                           Classes="columnTitleCollapsed"
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
                                         </Grid>
                                         </Border>
                                     </Grid>

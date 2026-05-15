@@ -70,9 +70,9 @@ public sealed class LaneViewModel : ViewModelBase
     }
 
     public const double ExpandedColumnWidth = 272;
-    public const double CollapsedColumnWidth = 44;
+    public const double CollapsedColumnWidth = 96;
     public const double ExpandedColumnGridWidth = 284;
-    public const double CollapsedColumnGridWidth = 52;
+    public const double CollapsedColumnGridWidth = 108;
 
     public string Id { get; }
 

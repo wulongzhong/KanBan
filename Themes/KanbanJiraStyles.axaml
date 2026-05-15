@@ -347,6 +347,15 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="4,0,8,0"/>
     </Style>
+    <Style Selector="Border.columnHeader.collapsed">
+        <Setter Property="Padding" Value="4,0,6,0"/>
+    </Style>
+    <Style Selector="Button.collapseToggle.column.collapsedHeader">
+        <Setter Property="MinWidth" Value="24"/>
+        <Setter Property="MinHeight" Value="24"/>
+        <Setter Property="Padding" Value="4"/>
+        <Setter Property="Margin" Value="0"/>
+    </Style>
     <Style Selector="Border.columnSeparator">
         <Setter Property="Width" Value="1"/>
         <Setter Property="Background" Value="#C8C4BC"/>
@@ -366,11 +375,13 @@
         <Setter Property="Padding" Value="0"/>
     </Style>
     <Style Selector="TextBlock.columnTitleCollapsed">
-        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Foreground" Value="#6B7A8C"/>
+        <Setter Property="LetterSpacing" Value="0.6"/>
         <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-        <Setter Property="MaxWidth" Value="36"/>
+        <Setter Property="TextWrapping" Value="NoWrap"/>
+        <Setter Property="LineHeight" Value="14"/>
     </Style>
     <Style Selector="Button.collapseToggle">
         <Setter Property="Background" Value="Transparent"/>
