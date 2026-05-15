@@ -1,16 +1,12 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using KanBan.Serialization;
 
 namespace KanBan.Services;
 
 public sealed class AppPreferences
 {
-    private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web)
-    {
-        WriteIndented = true,
-    };
-
     public string? WorkspaceFolder { get; set; }
 
     public static string PreferencesPath
@@ -32,7 +28,7 @@ public sealed class AppPreferences
             }
 
             var json = File.ReadAllText(PreferencesPath);
-            return JsonSerializer.Deserialize<AppPreferences>(json, SerializerOptions) ?? new AppPreferences();
+            return JsonSerializer.Deserialize(json, KanBanJsonContext.Default.AppPreferences) ?? new AppPreferences();
         }
         catch (JsonException)
         {
@@ -46,7 +42,7 @@ public sealed class AppPreferences
         Directory.CreateDirectory(directory);
 
         var tempPath = $"{PreferencesPath}.tmp";
-        var json = JsonSerializer.Serialize(this, SerializerOptions);
+        var json = JsonSerializer.Serialize(this, KanBanJsonContext.Default.AppPreferences);
         File.WriteAllText(tempPath, json);
 
         if (File.Exists(PreferencesPath))

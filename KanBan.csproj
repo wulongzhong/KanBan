@@ -15,6 +15,18 @@
     <Copyright>Copyright © KanBan</Copyright>
   </PropertyGroup>
 
+  <!-- Release publish: trim unused BCL, omit symbols, strip native PDBs from Skia/HarfBuzz. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' and '$(RuntimeIdentifier)' != ''">
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+    <TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
+    <PublishReadyToRun>false</PublishReadyToRun>
+  </PropertyGroup>
+
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
     <AvaloniaResource Include="Themes\**" />
@@ -38,4 +50,12 @@
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.1" />
   </ItemGroup>
+
+  <Target Name="RemovePublishedNativePdbs" AfterTargets="CopyFilesToPublishDirectory"
+          Condition="'$(Configuration)' == 'Release'">
+    <ItemGroup>
+      <_NativePublishPdbs Include="$(PublishDir)**\*.pdb" />
+    </ItemGroup>
+    <Delete Files="@(_NativePublishPdbs)" />
+  </Target>
 </Project>

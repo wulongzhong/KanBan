@@ -24,8 +24,10 @@ dotnet publish (Join-Path $Root "KanBan.csproj") `
     -c Release `
     -r $Runtime `
     --self-contained `
-    -p:PublishReadyToRun=true `
     -o $PublishDir
+
+$publishMb = [math]::Round((Get-ChildItem $PublishDir -Recurse -File | Measure-Object Length -Sum).Sum / 1MB, 2)
+Write-Host "  Published app: $publishMb MB (trimmed, no PDBs)" -ForegroundColor DarkGray
 
 if (-not (Get-Command wix -ErrorAction SilentlyContinue)) {
     Write-Host "Installing WiX Toolset 6..." -ForegroundColor Yellow
