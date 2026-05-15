@@ -118,6 +118,16 @@
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
         </Style>
+        <Style Selector="TextBox.cardDetails">
+            <Setter Property="AcceptsReturn" Value="True"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="MinHeight" Value="96"/>
+            <Setter Property="MaxHeight" Value="280"/>
+            <Setter Property="VerticalContentAlignment" Value="Top"/>
+            <Setter Property="Padding" Value="7,6"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+        </Style>
         <Style Selector="Border.card">
             <Setter Property="Background" Value="#1f1f1f"/>
             <Setter Property="BorderBrush" Value="#3a3a3a"/>
@@ -466,9 +476,8 @@
                                                                 <TextBlock Text="拖放图片到卡片，或 Ctrl+V 粘贴"
                                                                            Classes="faint"
                                                                            FontSize="11"/>
-                                                                <TextBox Text="{Binding Description}"
-                                                                         AcceptsReturn="True"
-                                                                         MinHeight="68"
+                                                                <TextBox Classes="cardDetails"
+                                                                         Text="{Binding Description}"
                                                                          PlaceholderText="Card details..."/>
                                                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                                                     <Button Classes="accent" Content="Done" Command="{Binding EndEditCommand}"/>
@@ -488,10 +497,9 @@
                                             <Border Padding="0,0,0,8" IsVisible="{Binding IsAddingCard}">
                                                 <StackPanel Spacing="6">
                                                     <TextBox Text="{Binding NewCardTitle}" PlaceholderText="卡片标题..."/>
-                                                    <TextBox Text="{Binding NewCardDetails}"
-                                                             PlaceholderText="详情..."
-                                                             AcceptsReturn="True"
-                                                             MinHeight="52"/>
+                                                    <TextBox Classes="cardDetails"
+                                                             Text="{Binding NewCardDetails}"
+                                                             PlaceholderText="详情..."/>
                                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                                         <Button Classes="accent" Content="添加" Command="{Binding CommitAddCardCommand}"/>
                                                         <Button Content="取消" Command="{Binding CancelAddCardCommand}"/>
