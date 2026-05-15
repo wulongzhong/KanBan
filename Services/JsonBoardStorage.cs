@@ -39,7 +39,13 @@ public sealed class JsonBoardStorage
         {
             var json = File.ReadAllText(BoardPath);
             var data = JsonSerializer.Deserialize<KanBanData>(json, SerializerOptions);
-            return data?.Board is null ? new KanBanData() : data;
+            if (data?.Board is null)
+            {
+                return new KanBanData();
+            }
+
+            KanbanBoardMigration.NormalizeLegacyFields(data.Board);
+            return data;
         }
         catch (JsonException)
         {

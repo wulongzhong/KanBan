@@ -479,8 +479,8 @@ public partial class MainWindowViewModel : ViewModelBase
             LaneSort.TitleDesc => lane.Cards.OrderByDescending(card => card.Title, StringComparer.OrdinalIgnoreCase),
             LaneSort.DateAsc => lane.Cards.OrderBy(card => card.DueDate),
             LaneSort.DateDesc => lane.Cards.OrderByDescending(card => card.DueDate),
-            LaneSort.TagsAsc => lane.Cards.OrderBy(card => card.TagsText, StringComparer.OrdinalIgnoreCase),
-            LaneSort.TagsDesc => lane.Cards.OrderByDescending(card => card.TagsText, StringComparer.OrdinalIgnoreCase),
+            LaneSort.TagsAsc => lane.Cards.OrderBy(card => CardTagHelper.GetSortKey(card.Description), StringComparer.OrdinalIgnoreCase),
+            LaneSort.TagsDesc => lane.Cards.OrderByDescending(card => CardTagHelper.GetSortKey(card.Description), StringComparer.OrdinalIgnoreCase),
             _ => lane.Cards.AsEnumerable(),
         };
 

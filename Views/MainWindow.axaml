@@ -297,20 +297,6 @@
                                                                            IsVisible="{Binding HasDescription}"/>
 
                                                                 <WrapPanel Margin="34,0,8,7">
-                                                                    <ItemsControl ItemsSource="{Binding Tags}">
-                                                                        <ItemsControl.ItemsPanel>
-                                                                            <ItemsPanelTemplate>
-                                                                                <WrapPanel/>
-                                                                            </ItemsPanelTemplate>
-                                                                        </ItemsControl.ItemsPanel>
-                                                                        <ItemsControl.ItemTemplate>
-                                                                            <DataTemplate>
-                                                                                <Border Classes="tag">
-                                                                                    <TextBlock Text="{Binding}" FontSize="11"/>
-                                                                                </Border>
-                                                                            </DataTemplate>
-                                                                        </ItemsControl.ItemTemplate>
-                                                                    </ItemsControl>
                                                                     <Button Classes="tagButton dateBadge"
                                                                             Content="{Binding DateDisplayText}"
                                                                             IsVisible="{Binding HasDueDate}"
@@ -333,7 +319,6 @@
                                                                          AcceptsReturn="True"
                                                                          MinHeight="68"
                                                                          PlaceholderText="Card details..."/>
-                                                                <TextBox Text="{Binding TagsText}" PlaceholderText="#tag"/>
                                                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                                                     <Button Classes="accent" Content="Done" Command="{Binding EndEditCommand}"/>
                                                                     <Button Content="Archive" Command="{Binding ArchiveCommand}"/>
@@ -415,22 +400,20 @@
                 <Border Classes="drawer" Padding="0">
                     <StackPanel>
                         <Border Background="#262626" Padding="10">
-                            <Grid ColumnDefinitions="2*,3*,*,*" ColumnSpacing="12">
+                            <Grid ColumnDefinitions="2*,3*,*" ColumnSpacing="12">
                                 <TextBlock Text="Title" FontWeight="SemiBold"/>
                                 <TextBlock Grid.Column="1" Text="Description" FontWeight="SemiBold"/>
-                                <TextBlock Grid.Column="2" Text="Tags" FontWeight="SemiBold"/>
-                                <TextBlock Grid.Column="3" Text="Due" FontWeight="SemiBold"/>
+                                <TextBlock Grid.Column="2" Text="Due" FontWeight="SemiBold"/>
                             </Grid>
                         </Border>
                         <ItemsControl ItemsSource="{Binding TableCards}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:CardViewModel">
                                     <Border BorderBrush="#3a3a3a" BorderThickness="0,1,0,0" Padding="10">
-                                        <Grid ColumnDefinitions="2*,3*,*,*" ColumnSpacing="12">
+                                        <Grid ColumnDefinitions="2*,3*,*" ColumnSpacing="12">
                                             <TextBlock Text="{Binding Title}" TextWrapping="Wrap"/>
                                             <TextBlock Grid.Column="1" Text="{Binding Description}" Classes="muted" TextWrapping="Wrap"/>
-                                            <TextBlock Grid.Column="2" Text="{Binding TagsText}" Classes="muted"/>
-                                            <TextBlock Grid.Column="3" Text="{Binding DateDisplayText}" Classes="muted"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding DateDisplayText}" Classes="muted"/>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>

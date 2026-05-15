@@ -44,8 +44,7 @@ public sealed class KanbanBoard
                         new KanbanCard
                         {
                             Title = "Capture ideas",
-                            Description = "Drop tasks here before they are ready to start.",
-                            Tags = ["inbox"],
+                            Description = "Drop tasks here before they are ready to start. #inbox",
                             CreatedAt = now,
                             UpdatedAt = now,
                         },
@@ -60,8 +59,7 @@ public sealed class KanbanBoard
                         new KanbanCard
                         {
                             Title = "Build the board",
-                            Description = "Columns, cards, search, archive, settings, and local JSON storage.",
-                            Tags = ["kanban", "desktop"],
+                            Description = "Columns, cards, search, archive, settings, and local JSON storage. #kanban #desktop",
                             DueDate = now.AddDays(2),
                             CreatedAt = now,
                             UpdatedAt = now,
@@ -76,8 +74,8 @@ public sealed class KanbanBoard
                         new KanbanCard
                         {
                             Title = "Create project shell",
+                            Description = "#setup",
                             IsComplete = true,
-                            Tags = ["setup"],
                             CreatedAt = now,
                             UpdatedAt = now,
                         },
@@ -103,7 +101,7 @@ public sealed class KanbanLane
     public List<KanbanCard> Cards { get; set; } = [];
 }
 
-public sealed class KanbanCard
+public sealed partial class KanbanCard
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
 
@@ -114,8 +112,6 @@ public sealed class KanbanCard
     public bool IsComplete { get; set; }
 
     public string CheckChar { get; set; } = " ";
-
-    public List<string> Tags { get; set; } = [];
 
     public DateTimeOffset? DueDate { get; set; }
 
@@ -141,17 +137,6 @@ public sealed class BoardSettings
     public int MaxArchiveSize { get; set; } = 200;
 
     public string DateFormat { get; set; } = "yyyy-MM-dd";
-
-    public List<TagColorSetting> TagColors { get; set; } = [];
-}
-
-public sealed class TagColorSetting
-{
-    public string Tag { get; set; } = string.Empty;
-
-    public string Foreground { get; set; } = "#d7e6ff";
-
-    public string Background { get; set; } = "#273449";
 }
 
 public enum BoardViewMode

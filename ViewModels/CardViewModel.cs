@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
 using CommunityToolkit.Mvvm.Input;
 using KanBan.Models;
 
@@ -18,7 +15,6 @@ public sealed class CardViewModel : ViewModelBase
     private string _title;
     private string _description;
     private bool _isComplete;
-    private string _tagsText;
     private DateTime? _dueDate;
     private TimeSpan? _dueTime;
     private bool _showCheckbox = true;
@@ -41,10 +37,8 @@ public sealed class CardViewModel : ViewModelBase
         _title = card.Title;
         _description = card.Description;
         _isComplete = card.IsComplete;
-        _tagsText = string.Join(' ', card.Tags.Select(tag => tag.StartsWith('#') ? tag : $"#{tag}"));
         _dueDate = card.DueDate?.LocalDateTime.Date;
         _dueTime = card.DueTime;
-        Tags = new ObservableCollection<string>(ParseTags(_tagsText));
         _onChanged = onChanged;
         _onArchive = onArchive;
         _onDelete = onDelete;
@@ -125,23 +119,6 @@ public sealed class CardViewModel : ViewModelBase
             }
         }
     }
-
-    public string TagsText
-    {
-        get => _tagsText;
-        set
-        {
-            if (SetProperty(ref _tagsText, value))
-            {
-                ReplaceTags(ParseTags(value));
-                Touch();
-            }
-        }
-    }
-
-    public ObservableCollection<string> Tags { get; }
-
-    public bool HasTags => Tags.Count > 0;
 
     public DateTime? DueDate => _dueDate;
 
@@ -287,7 +264,6 @@ public sealed class CardViewModel : ViewModelBase
             Description = Description.Trim(),
             IsComplete = IsComplete,
             CheckChar = IsComplete ? "x" : " ",
-            Tags = Tags.Select(tag => tag.TrimStart('#')).Where(tag => !string.IsNullOrWhiteSpace(tag)).Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
             DueDate = _dueDate is null ? null : new DateTimeOffset(_dueDate.Value),
             DueTime = _dueTime,
             CreatedAt = CreatedAt,
@@ -303,7 +279,7 @@ public sealed class CardViewModel : ViewModelBase
             return true;
         }
 
-        var haystack = $"{Title} {Description} {TagsText} {DateDisplayText} {TimeDisplayText}";
+        var haystack = $"{Title} {Description} {DateDisplayText} {TimeDisplayText}";
         return haystack.Contains(query, StringComparison.OrdinalIgnoreCase);
     }
 
@@ -346,24 +322,5 @@ public sealed class CardViewModel : ViewModelBase
     {
         UpdatedAt = DateTimeOffset.UtcNow;
         _onChanged?.Invoke(this);
-    }
-
-    private void ReplaceTags(IEnumerable<string> tags)
-    {
-        Tags.Clear();
-        foreach (var tag in tags)
-        {
-            Tags.Add(tag);
-        }
-
-        OnPropertyChanged(nameof(HasTags));
-    }
-
-    private static IEnumerable<string> ParseTags(string value)
-    {
-        return value
-            .Split([' ', ',', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(tag => tag.StartsWith('#') ? tag : $"#{tag}")
-            .Distinct(StringComparer.OrdinalIgnoreCase);
     }
 }

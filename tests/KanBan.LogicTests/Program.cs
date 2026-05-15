@@ -89,7 +89,7 @@ static void JsonStorageRoundTrips()
                     new KanbanLane
                     {
                         Title = "Lane",
-                        Cards = [new KanbanCard { Title = "Card", Tags = ["test"] }],
+                        Cards = [new KanbanCard { Title = "Card", Description = "#test" }],
                     },
                 ],
             },
@@ -100,7 +100,7 @@ static void JsonStorageRoundTrips()
 
         Assert(loaded.Board.Title == "Round trip", "Expected board title to round-trip.");
         Assert(loaded.Board.Lanes.Count == 1, "Expected lane to round-trip.");
-        Assert(loaded.Board.Lanes[0].Cards[0].Tags[0] == "test", "Expected card metadata to round-trip.");
+        Assert(loaded.Board.Lanes[0].Cards[0].Description.Contains("#test", StringComparison.Ordinal), "Expected card description to round-trip.");
     }
     finally
     {
