@@ -149,8 +149,14 @@
                                                 <Button Classes="collapseToggle column"
                                                         Command="{Binding ToggleCollapseCommand}"
                                                         ToolTip.Tip="{Binding CollapseToolTip}">
-                                                    <TextBlock Text="{Binding CollapseButtonContent}"
-                                                               Classes="collapseGlyph column"/>
+                                                    <Viewbox Classes="collapseIconHost">
+                                                        <Panel Width="16" Height="16">
+                                                            <Path Classes="collapseIcon collapseIconLeft"
+                                                                  IsVisible="{Binding IsExpanded}"/>
+                                                            <Path Classes="collapseIcon collapseIconRight"
+                                                                  IsVisible="{Binding IsCollapsed}"/>
+                                                        </Panel>
+                                                    </Viewbox>
                                                 </Button>
                                                 <Grid VerticalAlignment="Center"
                                                       IsVisible="{Binding IsExpanded}">
@@ -230,8 +236,14 @@
                                                 <Button Classes="collapseToggle swimlane"
                                                         Command="{Binding ToggleCollapseCommand}"
                                                         ToolTip.Tip="{Binding CollapseToolTip}">
-                                                    <TextBlock Text="{Binding CollapseButtonContent}"
-                                                               Classes="collapseGlyph swimlane"/>
+                                                    <Viewbox Classes="collapseIconHost">
+                                                        <Panel Width="16" Height="16">
+                                                            <Path Classes="collapseIcon collapseIconUp"
+                                                                  IsVisible="{Binding IsExpanded}"/>
+                                                            <Path Classes="collapseIcon collapseIconDown"
+                                                                  IsVisible="{Binding IsCollapsed}"/>
+                                                        </Panel>
+                                                    </Viewbox>
                                                 </Button>
                                                 <TextBlock Text="{Binding Title}"
                                                            Classes="swimlaneTitle"
