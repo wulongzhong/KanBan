@@ -157,6 +157,9 @@
         </Style>
         <Style Selector="TextBlock.cardBody">
             <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="LineHeight" Value="20"/>
+            <Setter Property="Foreground" Value="#dcddde"/>
             <Setter Property="TextWrapping" Value="Wrap"/>
         </Style>
         <Style Selector="TextBox.cardDetails">
@@ -164,6 +167,8 @@
             <Setter Property="TextWrapping" Value="Wrap"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="LineHeight" Value="20"/>
+            <Setter Property="Foreground" Value="#dcddde"/>
             <Setter Property="MinHeight" Value="96"/>
             <Setter Property="MaxHeight" Value="280"/>
             <Setter Property="VerticalContentAlignment" Value="Top"/>
@@ -433,15 +438,16 @@
                                                             KeyDown="Card_KeyDown">
                                                         <Grid>
                                                             <StackPanel Spacing="5" IsVisible="{Binding IsDisplayMode}">
-                                                                <Grid ColumnDefinitions="*,Auto" Margin="8,8,6,0">
+                                                                <Grid Margin="8,8,8,0">
                                                                     <TextBlock Text="{Binding Description}"
                                                                                Classes="cardBody"
-                                                                               Margin="0,1,4,0"
+                                                                               Margin="0,0,26,0"
                                                                                IsVisible="{Binding HasDescription}"/>
-                                                                    <Button Grid.Column="1"
-                                                                            Classes="cardMenu"
+                                                                    <Button Classes="cardMenu"
                                                                             Content="⋮"
                                                                             Padding="3"
+                                                                            HorizontalAlignment="Right"
+                                                                            VerticalAlignment="Top"
                                                                             Tag="{Binding}"
                                                                             PointerPressed="CardMenu_PointerPressed">
                                                                         <Button.Flyout>
