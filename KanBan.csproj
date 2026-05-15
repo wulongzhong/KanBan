@@ -5,6 +5,14 @@
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <ApplicationIcon>Assets\avalonia-logo.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Product>KanBan</Product>
+    <Description>KanBan 桌面看板应用</Description>
+    <Company>KanBan</Company>
+    <Copyright>Copyright © KanBan</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,5 +36,6 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.1" />
+    <PackageReference Include="Velopack" Version="0.0.1298" />
   </ItemGroup>
 </Project>
