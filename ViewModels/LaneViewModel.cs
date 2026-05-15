@@ -22,6 +22,7 @@ public sealed class LaneViewModel : ViewModelBase
     private bool _isAddingCard;
     private string _newCardDetails = string.Empty;
     private int? _aggregateCardCount;
+    private bool _showLeadingSeparator;
 
     public LaneViewModel(
         KanbanLane lane,
@@ -70,6 +71,12 @@ public sealed class LaneViewModel : ViewModelBase
     public string? SwimlaneId { get; }
 
     public bool IsColumnHeader { get; }
+
+    public bool ShowLeadingSeparator
+    {
+        get => _showLeadingSeparator;
+        set => SetProperty(ref _showLeadingSeparator, value);
+    }
 
     public string Title
     {

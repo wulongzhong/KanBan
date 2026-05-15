@@ -274,6 +274,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         ColumnLanes.Insert(newIndex, lane);
         ReorderSwimlaneLanes(laneId, beforeLaneId);
+        RefreshColumnSeparators();
         SaveAndRefresh("Lane moved.");
     }
 
@@ -324,6 +325,8 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             Swimlanes.Add(CreateSwimlane(swimlane, board.Lanes));
         }
+
+        RefreshColumnSeparators();
 
         foreach (var card in board.Archive)
         {
@@ -429,6 +432,7 @@ public partial class MainWindowViewModel : ViewModelBase
             swimlane.Lanes.Add(CreateLane(laneModel, swimlane.Id));
         }
 
+        RefreshColumnSeparators();
         SaveAndRefresh("Lane added.");
     }
 
@@ -507,6 +511,7 @@ public partial class MainWindowViewModel : ViewModelBase
             ColumnLanes.Remove(headerLane);
         }
 
+        RefreshColumnSeparators();
         SaveAndRefresh("Lane deleted. Cards moved to archive.");
     }
 
@@ -528,7 +533,24 @@ public partial class MainWindowViewModel : ViewModelBase
 
         ColumnLanes.Move(oldIndex, newIndex);
         ReorderSwimlaneLanesByOffset(lane.Id, offset);
+        RefreshColumnSeparators();
         SaveAndRefresh("Lane moved.");
+    }
+
+    private void RefreshColumnSeparators()
+    {
+        for (var index = 0; index < ColumnLanes.Count; index++)
+        {
+            ColumnLanes[index].ShowLeadingSeparator = index > 0;
+        }
+
+        foreach (var swimlane in Swimlanes)
+        {
+            for (var index = 0; index < swimlane.Lanes.Count; index++)
+            {
+                swimlane.Lanes[index].ShowLeadingSeparator = index > 0;
+            }
+        }
     }
 
     private void ReorderSwimlaneLanes(string laneId, string beforeLaneId)

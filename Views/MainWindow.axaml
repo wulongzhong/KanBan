@@ -115,7 +115,8 @@
                                   HorizontalScrollBarVisibility="Hidden"
                                   VerticalScrollBarVisibility="Disabled"
                                   ScrollChanged="ColumnHeaderScrollViewer_ScrollChanged">
-                        <ItemsControl ItemsSource="{Binding ColumnLanes}">
+                        <ItemsControl Classes="columnHeaderItems"
+                                      ItemsSource="{Binding ColumnLanes}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Orientation="Horizontal"/>
@@ -123,12 +124,20 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:LaneViewModel">
-                                    <Border Classes="columnHeader"
-                                            Width="272"
-                                            Margin="0,0,12,0"
-                                            PointerPressed="LaneHeader_PointerPressed"
-                                            PointerMoved="LaneHeader_PointerMoved"
-                                            DoubleTapped="LaneHeader_DoubleTapped">
+                                    <Grid Width="284" VerticalAlignment="Stretch">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="272"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0"
+                                                Classes="columnSeparator"
+                                                IsVisible="{Binding ShowLeadingSeparator}"/>
+                                        <Border Grid.Column="1"
+                                                Classes="columnHeader"
+                                                PointerPressed="LaneHeader_PointerPressed"
+                                                PointerMoved="LaneHeader_PointerMoved"
+                                                DoubleTapped="LaneHeader_DoubleTapped">
                                         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
                                             <Grid Grid.Column="0">
                                                 <TextBlock Text="{Binding HeaderTitle}"
@@ -157,7 +166,8 @@
                                                 </Button.Flyout>
                                             </Button>
                                         </Grid>
-                                    </Border>
+                                        </Border>
+                                    </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
@@ -213,9 +223,16 @@
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="vm:LaneViewModel">
-                                <StackPanel Width="272"
-                                            Margin="0,0,12,0"
-                                            VerticalAlignment="Top">
+                                <Grid Width="284" VerticalAlignment="Top">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="272"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0"
+                                            Classes="columnSeparator"
+                                            IsVisible="{Binding ShowLeadingSeparator}"/>
+                                <StackPanel Grid.Column="1" Width="272">
                                     <Border Classes="laneCell">
                                         <Grid RowDefinitions="Auto,Auto">
                                             <Border Grid.Row="0" Padding="4,4,4,8" IsVisible="False">
@@ -399,6 +416,7 @@
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
+                                </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
