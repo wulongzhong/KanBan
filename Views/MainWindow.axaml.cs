@@ -187,7 +187,12 @@ public partial class MainWindow : Window
 
     private void CardEdit_KeyDown(object? sender, KeyEventArgs e)
     {
-        if (sender is Control { DataContext: CardViewModel card } && e.Key == Key.Enter && e.KeyModifiers == KeyModifiers.None)
+        if (sender is not TextBox || sender is not Control { DataContext: CardViewModel card })
+        {
+            return;
+        }
+
+        if (e.Key == Key.Enter && e.KeyModifiers == KeyModifiers.Control)
         {
             card.EndEdit();
             e.Handled = true;

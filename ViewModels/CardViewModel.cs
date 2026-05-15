@@ -267,10 +267,23 @@ public sealed class CardViewModel : ViewModelBase
                 continue;
             }
 
-            PreviewImages.Add(new CardImageViewModel(relativePath, absolutePath));
+            var path = relativePath;
+            PreviewImages.Add(new CardImageViewModel(
+                path,
+                absolutePath,
+                new RelayCommand(() => RemoveImage(attachments, path))));
         }
 
         OnPropertyChanged(nameof(HasPreviewImages));
+    }
+
+    public void RemoveImage(CardAttachmentService attachments, string relativePath)
+    {
+        _imagePaths.RemoveAll(existing =>
+            string.Equals(existing, relativePath, StringComparison.OrdinalIgnoreCase));
+        attachments.DeleteImage(relativePath);
+        LoadPreviewImages(attachments);
+        Touch();
     }
 
     public void AddImageFromFile(CardAttachmentService attachments, string sourcePath)

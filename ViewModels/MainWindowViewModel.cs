@@ -373,7 +373,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         var cardViewModel = new CardViewModel(
             card,
-            _ => SaveAndRefresh("Card updated."),
+            OnCardContentChanged,
             ArchiveCard,
             DeleteCard,
             RestoreCard,
@@ -695,6 +695,17 @@ public partial class MainWindowViewModel : ViewModelBase
 
         lane.RefreshFilter(SearchQuery);
         SaveAndRefresh("Lane sorted.");
+    }
+
+    private void OnCardContentChanged(CardViewModel card)
+    {
+        if (card.IsEditing)
+        {
+            Save("Saved.");
+            return;
+        }
+
+        SaveAndRefresh("Card updated.");
     }
 
     private void SaveAndRefresh(string message)

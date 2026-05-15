@@ -108,6 +108,11 @@
         <Setter Property="Background" Value="#363636"/>
         <Setter Property="Foreground" Value="#ffffff"/>
     </Style>
+    <Style Selector="Button.cardImageRemove">
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
 
     <!-- CheckBox -->
     <Style Selector="CheckBox">

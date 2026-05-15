@@ -233,9 +233,30 @@ public sealed class LaneViewModel : ViewModelBase
     public void RefreshFilter(string query)
     {
         _activeQuery = query;
+        var matching = Cards.Where(card => card.Matches(query)).ToList();
+
+        if (FilteredCards.Count == matching.Count)
+        {
+            var unchanged = true;
+            for (var i = 0; i < matching.Count; i++)
+            {
+                if (!ReferenceEquals(FilteredCards[i], matching[i]))
+                {
+                    unchanged = false;
+                    break;
+                }
+            }
+
+            if (unchanged)
+            {
+                NotifyCounts();
+                return;
+            }
+        }
+
         FilteredCards.Clear();
 
-        foreach (var card in Cards.Where(card => card.Matches(query)))
+        foreach (var card in matching)
         {
             FilteredCards.Add(card);
         }

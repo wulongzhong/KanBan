@@ -50,6 +50,15 @@ public sealed class CardAttachmentService
         return ToRelativePath(cardId, fileName);
     }
 
+    public void DeleteImage(string relativePath)
+    {
+        var absolutePath = ResolveAbsolutePath(relativePath);
+        if (File.Exists(absolutePath))
+        {
+            File.Delete(absolutePath);
+        }
+    }
+
     private string GetDestinationPath(string cardId, string fileName)
     {
         var cardDirectory = Path.Combine(_root, cardId);

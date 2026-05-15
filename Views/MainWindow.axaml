@@ -31,6 +31,43 @@
             <Setter Property="HorizontalAlignment" Value="Left"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
+        <Style Selector="Button.cardImageRemove">
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="MinWidth" Value="24"/>
+            <Setter Property="MinHeight" Value="24"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="6"/>
+            <Setter Property="Background" Value="#CC1a1a1a"/>
+            <Setter Property="Foreground" Value="#ffffff"/>
+            <Setter Property="BorderBrush" Value="#666666"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="ZIndex" Value="1"/>
+        </Style>
+        <Style Selector="Button.cardImageRemove /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+        </Style>
+        <Style Selector="Button.cardImageRemove:pointerover">
+            <Setter Property="Background" Value="#E53935"/>
+            <Setter Property="BorderBrush" Value="#E53935"/>
+        </Style>
+        <Style Selector="Path.cardImageRemoveIcon">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Height" Value="10"/>
+            <Setter Property="Stretch" Value="Uniform"/>
+            <Setter Property="Stroke" Value="#ffffff"/>
+            <Setter Property="StrokeThickness" Value="1.6"/>
+            <Setter Property="StrokeLineCap" Value="Round"/>
+            <Setter Property="Data" Value="M1,1 L9,9 M9,1 L1,9"/>
+        </Style>
         <Style Selector="Border.imageLightbox">
             <Setter Property="Background" Value="#D9000000"/>
         </Style>
@@ -467,9 +504,21 @@
                                                                               IsVisible="{Binding HasPreviewImages}">
                                                                     <ItemsControl.ItemTemplate>
                                                                         <DataTemplate x:DataType="vm:CardImageViewModel">
-                                                                            <Image Classes="cardPreview"
-                                                                                   Source="{Binding AbsolutePath, Converter={StaticResource FilePathToBitmap}}"
-                                                                                   DoubleTapped="CardImage_DoubleTapped"/>
+                                                                            <Border Margin="0,0,0,6"
+                                                                                    CornerRadius="4"
+                                                                                    ClipToBounds="True"
+                                                                                    Background="#1a1a1a">
+                                                                                <Grid>
+                                                                                    <Image Classes="cardPreview"
+                                                                                           Source="{Binding AbsolutePath, Converter={StaticResource FilePathToBitmap}}"
+                                                                                           DoubleTapped="CardImage_DoubleTapped"/>
+                                                                                    <Button Classes="cardImageRemove"
+                                                                                            ToolTip.Tip="移除图片"
+                                                                                            Command="{Binding RemoveCommand}">
+                                                                                        <Path Classes="cardImageRemoveIcon"/>
+                                                                                    </Button>
+                                                                                </Grid>
+                                                                            </Border>
                                                                         </DataTemplate>
                                                                     </ItemsControl.ItemTemplate>
                                                                 </ItemsControl>
