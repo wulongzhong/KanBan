@@ -65,6 +65,52 @@
             <Setter Property="BorderThickness" Value="1,0,0,0"/>
             <Setter Property="Padding" Value="8"/>
         </Style>
+        <Style Selector="Border.columnHeader">
+            <Setter Property="Background" Value="#2a2a2a"/>
+            <Setter Property="BorderBrush" Value="#3a3a3a"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6,6,0,0"/>
+            <Setter Property="Padding" Value="10,10,12,10"/>
+        </Style>
+        <Style Selector="StackPanel.swimlaneRow">
+            <Setter Property="Spacing" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+        </Style>
+        <Style Selector="Border.swimlaneBar">
+            <Setter Property="Background" Value="#2a2a2a"/>
+            <Setter Property="BorderBrush" Value="#3a3a3a"/>
+            <Setter Property="BorderThickness" Value="1,1,1,0"/>
+            <Setter Property="CornerRadius" Value="6,6,0,0"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Margin" Value="0,0,0,0"/>
+        </Style>
+        <Style Selector="Border.laneCell">
+            <Setter Property="Background" Value="#262626"/>
+            <Setter Property="BorderBrush" Value="#3a3a3a"/>
+            <Setter Property="BorderThickness" Value="0,1,1,0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Width" Value="272"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+        </Style>
+        <Style Selector="Border.laneCellFooter">
+            <Setter Property="Background" Value="#262626"/>
+            <Setter Property="BorderBrush" Value="#3a3a3a"/>
+            <Setter Property="BorderThickness" Value="0,1,1,1"/>
+            <Setter Property="CornerRadius" Value="0,0,6,6"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Width" Value="272"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+        </Style>
+        <Style Selector="ScrollViewer.laneCards">
+            <Setter Property="MaxHeight" Value="380"/>
+            <Setter Property="MinHeight" Value="96"/>
+        </Style>
+        <Style Selector="TextBlock.swimlaneTitle">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
         <Style Selector="Button.laneAddCard">
             <Setter Property="Padding" Value="8,10"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -162,6 +208,7 @@
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
                     <Button Content="Archive" Command="{Binding ToggleArchiveCommand}"/>
                     <Button Content="Settings" Command="{Binding ToggleSettingsCommand}"/>
+                    <Button Content="+ Add swimlane" Command="{Binding AddSwimlaneCommand}"/>
                     <Button Content="+ Add list" Command="{Binding AddLaneCommand}"/>
                 </StackPanel>
             </Grid>
@@ -186,30 +233,24 @@
                           VerticalScrollBarVisibility="Auto"
                           Padding="16"
                           IsVisible="{Binding IsBoardView}">
-                <ItemsControl ItemsSource="{Binding Lanes}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Top"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="vm:LaneViewModel">
-                            <Border Classes="lane"
-                                    Width="272"
-                                    Margin="0,0,10,0"
-                                    VerticalAlignment="Top"
-                                    MaxHeight="{Binding Bounds.Height, ElementName=BoardScrollViewer}">
-                                <Grid RowDefinitions="Auto,*,Auto">
-                                    <Border Grid.Row="0"
-                                            Classes="laneHeader"
+                <StackPanel Spacing="0">
+                    <ItemsControl Margin="0,0,0,12" ItemsSource="{Binding ColumnLanes}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:LaneViewModel">
+                                    <Border Classes="columnHeader"
+                                            Width="272"
+                                            Margin="0,0,12,0"
                                             PointerPressed="LaneHeader_PointerPressed"
                                             PointerMoved="LaneHeader_PointerMoved"
                                             DoubleTapped="LaneHeader_DoubleTapped">
-                                        <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto" ColumnSpacing="5">
+                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="6">
                                             <TextBlock Text="⋮⋮" Classes="faint" VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="1" Text="⌄" Classes="faint" VerticalAlignment="Center"/>
-
-                                            <Grid Grid.Column="2">
+                                            <Grid Grid.Column="1">
                                                 <TextBlock Text="{Binding Title}"
                                                            FontWeight="SemiBold"
                                                            FontSize="13"
@@ -221,17 +262,14 @@
                                                          LostFocus="LaneEdit_LostFocus"
                                                          IsVisible="{Binding IsEditing}"/>
                                             </Grid>
-
-                                            <TextBlock Grid.Column="3"
+                                            <TextBlock Grid.Column="2"
                                                        Text="{Binding WipText}"
                                                        Classes="muted"
                                                        FontSize="12"
                                                        VerticalAlignment="Center"/>
-
-                                            <Button Grid.Column="4" Classes="cardMenu" Content="⋮" Padding="4">
+                                            <Button Grid.Column="3" Classes="cardMenu" Content="⋮" Padding="4">
                                                 <Button.Flyout>
                                                     <MenuFlyout>
-                                                        <MenuItem Header="Add a card" Command="{Binding AddCardCommand}"/>
                                                         <MenuItem Header="Move left" Command="{Binding MoveLeftCommand}"/>
                                                         <MenuItem Header="Move right" Command="{Binding MoveRightCommand}"/>
                                                         <MenuItem Header="Sort now" Command="{Binding SortCommand}"/>
@@ -241,10 +279,76 @@
                                             </Button>
                                         </Grid>
                                     </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
-                                    <ScrollViewer Grid.Row="1"
-                                                  VerticalScrollBarVisibility="Auto"
-                                                  HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding Swimlanes}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:SwimlaneViewModel">
+                                <StackPanel Classes="swimlaneRow">
+                                    <Border Classes="swimlaneBar"
+                                            DoubleTapped="SwimlaneLabel_DoubleTapped">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding Title}"
+                                                       Classes="swimlaneTitle"
+                                                       IsVisible="{Binding IsDisplayMode}"/>
+                                            <TextBox Grid.Column="0"
+                                                     Text="{Binding Title}"
+                                                     Classes="swimlaneTitle"
+                                                     KeyDown="SwimlaneEdit_KeyDown"
+                                                     LostFocus="SwimlaneEdit_LostFocus"
+                                                     IsVisible="{Binding IsEditing}"/>
+                                            <Button Grid.Column="1"
+                                                    Classes="cardMenu"
+                                                    Content="⋮"
+                                                    Padding="3,0,0,0"
+                                                    Margin="8,0,0,0">
+                                                <Button.Flyout>
+                                                    <MenuFlyout>
+                                                        <MenuItem Header="Rename swimlane" Command="{Binding BeginEditCommand}"/>
+                                                        <MenuItem Header="Move up" Command="{Binding MoveUpCommand}"/>
+                                                        <MenuItem Header="Move down" Command="{Binding MoveDownCommand}"/>
+                                                        <MenuItem Header="Delete swimlane" Command="{Binding DeleteSwimlaneCommand}"/>
+                                                    </MenuFlyout>
+                                                </Button.Flyout>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+
+                                    <ItemsControl ItemsSource="{Binding Lanes}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:LaneViewModel">
+                                <StackPanel Width="272" Margin="0,0,12,0">
+                                    <Border Classes="laneCell">
+                                        <Grid RowDefinitions="Auto,Auto">
+                                            <Border Grid.Row="0" Padding="10,8" BorderBrush="#3a3a3a" BorderThickness="0,0,0,1">
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <TextBlock Text="{Binding WipText}"
+                                                               Classes="muted"
+                                                               FontSize="12"
+                                                               VerticalAlignment="Center"/>
+                                                    <Button Grid.Column="1" Classes="cardMenu" Content="⋮" Padding="4">
+                                                        <Button.Flyout>
+                                                            <MenuFlyout>
+                                                                <MenuItem Header="Add a card" Command="{Binding AddCardCommand}"/>
+                                                                <MenuItem Header="Sort now" Command="{Binding SortCommand}"/>
+                                                            </MenuFlyout>
+                                                        </Button.Flyout>
+                                                    </Button>
+                                                </Grid>
+                                            </Border>
+
+                                            <ScrollViewer Grid.Row="1"
+                                                          Classes="laneCards"
+                                                          VerticalScrollBarVisibility="Auto"
+                                                          HorizontalScrollBarVisibility="Disabled">
                                         <ItemsControl ItemsSource="{Binding FilteredCards}">
                                             <ItemsControl.ItemsPanel>
                                                 <ItemsPanelTemplate>
@@ -369,9 +473,10 @@
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
-                                    </ScrollViewer>
-
-                                    <Border Grid.Row="2" Classes="laneFooter">
+                                            </ScrollViewer>
+                                        </Grid>
+                                    </Border>
+                                    <Border Classes="laneCellFooter">
                                         <StackPanel Spacing="0">
                                             <Border Padding="0,0,0,8" IsVisible="{Binding IsAddingCard}">
                                                 <StackPanel Spacing="6">
@@ -392,20 +497,29 @@
                                                     IsVisible="{Binding IsAddCardButtonVisible}"/>
                                         </StackPanel>
                                     </Border>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
             </ScrollViewer>
 
             <ScrollViewer VerticalScrollBarVisibility="Auto"
                           Padding="24"
                           IsVisible="{Binding IsListView}">
                 <StackPanel Spacing="8">
-                    <ItemsControl ItemsSource="{Binding Lanes}">
+                    <ItemsControl ItemsSource="{Binding Swimlanes}">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="vm:LaneViewModel">
+                            <DataTemplate x:DataType="vm:SwimlaneViewModel">
+                                <StackPanel Spacing="6" Margin="0,0,0,12">
+                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="15"/>
+                                    <ItemsControl ItemsSource="{Binding Lanes}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:LaneViewModel">
                                 <Border Classes="lane" Padding="0" Margin="0,0,0,8">
                                     <StackPanel>
                                         <Border Classes="laneHeader">
@@ -429,6 +543,10 @@
                                         </ItemsControl>
                                     </StackPanel>
                                 </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

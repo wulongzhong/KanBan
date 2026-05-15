@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.Input;
@@ -32,11 +33,13 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _storage = storage;
         _attachments = new CardAttachmentService(storage);
-        Lanes = [];
+        ColumnLanes = [];
+        Swimlanes = [];
         ArchiveCards = [];
         TableCards = [];
 
         AddLaneCommand = new RelayCommand(AddLane);
+        AddSwimlaneCommand = new RelayCommand(AddSwimlane);
         ToggleArchiveCommand = new RelayCommand(() => ShowArchive = !ShowArchive);
         ToggleSettingsCommand = new RelayCommand(() => ShowSettings = !ShowSettings);
         SetBoardViewCommand = new RelayCommand(() => CurrentViewMode = BoardViewMode.Board);
@@ -48,7 +51,9 @@ public partial class MainWindowViewModel : ViewModelBase
         Load();
     }
 
-    public ObservableCollection<LaneViewModel> Lanes { get; }
+    public ObservableCollection<LaneViewModel> ColumnLanes { get; }
+
+    public ObservableCollection<SwimlaneViewModel> Swimlanes { get; }
 
     public ObservableCollection<CardViewModel> ArchiveCards { get; }
 
@@ -180,11 +185,19 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    public int TotalCards => Lanes.Sum(lane => lane.Cards.Count);
+    public int SwimlaneCount => Swimlanes.Count;
+
+    public int TotalCards => Swimlanes
+        .SelectMany(swimlane => swimlane.Lanes)
+        .SelectMany(lane => lane.Cards)
+        .DistinctBy(card => card.Id)
+        .Count();
 
     public int ArchiveCount => ArchiveCards.Count;
 
     public RelayCommand AddLaneCommand { get; }
+
+    public RelayCommand AddSwimlaneCommand { get; }
 
     public RelayCommand ToggleArchiveCommand { get; }
 
@@ -219,10 +232,10 @@ public partial class MainWindowViewModel : ViewModelBase
         MoveCardToLane(card, targetLane, targetLane.IndexOf(targetCard));
     }
 
-    public void MoveCardToLane(string cardId, string laneId)
+    public void MoveCardToLane(string cardId, string laneId, string? swimlaneId = null)
     {
         var card = FindCard(cardId);
-        var targetLane = Lanes.FirstOrDefault(lane => lane.Id == laneId);
+        var targetLane = FindLane(laneId, swimlaneId);
 
         if (card is null || targetLane is null)
         {
@@ -239,24 +252,25 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        var lane = Lanes.FirstOrDefault(existingLane => existingLane.Id == laneId);
-        var targetLane = Lanes.FirstOrDefault(existingLane => existingLane.Id == beforeLaneId);
+        var lane = ColumnLanes.FirstOrDefault(existingLane => existingLane.Id == laneId);
+        var targetLane = ColumnLanes.FirstOrDefault(existingLane => existingLane.Id == beforeLaneId);
 
         if (lane is null || targetLane is null)
         {
             return;
         }
 
-        var oldIndex = Lanes.IndexOf(lane);
-        var newIndex = Lanes.IndexOf(targetLane);
-        Lanes.RemoveAt(oldIndex);
+        var oldIndex = ColumnLanes.IndexOf(lane);
+        var newIndex = ColumnLanes.IndexOf(targetLane);
+        ColumnLanes.RemoveAt(oldIndex);
 
         if (oldIndex < newIndex)
         {
             newIndex--;
         }
 
-        Lanes.Insert(newIndex, lane);
+        ColumnLanes.Insert(newIndex, lane);
+        ReorderSwimlaneLanes(laneId, beforeLaneId);
         SaveAndRefresh("Lane moved.");
     }
 
@@ -269,8 +283,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void Hydrate(KanbanBoard board)
     {
-        Lanes.Clear();
+        ColumnLanes.Clear();
+        Swimlanes.Clear();
         ArchiveCards.Clear();
+
+        KanbanBoardMigration.EnsureSwimlanes(board);
 
         _boardTitle = board.Title;
         _currentViewMode = board.ViewMode;
@@ -282,7 +299,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
         foreach (var lane in board.Lanes)
         {
-            Lanes.Add(CreateLane(lane));
+            ColumnLanes.Add(CreateColumnHeader(lane));
+        }
+
+        foreach (var swimlane in board.Swimlanes)
+        {
+            Swimlanes.Add(CreateSwimlane(swimlane, board.Lanes));
         }
 
         foreach (var card in board.Archive)
@@ -295,7 +317,37 @@ public partial class MainWindowViewModel : ViewModelBase
         NotifyBoardProperties();
     }
 
-    private LaneViewModel CreateLane(KanbanLane lane)
+    private SwimlaneViewModel CreateSwimlane(KanbanSwimlane swimlane, IReadOnlyList<KanbanLane> boardLanes)
+    {
+        var swimlaneViewModel = new SwimlaneViewModel(
+            swimlane,
+            _ => SaveAndRefresh("Swimlane updated."),
+            DeleteSwimlane,
+            MoveSwimlane);
+
+        foreach (var lane in boardLanes)
+        {
+            swimlaneViewModel.Lanes.Add(CreateLane(lane, swimlane.Id));
+        }
+
+        return swimlaneViewModel;
+    }
+
+    private LaneViewModel CreateColumnHeader(KanbanLane lane)
+    {
+        return new LaneViewModel(
+            lane,
+            card => CreateCard(card, isArchived: false),
+            OnColumnHeaderChanged,
+            onAddCard: null,
+            onDelete: DeleteLane,
+            onMove: MoveLane,
+            onSort: SortLane,
+            swimlaneId: null,
+            isColumnHeader: true);
+    }
+
+    private LaneViewModel CreateLane(KanbanLane lane, string swimlaneId)
     {
         return new LaneViewModel(
             lane,
@@ -304,7 +356,28 @@ public partial class MainWindowViewModel : ViewModelBase
             AddCard,
             DeleteLane,
             MoveLane,
-            SortLane);
+            SortLane,
+            swimlaneId: swimlaneId,
+            isColumnHeader: false);
+    }
+
+    private void OnColumnHeaderChanged(LaneViewModel headerLane)
+    {
+        foreach (var swimlane in Swimlanes)
+        {
+            var lane = swimlane.Lanes.FirstOrDefault(existingLane => existingLane.Id == headerLane.Id);
+            if (lane is null)
+            {
+                continue;
+            }
+
+            lane.Title = headerLane.Title;
+            lane.MaxItemsText = headerLane.MaxItemsText;
+            lane.Sort = headerLane.Sort;
+            lane.ShouldMarkItemsComplete = headerLane.ShouldMarkItemsComplete;
+        }
+
+        SaveAndRefresh("Lane updated.");
     }
 
     private CardViewModel CreateCard(KanbanCard card, bool isArchived)
@@ -331,39 +404,161 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void AddLane()
     {
-        var lane = CreateLane(new KanbanLane { Title = $"Lane {Lanes.Count + 1}" });
-        Lanes.Add(lane);
+        var laneModel = new KanbanLane { Title = $"Lane {ColumnLanes.Count + 1}" };
+        ColumnLanes.Add(CreateColumnHeader(laneModel));
+
+        foreach (var swimlane in Swimlanes)
+        {
+            swimlane.Lanes.Add(CreateLane(laneModel, swimlane.Id));
+        }
+
         SaveAndRefresh("Lane added.");
     }
 
-    private void DeleteLane(LaneViewModel lane)
+    private void AddSwimlane()
     {
-        if (lane.Cards.Count > 0)
+        var swimlane = new KanbanSwimlane { Title = $"Swimlane {Swimlanes.Count + 1}" };
+        var swimlaneViewModel = CreateSwimlane(swimlane, ColumnLanes.Select(column => column.ToMetadataModel()).ToList());
+        Swimlanes.Add(swimlaneViewModel);
+        SaveAndRefresh("Swimlane added.");
+    }
+
+    private void DeleteSwimlane(SwimlaneViewModel swimlane)
+    {
+        if (Swimlanes.Count <= 1)
+        {
+            return;
+        }
+
+        var fallback = Swimlanes.First(sw => sw.Id != swimlane.Id);
+        foreach (var lane in swimlane.Lanes)
         {
             foreach (var card in lane.Cards.ToList())
             {
                 lane.RemoveCard(card);
-                card.ArchivedAt = DateTimeOffset.UtcNow;
-                ArchiveCards.Add(card);
+                card.SwimlaneId = fallback.Id;
+                var targetLane = fallback.Lanes.FirstOrDefault(existingLane => existingLane.Id == lane.Id)
+                    ?? fallback.Lanes.First();
+                targetLane.AddCard(card);
             }
         }
 
-        Lanes.Remove(lane);
+        Swimlanes.Remove(swimlane);
+        SaveAndRefresh("Swimlane deleted.");
+    }
+
+    private void MoveSwimlane(SwimlaneViewModel swimlane, int offset)
+    {
+        var oldIndex = Swimlanes.IndexOf(swimlane);
+        var newIndex = oldIndex + offset;
+
+        if (oldIndex < 0 || newIndex < 0 || newIndex >= Swimlanes.Count)
+        {
+            return;
+        }
+
+        Swimlanes.Move(oldIndex, newIndex);
+        SaveAndRefresh("Swimlane moved.");
+    }
+
+    private void DeleteLane(LaneViewModel lane)
+    {
+        foreach (var swimlane in Swimlanes)
+        {
+            var swimlaneLane = swimlane.Lanes.FirstOrDefault(existingLane => existingLane.Id == lane.Id);
+            if (swimlaneLane is null)
+            {
+                continue;
+            }
+
+            if (swimlaneLane.Cards.Count > 0)
+            {
+                foreach (var card in swimlaneLane.Cards.ToList())
+                {
+                    swimlaneLane.RemoveCard(card);
+                    card.ArchivedAt = DateTimeOffset.UtcNow;
+                    ArchiveCards.Add(card);
+                }
+            }
+
+            swimlane.Lanes.Remove(swimlaneLane);
+        }
+
+        var headerLane = ColumnLanes.FirstOrDefault(existingLane => existingLane.Id == lane.Id);
+        if (headerLane is not null)
+        {
+            ColumnLanes.Remove(headerLane);
+        }
+
         SaveAndRefresh("Lane deleted. Cards moved to archive.");
     }
 
     private void MoveLane(LaneViewModel lane, int offset)
     {
-        var oldIndex = Lanes.IndexOf(lane);
-        var newIndex = oldIndex + offset;
-
-        if (oldIndex < 0 || newIndex < 0 || newIndex >= Lanes.Count)
+        var headerLane = ColumnLanes.FirstOrDefault(existingLane => existingLane.Id == lane.Id);
+        if (headerLane is null)
         {
             return;
         }
 
-        Lanes.Move(oldIndex, newIndex);
+        var oldIndex = ColumnLanes.IndexOf(headerLane);
+        var newIndex = oldIndex + offset;
+
+        if (oldIndex < 0 || newIndex < 0 || newIndex >= ColumnLanes.Count)
+        {
+            return;
+        }
+
+        ColumnLanes.Move(oldIndex, newIndex);
+        ReorderSwimlaneLanesByOffset(lane.Id, offset);
         SaveAndRefresh("Lane moved.");
+    }
+
+    private void ReorderSwimlaneLanes(string laneId, string beforeLaneId)
+    {
+        foreach (var swimlane in Swimlanes)
+        {
+            var lane = swimlane.Lanes.FirstOrDefault(existingLane => existingLane.Id == laneId);
+            var targetLane = swimlane.Lanes.FirstOrDefault(existingLane => existingLane.Id == beforeLaneId);
+
+            if (lane is null || targetLane is null)
+            {
+                continue;
+            }
+
+            var oldIndex = swimlane.Lanes.IndexOf(lane);
+            var newIndex = swimlane.Lanes.IndexOf(targetLane);
+            swimlane.Lanes.RemoveAt(oldIndex);
+
+            if (oldIndex < newIndex)
+            {
+                newIndex--;
+            }
+
+            swimlane.Lanes.Insert(newIndex, lane);
+        }
+    }
+
+    private void ReorderSwimlaneLanesByOffset(string laneId, int offset)
+    {
+        foreach (var swimlane in Swimlanes)
+        {
+            var lane = swimlane.Lanes.FirstOrDefault(existingLane => existingLane.Id == laneId);
+            if (lane is null)
+            {
+                continue;
+            }
+
+            var oldIndex = swimlane.Lanes.IndexOf(lane);
+            var newIndex = oldIndex + offset;
+
+            if (oldIndex < 0 || newIndex < 0 || newIndex >= swimlane.Lanes.Count)
+            {
+                continue;
+            }
+
+            swimlane.Lanes.Move(oldIndex, newIndex);
+        }
     }
 
     private void AddCard(LaneViewModel lane, string title, string description)
@@ -371,6 +566,7 @@ public partial class MainWindowViewModel : ViewModelBase
         var card = CreateCard(
             new KanbanCard
             {
+                SwimlaneId = lane.SwimlaneId,
                 Title = string.IsNullOrWhiteSpace(title) ? "New card" : title.Trim(),
                 Description = description.Trim(),
                 CreatedAt = DateTimeOffset.UtcNow,
@@ -399,16 +595,24 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void RestoreCard(CardViewModel card)
     {
-        var targetLane = Lanes.FirstOrDefault();
+        var targetSwimlane = Swimlanes.FirstOrDefault();
+        var targetLane = targetSwimlane?.Lanes.FirstOrDefault();
         if (targetLane is null)
         {
-            targetLane = CreateLane(new KanbanLane { Title = "Restored" });
-            Lanes.Add(targetLane);
+            AddLane();
+            targetSwimlane = Swimlanes.FirstOrDefault();
+            targetLane = targetSwimlane?.Lanes.FirstOrDefault();
+        }
+
+        if (targetLane is null)
+        {
+            return;
         }
 
         if (ArchiveCards.Remove(card))
         {
             card.ArchivedAt = null;
+            card.SwimlaneId = targetLane.SwimlaneId;
             targetLane.AddCard(card);
             SaveAndRefresh("Card restored.");
         }
@@ -465,6 +669,7 @@ public partial class MainWindowViewModel : ViewModelBase
             card.IsComplete = true;
         }
 
+        card.SwimlaneId = targetLane.SwimlaneId;
         var targetIndex = Math.Clamp(index, 0, targetLane.Cards.Count);
         targetLane.AddCard(card, targetIndex);
         SaveAndRefresh("Card moved.");
@@ -472,6 +677,20 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void SortLane(LaneViewModel lane)
     {
+        if (lane.IsColumnHeader)
+        {
+            foreach (var swimlane in Swimlanes)
+            {
+                var swimlaneLane = swimlane.Lanes.FirstOrDefault(existingLane => existingLane.Id == lane.Id);
+                if (swimlaneLane is not null)
+                {
+                    SortLane(swimlaneLane);
+                }
+            }
+
+            return;
+        }
+
         if (lane.Sort == LaneSort.Manual)
         {
             SaveAndRefresh("Manual order enabled.");
@@ -537,6 +756,20 @@ public partial class MainWindowViewModel : ViewModelBase
             ? parsedMaxArchiveSize
             : 200;
 
+        var lanes = ColumnLanes
+            .Select(header =>
+            {
+                var lane = header.ToMetadataModel();
+                lane.Cards = Swimlanes
+                    .SelectMany(swimlane => swimlane.Lanes)
+                    .Where(swimlaneLane => swimlaneLane.Id == header.Id)
+                    .SelectMany(swimlaneLane => swimlaneLane.Cards)
+                    .Select(card => card.ToModel())
+                    .ToList();
+                return lane;
+            })
+            .ToList();
+
         var board = new KanbanBoard
         {
             Title = string.IsNullOrWhiteSpace(BoardTitle) ? "KanBan" : BoardTitle.Trim(),
@@ -549,7 +782,8 @@ public partial class MainWindowViewModel : ViewModelBase
                 MaxArchiveSize = maxArchiveSize,
                 DateFormat = string.IsNullOrWhiteSpace(DateFormat) ? "yyyy-MM-dd" : DateFormat.Trim(),
             },
-            Lanes = Lanes.Select(lane => lane.ToModel()).ToList(),
+            Lanes = lanes,
+            Swimlanes = Swimlanes.Select(swimlane => swimlane.ToModel()).ToList(),
             Archive = ArchiveCards.Select(card => card.ToModel()).ToList(),
         };
 
@@ -559,13 +793,28 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void RefreshFilters()
     {
-        foreach (var lane in Lanes)
+        foreach (var swimlane in Swimlanes)
         {
-            lane.RefreshFilter(SearchQuery);
+            foreach (var lane in swimlane.Lanes)
+            {
+                lane.RefreshFilter(SearchQuery);
+            }
+        }
+
+        foreach (var header in ColumnLanes)
+        {
+            var aggregateCount = Swimlanes
+                .SelectMany(swimlane => swimlane.Lanes)
+                .Where(lane => lane.Id == header.Id)
+                .Sum(lane => lane.Cards.Count);
+            header.SetAggregateCardCount(aggregateCount);
         }
 
         TableCards.Clear();
-        foreach (var card in Lanes.SelectMany(lane => lane.Cards).Where(card => card.Matches(SearchQuery)))
+        foreach (var card in Swimlanes
+                     .SelectMany(swimlane => swimlane.Lanes)
+                     .SelectMany(lane => lane.Cards)
+                     .Where(card => card.Matches(SearchQuery)))
         {
             TableCards.Add(card);
         }
@@ -575,7 +824,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void ApplyCardSettings()
     {
-        foreach (var card in Lanes.SelectMany(lane => lane.Cards).Concat(ArchiveCards))
+        foreach (var card in Swimlanes
+                     .SelectMany(swimlane => swimlane.Lanes)
+                     .SelectMany(lane => lane.Cards)
+                     .Concat(ArchiveCards))
         {
             card.ShowCheckbox = ShowCardCheckbox;
         }
@@ -597,12 +849,30 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private CardViewModel? FindCard(string cardId)
     {
-        return Lanes.SelectMany(lane => lane.Cards).FirstOrDefault(card => card.Id == cardId);
+        return Swimlanes
+            .SelectMany(swimlane => swimlane.Lanes)
+            .SelectMany(lane => lane.Cards)
+            .FirstOrDefault(card => card.Id == cardId);
     }
 
     private LaneViewModel? FindLaneContaining(CardViewModel card)
     {
-        return Lanes.FirstOrDefault(lane => lane.Cards.Contains(card));
+        return Swimlanes
+            .SelectMany(swimlane => swimlane.Lanes)
+            .FirstOrDefault(lane => lane.Cards.Contains(card));
+    }
+
+    private LaneViewModel? FindLane(string laneId, string? swimlaneId)
+    {
+        if (swimlaneId is not null)
+        {
+            var swimlane = Swimlanes.FirstOrDefault(existingSwimlane => existingSwimlane.Id == swimlaneId);
+            return swimlane?.Lanes.FirstOrDefault(lane => lane.Id == laneId);
+        }
+
+        return Swimlanes
+            .SelectMany(swimlane => swimlane.Lanes)
+            .FirstOrDefault(lane => lane.Id == laneId);
     }
 
     private void NotifyBoardProperties()
@@ -619,5 +889,6 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(DateFormat));
         OnPropertyChanged(nameof(TotalCards));
         OnPropertyChanged(nameof(ArchiveCount));
+        OnPropertyChanged(nameof(SwimlaneCount));
     }
 }

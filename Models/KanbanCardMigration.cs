@@ -37,16 +37,39 @@ public sealed partial class KanbanCard
 
 public static class KanbanBoardMigration
 {
+    public const string DefaultSwimlaneId = "default";
+
     public static void NormalizeLegacyFields(KanbanBoard board)
     {
+        EnsureSwimlanes(board);
+
         foreach (var card in board.Lanes.SelectMany(lane => lane.Cards))
         {
             card.NormalizeLegacyFields();
+            card.SwimlaneId ??= board.Swimlanes[0].Id;
         }
 
         foreach (var card in board.Archive)
         {
             card.NormalizeLegacyFields();
+        }
+    }
+
+    public static void EnsureSwimlanes(KanbanBoard board)
+    {
+        if (board.Swimlanes.Count == 0)
+        {
+            board.Swimlanes.Add(new KanbanSwimlane
+            {
+                Id = DefaultSwimlaneId,
+                Title = "Default",
+            });
+        }
+
+        var defaultSwimlaneId = board.Swimlanes[0].Id;
+        foreach (var card in board.Lanes.SelectMany(lane => lane.Cards))
+        {
+            card.SwimlaneId ??= defaultSwimlaneId;
         }
     }
 }

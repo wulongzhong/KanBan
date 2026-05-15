@@ -5,8 +5,15 @@ namespace KanBan.Models;
 
 public static class KanbanBoardOperations
 {
-    public static bool MoveCard(KanbanBoard board, string cardId, string targetLaneId, string? beforeCardId = null)
+    public static bool MoveCard(
+        KanbanBoard board,
+        string cardId,
+        string targetLaneId,
+        string? beforeCardId = null,
+        string? targetSwimlaneId = null)
     {
+        KanbanBoardMigration.EnsureSwimlanes(board);
+
         var sourceLane = board.Lanes.FirstOrDefault(lane => lane.Cards.Any(card => card.Id == cardId));
         var targetLane = board.Lanes.FirstOrDefault(lane => lane.Id == targetLaneId);
 
@@ -25,6 +32,11 @@ public static class KanbanBoardOperations
         if (targetIndex < 0)
         {
             targetIndex = targetLane.Cards.Count;
+        }
+
+        if (targetSwimlaneId is not null)
+        {
+            card.SwimlaneId = targetSwimlaneId;
         }
 
         if (targetLane.ShouldMarkItemsComplete)

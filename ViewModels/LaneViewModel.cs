@@ -22,6 +22,7 @@ public sealed class LaneViewModel : ViewModelBase
     private bool _isAddingCard;
     private string _newCardTitle = string.Empty;
     private string _newCardDetails = string.Empty;
+    private int? _aggregateCardCount;
 
     public LaneViewModel(
         KanbanLane lane,
@@ -30,9 +31,13 @@ public sealed class LaneViewModel : ViewModelBase
         Action<LaneViewModel, string, string>? onAddCard = null,
         Action<LaneViewModel>? onDelete = null,
         Action<LaneViewModel, int>? onMove = null,
-        Action<LaneViewModel>? onSort = null)
+        Action<LaneViewModel>? onSort = null,
+        string? swimlaneId = null,
+        bool isColumnHeader = false)
     {
         Id = lane.Id;
+        SwimlaneId = swimlaneId;
+        IsColumnHeader = isColumnHeader;
         _title = lane.Title;
         _maxItemsText = lane.MaxItems?.ToString() ?? string.Empty;
         _sort = lane.Sort;
@@ -43,7 +48,11 @@ public sealed class LaneViewModel : ViewModelBase
         _onMove = onMove;
         _onSort = onSort;
 
-        Cards = new ObservableCollection<CardViewModel>(lane.Cards.Select(cardFactory));
+        var laneCards = isColumnHeader
+            ? []
+            : lane.Cards.Where(card => card.SwimlaneId == swimlaneId);
+
+        Cards = new ObservableCollection<CardViewModel>(laneCards.Select(cardFactory));
         FilteredCards = new ObservableCollection<CardViewModel>(Cards);
 
         AddCardCommand = new RelayCommand(BeginAddCard);
@@ -58,6 +67,10 @@ public sealed class LaneViewModel : ViewModelBase
     }
 
     public string Id { get; }
+
+    public string? SwimlaneId { get; }
+
+    public bool IsColumnHeader { get; }
 
     public string Title
     {
@@ -119,11 +132,15 @@ public sealed class LaneViewModel : ViewModelBase
 
     public Array SortModes { get; } = Enum.GetValues(typeof(LaneSort));
 
-    public string CountText => $"{Cards.Count} cards";
+    public int DisplayCardCount => IsColumnHeader && _aggregateCardCount is int aggregateCount
+        ? aggregateCount
+        : Cards.Count;
 
-    public string WipText => MaxItems is { } maxItems ? $"{Cards.Count}/{maxItems}" : Cards.Count.ToString();
+    public string CountText => $"{DisplayCardCount} cards";
 
-    public bool IsOverLimit => MaxItems is { } maxItems && Cards.Count > maxItems;
+    public string WipText => MaxItems is { } maxItems ? $"{DisplayCardCount}/{maxItems}" : DisplayCardCount.ToString();
+
+    public bool IsOverLimit => MaxItems is { } maxItems && DisplayCardCount > maxItems;
 
     public bool IsEditing
     {
@@ -192,7 +209,24 @@ public sealed class LaneViewModel : ViewModelBase
             MaxItems = MaxItems,
             Sort = Sort,
             ShouldMarkItemsComplete = ShouldMarkItemsComplete,
-            Cards = Cards.Select(card => card.ToModel()).ToList(),
+            Cards = Cards.Select(card =>
+            {
+                var model = card.ToModel();
+                model.SwimlaneId = SwimlaneId;
+                return model;
+            }).ToList(),
+        };
+    }
+
+    public KanbanLane ToMetadataModel()
+    {
+        return new KanbanLane
+        {
+            Id = Id,
+            Title = string.IsNullOrWhiteSpace(Title) ? "Untitled lane" : Title.Trim(),
+            MaxItems = MaxItems,
+            Sort = Sort,
+            ShouldMarkItemsComplete = ShouldMarkItemsComplete,
         };
     }
 
@@ -239,8 +273,20 @@ public sealed class LaneViewModel : ViewModelBase
         return Cards.IndexOf(card);
     }
 
+    public void SetAggregateCardCount(int count)
+    {
+        if (!IsColumnHeader)
+        {
+            return;
+        }
+
+        _aggregateCardCount = count;
+        NotifyCounts();
+    }
+
     public void NotifyCounts()
     {
+        OnPropertyChanged(nameof(DisplayCardCount));
         OnPropertyChanged(nameof(CountText));
         OnPropertyChanged(nameof(WipText));
         OnPropertyChanged(nameof(IsOverLimit));

@@ -225,6 +225,32 @@ public partial class MainWindow : Window
         }
     }
 
+    private void SwimlaneLabel_DoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if (sender is Control { DataContext: SwimlaneViewModel swimlane })
+        {
+            swimlane.BeginEdit();
+            e.Handled = true;
+        }
+    }
+
+    private void SwimlaneEdit_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (sender is Control { DataContext: SwimlaneViewModel swimlane } && e.Key == Key.Enter)
+        {
+            swimlane.EndEdit();
+            e.Handled = true;
+        }
+    }
+
+    private void SwimlaneEdit_LostFocus(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Control { DataContext: SwimlaneViewModel swimlane })
+        {
+            swimlane.EndEdit();
+        }
+    }
+
     private bool HasDragThreshold(Point currentPosition)
     {
         return Math.Abs(currentPosition.X - _dragStart.X) > 6 ||
@@ -316,11 +342,11 @@ public partial class MainWindow : Window
             var targetLane = elements
                 .Select(control => control.DataContext)
                 .OfType<LaneViewModel>()
-                .FirstOrDefault();
+                .FirstOrDefault(lane => !lane.IsColumnHeader);
 
             if (targetLane is not null)
             {
-                viewModel.MoveCardToLane(_draggingId, targetLane.Id);
+                viewModel.MoveCardToLane(_draggingId, targetLane.Id, targetLane.SwimlaneId);
             }
         }
         else if (_dragKind == DragKind.Lane)
@@ -328,7 +354,7 @@ public partial class MainWindow : Window
             var targetLane = elements
                 .Select(control => control.DataContext)
                 .OfType<LaneViewModel>()
-                .FirstOrDefault(lane => lane.Id != _draggingId);
+                .FirstOrDefault(lane => lane.IsColumnHeader && lane.Id != _draggingId);
 
             if (targetLane is not null)
             {

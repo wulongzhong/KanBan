@@ -27,6 +27,7 @@ public sealed class CardViewModel : ViewModelBase
     private bool _showCheckbox = true;
     private DateTimeOffset _updatedAt;
     private DateTimeOffset? _archivedAt;
+    private string? _swimlaneId;
     private bool _isEditing;
 
     public CardViewModel(
@@ -38,6 +39,7 @@ public sealed class CardViewModel : ViewModelBase
         Action<CardViewModel, int>? onMove = null)
     {
         Id = card.Id;
+        _swimlaneId = card.SwimlaneId;
         CreatedAt = card.CreatedAt;
         _updatedAt = card.UpdatedAt;
         _archivedAt = card.ArchivedAt;
@@ -67,6 +69,12 @@ public sealed class CardViewModel : ViewModelBase
     }
 
     public string Id { get; }
+
+    public string? SwimlaneId
+    {
+        get => _swimlaneId;
+        set => SetProperty(ref _swimlaneId, value);
+    }
 
     public DateTimeOffset CreatedAt { get; }
 
@@ -308,6 +316,7 @@ public sealed class CardViewModel : ViewModelBase
         return new KanbanCard
         {
             Id = Id,
+            SwimlaneId = SwimlaneId,
             Title = string.IsNullOrWhiteSpace(Title) ? "Untitled card" : Title.Trim(),
             Description = Description.Trim(),
             Images = _imagePaths.ToList(),

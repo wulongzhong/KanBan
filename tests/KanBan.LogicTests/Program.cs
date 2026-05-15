@@ -8,6 +8,8 @@ var tests = new (string Name, Action Run)[]
     ("MoveCard moves cards across lanes and honors completion lanes", MoveCardAcrossLanes),
     ("ArchiveCard trims archive to configured size", ArchiveCardTrimsArchive),
     ("JsonBoardStorage round-trips board data", JsonStorageRoundTrips),
+    ("EnsureSwimlanes migrates legacy boards", EnsureSwimlanesMigratesLegacyBoards),
+    ("MoveCard updates swimlane when provided", MoveCardUpdatesSwimlane),
 };
 
 foreach (var test in tests)
@@ -71,6 +73,55 @@ static void ArchiveCardTrimsArchive()
     Assert(board.Archive[0].Id == "b", "Expected newest archived card to remain.");
 }
 
+static void EnsureSwimlanesMigratesLegacyBoards()
+{
+    var board = new KanbanBoard
+    {
+        Lanes =
+        [
+            new KanbanLane
+            {
+                Cards = [new KanbanCard { Id = "a", Title = "A" }],
+            },
+        ],
+    };
+
+    KanbanBoardMigration.EnsureSwimlanes(board);
+
+    Assert(board.Swimlanes.Count == 1, "Expected a default swimlane.");
+    Assert(board.Lanes[0].Cards[0].SwimlaneId == board.Swimlanes[0].Id, "Expected cards to receive swimlane ids.");
+}
+
+static void MoveCardUpdatesSwimlane()
+{
+    var board = new KanbanBoard
+    {
+        Swimlanes =
+        [
+            new KanbanSwimlane { Id = "s1", Title = "Team A" },
+            new KanbanSwimlane { Id = "s2", Title = "Team B" },
+        ],
+        Lanes =
+        [
+            new KanbanLane
+            {
+                Id = "todo",
+                Cards = [new KanbanCard { Id = "a", Title = "A", SwimlaneId = "s1" }],
+            },
+            new KanbanLane
+            {
+                Id = "done",
+                Cards = [],
+            },
+        ],
+    };
+
+    var moved = KanbanBoardOperations.MoveCard(board, "a", "done", targetSwimlaneId: "s2");
+
+    Assert(moved, "Expected move to succeed.");
+    Assert(board.Lanes[1].Cards[0].SwimlaneId == "s2", "Expected swimlane to update.");
+}
+
 static void JsonStorageRoundTrips()
 {
     var testDirectory = Path.Combine(Path.GetTempPath(), "KanBanTests", Guid.NewGuid().ToString("N"));
@@ -84,12 +135,13 @@ static void JsonStorageRoundTrips()
             Board = new KanbanBoard
             {
                 Title = "Round trip",
+                Swimlanes = [new KanbanSwimlane { Id = "s1", Title = "Default" }],
                 Lanes =
                 [
                     new KanbanLane
                     {
                         Title = "Lane",
-                        Cards = [new KanbanCard { Title = "Card", Description = "#test" }],
+                        Cards = [new KanbanCard { Title = "Card", Description = "#test", SwimlaneId = "s1" }],
                     },
                 ],
             },
@@ -101,6 +153,7 @@ static void JsonStorageRoundTrips()
         Assert(loaded.Board.Title == "Round trip", "Expected board title to round-trip.");
         Assert(loaded.Board.Lanes.Count == 1, "Expected lane to round-trip.");
         Assert(loaded.Board.Lanes[0].Cards[0].Description.Contains("#test", StringComparison.Ordinal), "Expected card description to round-trip.");
+        Assert(loaded.Board.Swimlanes.Count == 1, "Expected swimlane to round-trip.");
     }
     finally
     {

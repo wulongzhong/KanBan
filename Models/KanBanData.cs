@@ -5,7 +5,7 @@ namespace KanBan.Models;
 
 public sealed class KanBanData
 {
-    public int Version { get; set; } = 1;
+    public int Version { get; set; } = 2;
 
     public KanbanBoard Board { get; set; } = KanbanBoard.CreateDefault();
 }
@@ -22,6 +22,8 @@ public sealed class KanbanBoard
 
     public List<KanbanLane> Lanes { get; set; } = [];
 
+    public List<KanbanSwimlane> Swimlanes { get; set; } = [];
+
     public List<KanbanCard> Archive { get; set; } = [];
 
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
@@ -29,11 +31,20 @@ public sealed class KanbanBoard
     public static KanbanBoard CreateDefault()
     {
         var now = DateTimeOffset.UtcNow;
+        var defaultSwimlaneId = KanbanBoardMigration.DefaultSwimlaneId;
 
         return new KanbanBoard
         {
             Title = "My Kanban Board",
             UpdatedAt = now,
+            Swimlanes =
+            [
+                new KanbanSwimlane
+                {
+                    Id = defaultSwimlaneId,
+                    Title = "Default",
+                },
+            ],
             Lanes =
             [
                 new KanbanLane
@@ -43,6 +54,7 @@ public sealed class KanbanBoard
                     [
                         new KanbanCard
                         {
+                            SwimlaneId = defaultSwimlaneId,
                             Title = "Capture ideas",
                             Description = "Drop tasks here before they are ready to start. #inbox",
                             CreatedAt = now,
@@ -58,6 +70,7 @@ public sealed class KanbanBoard
                     [
                         new KanbanCard
                         {
+                            SwimlaneId = defaultSwimlaneId,
                             Title = "Build the board",
                             Description = "Columns, cards, search, archive, settings, and local JSON storage. #kanban #desktop",
                             DueDate = now.AddDays(2),
@@ -73,6 +86,7 @@ public sealed class KanbanBoard
                     [
                         new KanbanCard
                         {
+                            SwimlaneId = defaultSwimlaneId,
                             Title = "Create project shell",
                             Description = "#setup",
                             IsComplete = true,
@@ -84,6 +98,13 @@ public sealed class KanbanBoard
             ],
         };
     }
+}
+
+public sealed class KanbanSwimlane
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+
+    public string Title { get; set; } = "New Swimlane";
 }
 
 public sealed class KanbanLane
@@ -104,6 +125,8 @@ public sealed class KanbanLane
 public sealed partial class KanbanCard
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
+
+    public string? SwimlaneId { get; set; }
 
     public string Title { get; set; } = "New Card";
 
