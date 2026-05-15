@@ -112,7 +112,6 @@
                 <Border Grid.Row="0"
                         Classes="boardColumnHeaderHost">
                     <ScrollViewer x:Name="ColumnHeaderScrollViewer"
-                                  Padding="16,10,16,8"
                                   HorizontalScrollBarVisibility="Hidden"
                                   VerticalScrollBarVisibility="Disabled"
                                   ScrollChanged="ColumnHeaderScrollViewer_ScrollChanged">

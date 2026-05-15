@@ -339,7 +339,8 @@
         <Setter Property="Background" Value="#ECEAE4"/>
         <Setter Property="BorderBrush" Value="#D8D4CC"/>
         <Setter Property="BorderThickness" Value="0,0,0,1"/>
-        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Padding" Value="16,10,16,8"/>
+        <Setter Property="MinHeight" Value="40"/>
     </Style>
     <Style Selector="Border.columnHeader">
         <Setter Property="Background" Value="Transparent"/>
