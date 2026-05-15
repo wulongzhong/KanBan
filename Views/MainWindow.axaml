@@ -518,12 +518,23 @@
         <Popup x:Name="TimePickerPopup"
                IsLightDismissEnabled="True"
                Placement="BottomEdgeAlignedLeft"
-               OverlayDismissEventPassThrough="False">
+               OverlayDismissEventPassThrough="False"
+               Closed="TimePickerPopup_Closed">
             <ThemeVariantScope RequestedThemeVariant="Dark">
-                <Border Classes="pickerPopup" MinWidth="220">
-                    <TimePicker x:Name="BoardTimePicker"
-                                ClockIdentifier="24HourClock"
-                                SelectedTimeChanged="BoardTimePicker_SelectedTimeChanged"/>
+                <Border Classes="pickerPopup" MinWidth="240">
+                    <StackPanel Spacing="10">
+                        <TimePicker x:Name="BoardTimePicker"
+                                    ClockIdentifier="24HourClock"/>
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                            <Button Grid.Column="1"
+                                    Content="取消"
+                                    Click="TimePickerCancel_Click"/>
+                            <Button Grid.Column="2"
+                                    Classes="accent"
+                                    Content="确认"
+                                    Click="TimePickerConfirm_Click"/>
+                        </Grid>
+                    </StackPanel>
                 </Border>
             </ThemeVariantScope>
         </Popup>

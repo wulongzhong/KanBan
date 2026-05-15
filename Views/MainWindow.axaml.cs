@@ -392,9 +392,42 @@ public partial class MainWindow : Window
         }
     }
 
-    private void BoardTimePicker_SelectedTimeChanged(object? sender, TimePickerSelectedValueChangedEventArgs e)
+    private void TimePickerConfirm_Click(object? sender, RoutedEventArgs e)
     {
-        // Time is committed when the popup closes so the picker can be adjusted freely.
+        CommitDueTime();
+        e.Handled = true;
+    }
+
+    private void TimePickerCancel_Click(object? sender, RoutedEventArgs e)
+    {
+        CloseTimePickerPopup();
+        e.Handled = true;
+    }
+
+    private void CommitDueTime()
+    {
+        if (_pickerCard is null)
+        {
+            return;
+        }
+
+        if (BoardTimePicker.SelectedTime is TimeSpan time)
+        {
+            _pickerCard.SetDueTime(time);
+        }
+
+        CloseTimePickerPopup();
+    }
+
+    private void CloseTimePickerPopup()
+    {
+        TimePickerPopup.IsOpen = false;
+    }
+
+    private void ResetTimePickerState()
+    {
+        _pickerCard = null;
+        _pickerAnchor = null;
     }
 
     private void OpenDatePicker(CardViewModel card, Control? placementTarget, bool fromCardMenu)
@@ -430,6 +463,11 @@ public partial class MainWindow : Window
 
     private void OpenTimePicker(CardViewModel card, Control? placementTarget, bool fromCardMenu)
     {
+        if (TimePickerPopup.IsOpen)
+        {
+            TimePickerPopup.IsOpen = false;
+        }
+
         _pickerCard = card;
         _pickerAlignRight = fromCardMenu;
         _pickerAnchor = placementTarget ?? FindPickerAnchor(card, fromCardMenu);
@@ -437,11 +475,10 @@ public partial class MainWindow : Window
 
         if (!TryConfigurePickerPopup(TimePickerPopup))
         {
+            ResetTimePickerState();
             return;
         }
 
-        TimePickerPopup.Closed -= TimePickerPopup_Closed;
-        TimePickerPopup.Closed += TimePickerPopup_Closed;
         TimePickerPopup.IsOpen = true;
     }
 
@@ -517,14 +554,7 @@ public partial class MainWindow : Window
 
     private void TimePickerPopup_Closed(object? sender, EventArgs e)
     {
-        TimePickerPopup.Closed -= TimePickerPopup_Closed;
-
-        if (_pickerCard is not null && BoardTimePicker.SelectedTime is TimeSpan time)
-        {
-            _pickerCard.SetDueTime(time);
-        }
-
-        _pickerCard = null;
+        ResetTimePickerState();
     }
 
     private static CardViewModel? GetCardFromSender(object? sender)
