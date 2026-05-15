@@ -101,10 +101,9 @@
                         Content="Swimlane"
                         Command="{Binding AddSwimlaneCommand}"
                         ToolTip.Tip="Add swimlane"/>
-                <Button Classes="createList"
+                <Button Classes="toolbarLink"
                         Content="Create list"
-                        Command="{Binding AddLaneCommand}"
-                        Margin="4,0,6,0"/>
+                        Command="{Binding AddLaneCommand}"/>
             </StackPanel>
         </Grid>
 

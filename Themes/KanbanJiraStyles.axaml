@@ -139,22 +139,6 @@
         <Setter Property="Background" Value="#ECEAE4"/>
         <Setter Property="Foreground" Value="#5B7C99"/>
     </Style>
-    <Style Selector="Button.createList">
-        <Setter Property="Background" Value="#5B7C99"/>
-        <Setter Property="Foreground" Value="#FFFFFF"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="10,4"/>
-        <Setter Property="FontSize" Value="12"/>
-        <Setter Property="FontWeight" Value="Medium"/>
-        <Setter Property="CornerRadius" Value="6"/>
-        <Setter Property="MinHeight" Value="26"/>
-    </Style>
-    <Style Selector="Button.createList:pointerover">
-        <Setter Property="Background" Value="#6A8AAD"/>
-    </Style>
-    <Style Selector="Button.createList:pressed">
-        <Setter Property="Background" Value="#4D6B85"/>
-    </Style>
     <Style Selector="TextBox /template/ Border">
         <Setter Property="Background" Value="#FAF8F5"/>
         <Setter Property="BorderBrush" Value="#D8D4CC"/>
