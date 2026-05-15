@@ -12,6 +12,11 @@
         <Setter Property="BorderBrush" Value="#D0CCC3"/>
     </Style>
 
+    <!-- Rounded hover/press tint (Fluent caption template uses sharp ContentPresenter) -->
+    <Style Selector="WindowDrawnDecorations /template/ Button /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="CornerRadius" Value="6"/>
+    </Style>
+
     <Style Selector="WindowDrawnDecorations /template/ Button#PART_CloseButton">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderBrush" Value="#D8D4CC"/>
