@@ -36,9 +36,40 @@ public partial class MainWindow : Window
     private bool _pickerAlignRight;
     private bool _suppressDateSelectionChanged;
 
+    private bool _isBoardScrollSyncing;
+
     public MainWindow()
     {
         InitializeComponent();
+    }
+
+    private void ColumnHeaderScrollViewer_ScrollChanged(object? sender, ScrollChangedEventArgs e)
+    {
+        if (_isBoardScrollSyncing || e.OffsetDelta.X == 0)
+        {
+            return;
+        }
+
+        _isBoardScrollSyncing = true;
+        BoardBodyScrollViewer.Offset = new Vector(ColumnHeaderScrollViewer.Offset.X, BoardBodyScrollViewer.Offset.Y);
+        _isBoardScrollSyncing = false;
+    }
+
+    private void BoardBodyScrollViewer_ScrollChanged(object? sender, ScrollChangedEventArgs e)
+    {
+        if (_isBoardScrollSyncing)
+        {
+            return;
+        }
+
+        if (ColumnHeaderScrollViewer.Offset.X == BoardBodyScrollViewer.Offset.X)
+        {
+            return;
+        }
+
+        _isBoardScrollSyncing = true;
+        ColumnHeaderScrollViewer.Offset = new Vector(BoardBodyScrollViewer.Offset.X, 0);
+        _isBoardScrollSyncing = false;
     }
 
     private void Card_PointerPressed(object? sender, PointerPressedEventArgs e)
