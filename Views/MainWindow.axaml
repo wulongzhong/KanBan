@@ -146,7 +146,7 @@
                                                         Orientation="Horizontal"
                                                         Spacing="6"
                                                         VerticalAlignment="Center">
-                                                <Button Classes="collapseToggle"
+                                                <Button Classes="collapseToggle column"
                                                         Command="{Binding ToggleCollapseCommand}"
                                                         ToolTip.Tip="{Binding CollapseToolTip}">
                                                     <TextBlock Text="{Binding CollapseButtonContent}"
@@ -227,7 +227,7 @@
                                                         Orientation="Horizontal"
                                                         Spacing="6"
                                                         VerticalAlignment="Center">
-                                                <Button Classes="collapseToggle"
+                                                <Button Classes="collapseToggle swimlane"
                                                         Command="{Binding ToggleCollapseCommand}"
                                                         ToolTip.Tip="{Binding CollapseToolTip}">
                                                     <TextBlock Text="{Binding CollapseButtonContent}"

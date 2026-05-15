@@ -375,46 +375,90 @@
     <Style Selector="Button.collapseToggle">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="0"/>
         <Setter Property="Margin" Value="0"/>
-        <Setter Property="MinWidth" Value="0"/>
-        <Setter Property="MinHeight" Value="0"/>
         <Setter Property="Focusable" Value="False"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="Template">
             <ControlTemplate TargetType="Button">
-                <ContentPresenter x:Name="PART_ContentPresenter"
-                                  Content="{TemplateBinding Content}"
-                                  ContentTemplate="{TemplateBinding ContentTemplate}"
-                                  Padding="0"
-                                  Margin="0"
-                                  RecognizesAccessKey="False"/>
+                <Border x:Name="CollapseRootBorder"
+                        Background="Transparent"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        MinWidth="{TemplateBinding MinWidth}"
+                        MinHeight="{TemplateBinding MinHeight}">
+                    <ContentPresenter x:Name="CollapseContent"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      Background="Transparent"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      RecognizesAccessKey="False"/>
+                </Border>
             </ControlTemplate>
         </Setter>
+    </Style>
+    <Style Selector="Button.collapseToggle:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="Button.collapseToggle:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="Button.collapseToggle.column">
+        <Setter Property="MinWidth" Value="32"/>
+        <Setter Property="MinHeight" Value="28"/>
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="Margin" Value="0,0,2,0"/>
+    </Style>
+    <Style Selector="Button.collapseToggle.column:pointerover /template/ Border#CollapseRootBorder">
+        <Setter Property="Background" Value="#E3E0D8"/>
+    </Style>
+    <Style Selector="Button.collapseToggle.column:pressed /template/ Border#CollapseRootBorder">
+        <Setter Property="Background" Value="#DDD9D0"/>
+    </Style>
+    <Style Selector="Button.collapseToggle.swimlane">
+        <Setter Property="MinWidth" Value="32"/>
+        <Setter Property="MinHeight" Value="28"/>
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="Margin" Value="0,0,2,0"/>
+    </Style>
+    <Style Selector="Button.collapseToggle.swimlane:pointerover /template/ Border#CollapseRootBorder">
+        <Setter Property="Background" Value="#D5D1C8"/>
+    </Style>
+    <Style Selector="Button.collapseToggle.swimlane:pressed /template/ Border#CollapseRootBorder">
+        <Setter Property="Background" Value="#CCC8BF"/>
+    </Style>
+    <Style Selector="Button.collapseToggle.swimlane:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="Border.swimlaneBar Button.collapseToggle:pointerover">
+        <Setter Property="Background" Value="Transparent"/>
     </Style>
     <Style Selector="TextBlock.collapseGlyph">
         <Setter Property="Padding" Value="0"/>
         <Setter Property="Margin" Value="0"/>
-        <Setter Property="Foreground" Value="#B4BBC6"/>
+        <Setter Property="Foreground" Value="#9AA5B5"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="TextAlignment" Value="Center"/>
     </Style>
     <Style Selector="TextBlock.collapseGlyph.swimlane">
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="LineHeight" Value="16"/>
         <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
     </Style>
     <Style Selector="Button.collapseToggle:pointerover TextBlock.collapseGlyph">
-        <Setter Property="Foreground" Value="#8B96A6"/>
+        <Setter Property="Foreground" Value="#6B7A8C"/>
     </Style>
     <Style Selector="TextBlock.collapseGlyph.column">
-        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="LineHeight" Value="14"/>
-        <Setter Property="LetterSpacing" Value="0.6"/>
+        <Setter Property="LineHeight" Value="16"/>
+        <Setter Property="LetterSpacing" Value="0"/>
         <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
     </Style>
     <Style Selector="Border.columnCollapsedStrip">
