@@ -13,7 +13,7 @@ public sealed class JsonBoardStorage
     };
 
     public JsonBoardStorage()
-        : this(GetDefaultBoardPath())
+        : this(GetBoardPath())
     {
     }
 
@@ -75,6 +75,16 @@ public sealed class JsonBoardStorage
         {
             File.Move(tempPath, BoardPath);
         }
+    }
+
+    public static string GetBoardPath(string? workspaceFolder = null)
+    {
+        if (!string.IsNullOrWhiteSpace(workspaceFolder))
+        {
+            return Path.Combine(workspaceFolder.Trim(), "default-board.json");
+        }
+
+        return GetDefaultBoardPath();
     }
 
     public static string GetDefaultBoardPath()

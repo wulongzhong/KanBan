@@ -8,6 +8,7 @@ var tests = new (string Name, Action Run)[]
     ("MoveCard moves cards across lanes", MoveCardAcrossLanes),
     ("ArchiveCard trims archive to configured size", ArchiveCardTrimsArchive),
     ("JsonBoardStorage round-trips board data", JsonStorageRoundTrips),
+    ("JsonBoardStorage uses workspace folder when set", JsonStorageUsesWorkspaceFolder),
     ("EnsureSwimlanes migrates legacy boards", EnsureSwimlanesMigratesLegacyBoards),
     ("MoveCard updates swimlane when provided", MoveCardUpdatesSwimlane),
 };
@@ -118,6 +119,25 @@ static void MoveCardUpdatesSwimlane()
 
     Assert(moved, "Expected move to succeed.");
     Assert(board.Lanes[1].Cards[0].SwimlaneId == "s2", "Expected swimlane to update.");
+}
+
+static void JsonStorageUsesWorkspaceFolder()
+{
+    var workspace = Path.Combine(Path.GetTempPath(), "KanBanTests", Guid.NewGuid().ToString("N"));
+    var expectedPath = Path.Combine(workspace, "default-board.json");
+
+    try
+    {
+        Assert(JsonBoardStorage.GetBoardPath(workspace) == expectedPath, "Expected workspace board path.");
+        Assert(JsonBoardStorage.GetBoardPath(null) == JsonBoardStorage.GetDefaultBoardPath(), "Expected default board path.");
+    }
+    finally
+    {
+        if (Directory.Exists(workspace))
+        {
+            Directory.Delete(workspace, recursive: true);
+        }
+    }
 }
 
 static void JsonStorageRoundTrips()

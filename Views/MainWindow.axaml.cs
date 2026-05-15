@@ -41,6 +41,15 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        Opened += MainWindow_Opened;
+    }
+
+    private void MainWindow_Opened(object? sender, EventArgs e)
+    {
+        if (DataContext is MainWindowViewModel viewModel)
+        {
+            viewModel.SetOwnerWindow(this);
+        }
     }
 
     private void ColumnHeaderScrollViewer_ScrollChanged(object? sender, ScrollChangedEventArgs e)

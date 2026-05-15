@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.Input;
 using KanBan.Models;
 using KanBan.Services;
@@ -10,8 +14,10 @@ namespace KanBan.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    private readonly JsonBoardStorage _storage;
-    private readonly CardAttachmentService _attachments;
+    private readonly AppPreferences _preferences;
+    private JsonBoardStorage _storage;
+    private CardAttachmentService _attachments;
+    private Window? _ownerWindow;
     private string _boardTitle = string.Empty;
     private string _searchQuery = string.Empty;
     private string _statusMessage = string.Empty;
@@ -24,12 +30,23 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _dateFormat = "yyyy-MM-dd";
 
     public MainWindowViewModel()
-        : this(new JsonBoardStorage())
+        : this(AppPreferences.Load())
+    {
+    }
+
+    public MainWindowViewModel(AppPreferences preferences)
+        : this(preferences, new JsonBoardStorage(JsonBoardStorage.GetBoardPath(preferences.WorkspaceFolder)))
     {
     }
 
     public MainWindowViewModel(JsonBoardStorage storage)
+        : this(AppPreferences.Load(), storage)
     {
+    }
+
+    public MainWindowViewModel(AppPreferences preferences, JsonBoardStorage storage)
+    {
+        _preferences = preferences;
         _storage = storage;
         _attachments = new CardAttachmentService(storage);
         ColumnLanes = [];
@@ -46,9 +63,14 @@ public partial class MainWindowViewModel : ViewModelBase
         SetTableViewCommand = new RelayCommand(() => CurrentViewMode = BoardViewMode.Table);
         SaveCommand = new RelayCommand(Save);
         NewBoardCommand = new RelayCommand(NewBoard);
+        SelectWorkspaceFolderCommand = new AsyncRelayCommand(SelectWorkspaceFolderAsync);
+        ResetWorkspaceFolderCommand = new RelayCommand(ResetWorkspaceFolder, () => HasCustomWorkspace);
 
         Load();
+        RefreshWorkspaceProperties();
     }
+
+    public void SetOwnerWindow(Window window) => _ownerWindow = window;
 
     public ObservableCollection<LaneViewModel> ColumnLanes { get; }
 
@@ -89,6 +111,13 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     public string BoardFilePath => _storage.BoardPath;
+
+    public string WorkspaceFolderDisplay =>
+        HasCustomWorkspace
+            ? _preferences.WorkspaceFolder!
+            : "默认（应用数据目录）";
+
+    public bool HasCustomWorkspace => !string.IsNullOrWhiteSpace(_preferences.WorkspaceFolder);
 
     public bool ShowArchive
     {
@@ -198,6 +227,10 @@ public partial class MainWindowViewModel : ViewModelBase
     public RelayCommand SaveCommand { get; }
 
     public RelayCommand NewBoardCommand { get; }
+
+    public IAsyncRelayCommand SelectWorkspaceFolderCommand { get; }
+
+    public RelayCommand ResetWorkspaceFolderCommand { get; }
 
     public void MoveCardBefore(string cardId, string targetCardId)
     {
@@ -736,6 +769,83 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Hydrate(KanbanBoard.CreateDefault());
         SaveAndRefresh("New board created.");
+    }
+
+    private async Task SelectWorkspaceFolderAsync()
+    {
+        if (_ownerWindow is null)
+        {
+            return;
+        }
+
+        var folders = await _ownerWindow.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = "选择工作区文件夹",
+            AllowMultiple = false,
+        });
+
+        if (folders.Count == 0)
+        {
+            return;
+        }
+
+        var path = folders[0].TryGetLocalPath();
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            StatusMessage = "无法读取所选文件夹路径。";
+            return;
+        }
+
+        ApplyWorkspaceFolder(path);
+    }
+
+    private void ResetWorkspaceFolder()
+    {
+        if (!HasCustomWorkspace)
+        {
+            return;
+        }
+
+        ApplyWorkspaceFolder(null);
+    }
+
+    private void ApplyWorkspaceFolder(string? workspaceFolder)
+    {
+        try
+        {
+            Save();
+
+            if (!string.IsNullOrWhiteSpace(workspaceFolder))
+            {
+                Directory.CreateDirectory(workspaceFolder);
+            }
+
+            _preferences.WorkspaceFolder = string.IsNullOrWhiteSpace(workspaceFolder)
+                ? null
+                : workspaceFolder.Trim();
+            _preferences.Save();
+
+            _storage = new JsonBoardStorage(JsonBoardStorage.GetBoardPath(_preferences.WorkspaceFolder));
+            _attachments = new CardAttachmentService(_storage);
+            Load();
+            RefreshWorkspaceProperties();
+
+            StatusMessage = HasCustomWorkspace
+                ? $"已切换到工作区：{_preferences.WorkspaceFolder}"
+                : $"已恢复默认存储位置：{BoardFilePath}";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"切换工作区失败：{ex.Message}";
+        }
+    }
+
+    private void RefreshWorkspaceProperties()
+    {
+        OnPropertyChanged(nameof(WorkspaceFolderDisplay));
+        OnPropertyChanged(nameof(HasCustomWorkspace));
+        OnPropertyChanged(nameof(BoardFilePath));
+        ResetWorkspaceFolderCommand.NotifyCanExecuteChanged();
     }
 
     private KanBanData ToData()

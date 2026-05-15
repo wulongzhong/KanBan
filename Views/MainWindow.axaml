@@ -695,6 +695,20 @@
                     <TextBox Text="{Binding MaxArchiveSizeText}"/>
                     <TextBlock Text="Date format" Classes="muted"/>
                     <TextBox Text="{Binding DateFormat}"/>
+                    <TextBlock Text="工作区文件夹" Classes="muted"/>
+                    <TextBlock Text="{Binding WorkspaceFolderDisplay}"
+                               TextWrapping="Wrap"
+                               FontSize="12"/>
+                    <TextBlock Text="看板文件" Classes="muted"/>
+                    <TextBlock Text="{Binding BoardFilePath}"
+                               TextWrapping="Wrap"
+                               FontSize="12"
+                               Classes="faint"/>
+                    <Button Content="选择工作区文件夹"
+                            Command="{Binding SelectWorkspaceFolderCommand}"/>
+                    <Button Content="恢复默认位置"
+                            Command="{Binding ResetWorkspaceFolderCommand}"
+                            IsEnabled="{Binding HasCustomWorkspace}"/>
                     <Button Content="Reset sample board" Command="{Binding NewBoardCommand}"/>
                     <TextBlock Text="{Binding StatusMessage}" Classes="muted" TextWrapping="Wrap"/>
                 </StackPanel>
