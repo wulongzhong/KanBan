@@ -28,6 +28,10 @@
             <Setter Property="MaxHeight" Value="180"/>
             <Setter Property="Stretch" Value="Uniform"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Border.imageLightbox">
+            <Setter Property="Background" Value="#D9000000"/>
         </Style>
         <Style Selector="TextBlock">
             <Setter Property="Foreground" Value="#dcddde"/>
@@ -310,7 +314,8 @@
                                                                     <ItemsControl.ItemTemplate>
                                                                         <DataTemplate x:DataType="vm:CardImageViewModel">
                                                                             <Image Classes="cardPreview"
-                                                                                   Source="{Binding AbsolutePath, Converter={StaticResource FilePathToBitmap}}"/>
+                                                                                   Source="{Binding AbsolutePath, Converter={StaticResource FilePathToBitmap}}"
+                                                                                   DoubleTapped="CardImage_DoubleTapped"/>
                                                                         </DataTemplate>
                                                                     </ItemsControl.ItemTemplate>
                                                                 </ItemsControl>
@@ -346,7 +351,8 @@
                                                                     <ItemsControl.ItemTemplate>
                                                                         <DataTemplate x:DataType="vm:CardImageViewModel">
                                                                             <Image Classes="cardPreview"
-                                                                                   Source="{Binding AbsolutePath, Converter={StaticResource FilePathToBitmap}}"/>
+                                                                                   Source="{Binding AbsolutePath, Converter={StaticResource FilePathToBitmap}}"
+                                                                                   DoubleTapped="CardImage_DoubleTapped"/>
                                                                         </DataTemplate>
                                                                     </ItemsControl.ItemTemplate>
                                                                 </ItemsControl>
@@ -576,5 +582,37 @@
                            FontWeight="SemiBold"/>
             </Border>
         </Canvas>
+
+        <Border x:Name="ImageLightbox"
+                Grid.RowSpan="3"
+                Classes="imageLightbox"
+                IsVisible="False"
+                Focusable="True"
+                KeyDown="ImageLightbox_KeyDown"
+                PointerPressed="ImageLightbox_Background_PointerPressed">
+            <Grid RowDefinitions="Auto,*">
+                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="16,12,16,8">
+                    <TextBlock x:Name="ImageLightboxTitle"
+                               Classes="muted"
+                               VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
+                    <Button Grid.Column="1"
+                            Content="×"
+                            Padding="10,4"
+                            Click="ImageLightbox_Close_Click"/>
+                </Grid>
+                <ScrollViewer Grid.Row="1"
+                              Margin="16,0,16,16"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto"
+                              PointerPressed="ImageLightbox_Scroll_PointerPressed">
+                    <Image x:Name="ImageLightboxImage"
+                           Stretch="None"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           DoubleTapped="ImageLightbox_Image_DoubleTapped"/>
+                </ScrollViewer>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

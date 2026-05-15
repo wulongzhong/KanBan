@@ -7,6 +7,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using KanBan.Services;
@@ -78,11 +79,79 @@ public partial class MainWindow : Window
 
     private void Card_DoubleTapped(object? sender, TappedEventArgs e)
     {
+        if (e.Source is Visual source &&
+            source.GetSelfAndVisualAncestors().OfType<Image>().Any(image => image.Classes.Contains("cardPreview")))
+        {
+            return;
+        }
+
         if (sender is Control { DataContext: CardViewModel card })
         {
             card.BeginEdit();
             e.Handled = true;
         }
+    }
+
+    private void CardImage_DoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if (sender is StyledElement { DataContext: CardImageViewModel image })
+        {
+            ShowImageLightbox(image);
+            e.Handled = true;
+        }
+    }
+
+    private void ShowImageLightbox(CardImageViewModel image)
+    {
+        ImageLightboxImage.Source = new Bitmap(image.AbsolutePath);
+        ImageLightboxTitle.Text = System.IO.Path.GetFileName(image.AbsolutePath);
+        ImageLightbox.IsVisible = true;
+        ImageLightbox.Focus();
+    }
+
+    private void CloseImageLightbox()
+    {
+        ImageLightbox.IsVisible = false;
+        ImageLightboxImage.Source = null;
+        ImageLightboxTitle.Text = string.Empty;
+    }
+
+    private void ImageLightbox_Close_Click(object? sender, RoutedEventArgs e)
+    {
+        CloseImageLightbox();
+        e.Handled = true;
+    }
+
+    private void ImageLightbox_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape)
+        {
+            CloseImageLightbox();
+            e.Handled = true;
+        }
+    }
+
+    private void ImageLightbox_Background_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.Source == sender)
+        {
+            CloseImageLightbox();
+            e.Handled = true;
+        }
+    }
+
+    private void ImageLightbox_Scroll_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.Source is ScrollViewer)
+        {
+            CloseImageLightbox();
+            e.Handled = true;
+        }
+    }
+
+    private void ImageLightbox_Image_DoubleTapped(object? sender, TappedEventArgs e)
+    {
+        e.Handled = true;
     }
 
     private void CardEdit_KeyDown(object? sender, KeyEventArgs e)
