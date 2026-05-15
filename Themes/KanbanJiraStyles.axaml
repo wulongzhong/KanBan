@@ -561,7 +561,7 @@
     </Style>
     <Style Selector="TextBlock.cardBody">
         <Setter Property="FontSize" Value="14"/>
-        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="LineHeight" Value="20"/>
         <Setter Property="Foreground" Value="#3D4A5C"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
@@ -570,6 +570,7 @@
         <Setter Property="AcceptsReturn" Value="True"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
         <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="LineHeight" Value="20"/>
         <Setter Property="Foreground" Value="#3D4A5C"/>
         <Setter Property="MinHeight" Value="96"/>
@@ -604,6 +605,10 @@
         <Setter Property="CornerRadius" Value="3"/>
         <Setter Property="Padding" Value="4,1"/>
         <Setter Property="Margin" Value="0,0,4,4"/>
+    </Style>
+    <Style Selector="Border.tag TextBlock">
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="#3D4A5C"/>
     </Style>
     <Style Selector="Border.tagPill">
         <Setter Property="CornerRadius" Value="3"/>
