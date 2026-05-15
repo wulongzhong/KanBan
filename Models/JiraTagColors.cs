@@ -7,14 +7,14 @@ public static class JiraTagColors
 {
     private static readonly IReadOnlyList<string> Palette =
     [
-        "#FFC400",
-        "#FF8B00",
-        "#00B8D9",
-        "#6554C0",
-        "#36B37E",
-        "#FF5630",
-        "#0065FF",
-        "#00875A",
+        "#D9CDB5",
+        "#C4D4BC",
+        "#B5CCD9",
+        "#C9BFD4",
+        "#D9B8B8",
+        "#B5C4D9",
+        "#D4D9B5",
+        "#B0C9C4",
     ];
 
     public static string GetBackground(string tag)
@@ -23,6 +23,5 @@ public static class JiraTagColors
         return Palette[index];
     }
 
-    public static string GetForeground(string background) =>
-        background is "#FFC400" or "#FFAB00" or "#FF8B00" ? "#172B4D" : "#FFFFFF";
+    public static string GetForeground(string background) => "#3D4A5C";
 }

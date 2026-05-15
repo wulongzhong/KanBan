@@ -13,7 +13,7 @@
         Height="780"
         MinWidth="980"
         MinHeight="620"
-        Background="#FFFFFF"
+        Background="#F5F3EF"
         RequestedThemeVariant="Light"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="40"
@@ -345,7 +345,7 @@
                                                                             <Border Margin="0,0,0,6"
                                                                                     CornerRadius="4"
                                                                                     ClipToBounds="True"
-                                                                                    Background="#EBECF0">
+                                                                                    Classes="cardImagePlaceholder">
                                                                                 <Grid>
                                                                                     <Image Classes="cardPreview"
                                                                                            Source="{Binding AbsolutePath, Converter={StaticResource FilePathToBitmap}}"
@@ -521,12 +521,11 @@
 
         <Canvas Grid.RowSpan="2" IsHitTestVisible="False">
             <Border x:Name="DragPreview"
+                    Classes="dragPreview"
                     IsVisible="False"
                     Width="244"
-                    Background="#FFFFFF"
-                    BorderBrush="#4C9AFF"
                     BorderThickness="1"
-                    CornerRadius="5"
+                    CornerRadius="6"
                     Padding="10"
                     Opacity="0.92">
                 <TextBlock x:Name="DragPreviewText"
