@@ -19,7 +19,8 @@ public sealed class CardViewModel : ViewModelBase
     private string _description;
     private bool _isComplete;
     private string _tagsText;
-    private string _dueDateText;
+    private DateTime? _dueDate;
+    private TimeSpan? _dueTime;
     private bool _showCheckbox = true;
     private DateTimeOffset _updatedAt;
     private DateTimeOffset? _archivedAt;
@@ -41,7 +42,8 @@ public sealed class CardViewModel : ViewModelBase
         _description = card.Description;
         _isComplete = card.IsComplete;
         _tagsText = string.Join(' ', card.Tags.Select(tag => tag.StartsWith('#') ? tag : $"#{tag}"));
-        _dueDateText = card.DueDate?.LocalDateTime.ToString("yyyy-MM-dd", CultureInfo.CurrentCulture) ?? string.Empty;
+        _dueDate = card.DueDate?.LocalDateTime.Date;
+        _dueTime = card.DueTime;
         Tags = new ObservableCollection<string>(ParseTags(_tagsText));
         _onChanged = onChanged;
         _onArchive = onArchive;
@@ -57,6 +59,8 @@ public sealed class CardViewModel : ViewModelBase
         RestoreCommand = new RelayCommand(() => _onRestore?.Invoke(this));
         MoveUpCommand = new RelayCommand(() => _onMove?.Invoke(this, -1));
         MoveDownCommand = new RelayCommand(() => _onMove?.Invoke(this, 1));
+        ClearDueDateCommand = new RelayCommand(ClearDueDate);
+        ClearDueTimeCommand = new RelayCommand(ClearDueTime);
     }
 
     public string Id { get; }
@@ -139,58 +143,68 @@ public sealed class CardViewModel : ViewModelBase
 
     public bool HasTags => Tags.Count > 0;
 
-    public string DueDateText
-    {
-        get => _dueDateText;
-        set
-        {
-            if (SetProperty(ref _dueDateText, value))
-            {
-                OnPropertyChanged(nameof(DueDate));
-                OnPropertyChanged(nameof(HasDueDate));
-                OnPropertyChanged(nameof(DueBadge));
-                OnPropertyChanged(nameof(IsOverdue));
-                Touch();
-            }
-        }
-    }
+    public DateTime? DueDate => _dueDate;
 
-    public DateTimeOffset? DueDate
-    {
-        get
-        {
-            if (DateTimeOffset.TryParse(DueDateText, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out var parsed))
-            {
-                return parsed;
-            }
+    public TimeSpan? DueTime => _dueTime;
 
-            return null;
-        }
-    }
+    public bool HasDueDate => _dueDate is not null;
 
-    public bool HasDueDate => DueDate is not null;
+    public bool HasDueTime => _dueTime is not null;
 
-    public bool IsOverdue => DueDate?.Date < DateTimeOffset.Now.Date && !IsComplete;
+    public bool ShowRemoveDateMenu => HasDueDate;
+
+    public bool ShowTimeMenuSection => HasDueDate;
+
+    public bool ShowRemoveTimeMenu => HasDueTime;
+
+    public bool ShowRelativeDueBadge => HasDueDate && !HasDueTime;
+
+    public string DateMenuHeader => HasDueDate ? "编辑日期" : "添加日期";
+
+    public string TimeMenuHeader => HasDueTime ? "编辑时间" : "添加时间";
+
+    public string DateDisplayText =>
+        HasDueDate ? _dueDate!.Value.ToString("yyyy-MM-dd", CultureInfo.CurrentCulture) : string.Empty;
+
+    public string TimeDisplayText =>
+        HasDueTime ? DateTime.Today.Add(_dueTime!.Value).ToString("HH:mm", CultureInfo.CurrentCulture) : string.Empty;
+
+    public bool IsOverdue => HasDueDate && _dueDate!.Value < DateTime.Today && !IsComplete;
 
     public string DueBadge
     {
         get
         {
-            if (DueDate is not { } dueDate)
+            if (!HasDueDate)
             {
                 return string.Empty;
             }
 
-            var today = DateTimeOffset.Now.Date;
-            var date = dueDate.Date;
+            if (HasDueTime)
+            {
+                return TimeDisplayText;
+            }
+
+            var today = DateTime.Today;
+            var date = _dueDate!.Value;
 
             if (date == today)
             {
-                return "Today";
+                return "今天";
             }
 
             var days = (date - today).Days;
-            return days > 0 ? $"{days}d left" : $"{Math.Abs(days)}d late";
+            if (days == -1)
+            {
+                return "昨天";
+            }
+
+            if (days == 1)
+            {
+                return "明天";
+            }
+
+            return days > 0 ? $"{days}天后" : $"{Math.Abs(days)}天前";
         }
     }
 
@@ -230,6 +244,40 @@ public sealed class CardViewModel : ViewModelBase
 
     public RelayCommand MoveDownCommand { get; }
 
+    public RelayCommand ClearDueDateCommand { get; }
+
+    public RelayCommand ClearDueTimeCommand { get; }
+
+    public void SetDueDate(DateTime date)
+    {
+        _dueDate = date.Date;
+        NotifyDateTimeChanged();
+    }
+
+    public void SetDueTime(TimeSpan time)
+    {
+        if (!HasDueDate)
+        {
+            _dueDate = DateTime.Today;
+        }
+
+        _dueTime = time;
+        NotifyDateTimeChanged();
+    }
+
+    public void ClearDueDate()
+    {
+        _dueDate = null;
+        _dueTime = null;
+        NotifyDateTimeChanged();
+    }
+
+    public void ClearDueTime()
+    {
+        _dueTime = null;
+        NotifyDateTimeChanged();
+    }
+
     public KanbanCard ToModel()
     {
         return new KanbanCard
@@ -240,7 +288,8 @@ public sealed class CardViewModel : ViewModelBase
             IsComplete = IsComplete,
             CheckChar = IsComplete ? "x" : " ",
             Tags = Tags.Select(tag => tag.TrimStart('#')).Where(tag => !string.IsNullOrWhiteSpace(tag)).Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
-            DueDate = DueDate,
+            DueDate = _dueDate is null ? null : new DateTimeOffset(_dueDate.Value),
+            DueTime = _dueTime,
             CreatedAt = CreatedAt,
             UpdatedAt = UpdatedAt,
             ArchivedAt = ArchivedAt,
@@ -254,7 +303,7 @@ public sealed class CardViewModel : ViewModelBase
             return true;
         }
 
-        var haystack = $"{Title} {Description} {TagsText} {DueDateText}";
+        var haystack = $"{Title} {Description} {TagsText} {DateDisplayText} {TimeDisplayText}";
         return haystack.Contains(query, StringComparison.OrdinalIgnoreCase);
     }
 
@@ -274,11 +323,28 @@ public sealed class CardViewModel : ViewModelBase
         Touch();
     }
 
+    private void NotifyDateTimeChanged()
+    {
+        OnPropertyChanged(nameof(DueDate));
+        OnPropertyChanged(nameof(DueTime));
+        OnPropertyChanged(nameof(HasDueDate));
+        OnPropertyChanged(nameof(HasDueTime));
+        OnPropertyChanged(nameof(ShowRemoveDateMenu));
+        OnPropertyChanged(nameof(ShowTimeMenuSection));
+        OnPropertyChanged(nameof(ShowRemoveTimeMenu));
+        OnPropertyChanged(nameof(DateMenuHeader));
+        OnPropertyChanged(nameof(TimeMenuHeader));
+        OnPropertyChanged(nameof(DateDisplayText));
+        OnPropertyChanged(nameof(TimeDisplayText));
+        OnPropertyChanged(nameof(ShowRelativeDueBadge));
+        OnPropertyChanged(nameof(DueBadge));
+        OnPropertyChanged(nameof(IsOverdue));
+        Touch();
+    }
+
     private void Touch()
     {
         UpdatedAt = DateTimeOffset.UtcNow;
-        OnPropertyChanged(nameof(DueBadge));
-        OnPropertyChanged(nameof(IsOverdue));
         _onChanged?.Invoke(this);
     }
 

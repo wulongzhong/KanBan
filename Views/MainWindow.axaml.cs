@@ -2,8 +2,10 @@ using System;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using KanBan.ViewModels;
 
@@ -25,6 +27,10 @@ public partial class MainWindow : Window
     private string? _pressedTitle;
     private string? _draggingId;
     private DragKind _dragKind;
+    private CardViewModel? _pickerCard;
+    private Control? _pickerAnchor;
+    private bool _pickerAlignRight;
+    private bool _suppressDateSelectionChanged;
 
     public MainWindow()
     {
@@ -282,5 +288,265 @@ public partial class MainWindow : Window
                visual.GetSelfAndVisualAncestors()
                    .OfType<Control>()
                    .Any(control => control is Button or TextBox or CheckBox or ComboBox);
+    }
+
+    private void CardMenu_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        _pickerAnchor = sender as Control;
+    }
+
+    private void CardMenu_Date_Click(object? sender, RoutedEventArgs e)
+    {
+        if (GetCardFromSender(sender) is not { } card)
+        {
+            return;
+        }
+
+        var anchor = _pickerAnchor;
+        e.Handled = true;
+        SchedulePickerOpen(() => OpenDatePicker(card, anchor, fromCardMenu: true));
+    }
+
+    private void CardMenu_Time_Click(object? sender, RoutedEventArgs e)
+    {
+        if (GetCardFromSender(sender) is not { } card)
+        {
+            return;
+        }
+
+        var anchor = _pickerAnchor;
+        e.Handled = true;
+        SchedulePickerOpen(() => OpenTimePicker(card, anchor, fromCardMenu: true));
+    }
+
+    private void CardDateBadge_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Control { DataContext: CardViewModel card } anchor)
+        {
+            e.Handled = true;
+            SchedulePickerOpen(() => OpenDatePicker(card, anchor, fromCardMenu: false));
+        }
+    }
+
+    private void CardTimeBadge_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Control { DataContext: CardViewModel card } anchor)
+        {
+            e.Handled = true;
+            SchedulePickerOpen(() => OpenTimePicker(card, anchor, fromCardMenu: false));
+        }
+    }
+
+    private static void SchedulePickerOpen(Action open)
+    {
+        Dispatcher.UIThread.Post(open, DispatcherPriority.Loaded);
+    }
+
+    private void DatePickerCalendar_SelectedDatesChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (_suppressDateSelectionChanged || _pickerCard is null)
+        {
+            return;
+        }
+
+        if (DatePickerCalendar.SelectedDate is DateTime selectedDate)
+        {
+            CommitDueDate(selectedDate);
+        }
+    }
+
+    private void DatePickerPopup_Closed(object? sender, EventArgs e)
+    {
+        ResetDatePickerState();
+    }
+
+    private void CommitDueDate(DateTime selectedDate)
+    {
+        if (_pickerCard is null)
+        {
+            return;
+        }
+
+        _pickerCard.SetDueDate(selectedDate);
+        CloseDatePickerPopup();
+    }
+
+    private void CloseDatePickerPopup()
+    {
+        DatePickerPopup.IsOpen = false;
+    }
+
+    private void ResetDatePickerState()
+    {
+        _pickerCard = null;
+        _pickerAnchor = null;
+
+        _suppressDateSelectionChanged = true;
+        try
+        {
+            DatePickerCalendar.SelectedDate = null;
+        }
+        finally
+        {
+            _suppressDateSelectionChanged = false;
+        }
+    }
+
+    private void BoardTimePicker_SelectedTimeChanged(object? sender, TimePickerSelectedValueChangedEventArgs e)
+    {
+        // Time is committed when the popup closes so the picker can be adjusted freely.
+    }
+
+    private void OpenDatePicker(CardViewModel card, Control? placementTarget, bool fromCardMenu)
+    {
+        if (DatePickerPopup.IsOpen)
+        {
+            DatePickerPopup.IsOpen = false;
+        }
+
+        _pickerCard = card;
+        _pickerAlignRight = fromCardMenu;
+        _pickerAnchor = placementTarget ?? FindPickerAnchor(card, fromCardMenu);
+
+        _suppressDateSelectionChanged = true;
+        try
+        {
+            DatePickerCalendar.SelectedDate = null;
+            DatePickerCalendar.DisplayDate = card.DueDate ?? DateTime.Today;
+        }
+        finally
+        {
+            _suppressDateSelectionChanged = false;
+        }
+
+        if (!TryConfigurePickerPopup(DatePickerPopup))
+        {
+            ResetDatePickerState();
+            return;
+        }
+
+        DatePickerPopup.IsOpen = true;
+    }
+
+    private void OpenTimePicker(CardViewModel card, Control? placementTarget, bool fromCardMenu)
+    {
+        _pickerCard = card;
+        _pickerAlignRight = fromCardMenu;
+        _pickerAnchor = placementTarget ?? FindPickerAnchor(card, fromCardMenu);
+        BoardTimePicker.SelectedTime = card.DueTime ?? DateTime.Now.TimeOfDay;
+
+        if (!TryConfigurePickerPopup(TimePickerPopup))
+        {
+            return;
+        }
+
+        TimePickerPopup.Closed -= TimePickerPopup_Closed;
+        TimePickerPopup.Closed += TimePickerPopup_Closed;
+        TimePickerPopup.IsOpen = true;
+    }
+
+    private bool TryConfigurePickerPopup(Popup popup)
+    {
+        var anchor = _pickerAnchor;
+        if (anchor is null && _pickerCard is not null)
+        {
+            anchor = FindPickerAnchor(_pickerCard, _pickerAlignRight);
+        }
+
+        if (anchor is null || !anchor.IsAttachedToVisualTree())
+        {
+            return false;
+        }
+
+        var host = TopLevel.GetTopLevel(anchor) as Visual ?? this;
+        var anchorWidth = Math.Max(anchor.Bounds.Width, 1);
+        var anchorHeight = Math.Max(anchor.Bounds.Height, 1);
+        var topLeft = anchor.TranslatePoint(new Point(0, 0), host);
+        var bottomRight = anchor.TranslatePoint(new Point(anchorWidth, anchorHeight), host);
+        if (topLeft is null || bottomRight is null)
+        {
+            return false;
+        }
+
+        var anchorRect = new Rect(topLeft.Value, bottomRight.Value);
+        popup.PlacementTarget = host as Control ?? this;
+        popup.PlacementRect = anchorRect;
+        popup.Placement = _pickerAlignRight
+            ? PlacementMode.BottomEdgeAlignedRight
+            : PlacementMode.BottomEdgeAlignedLeft;
+        popup.HorizontalOffset = 0;
+        popup.VerticalOffset = 4;
+        return true;
+    }
+
+    private Control? FindPickerAnchor(CardViewModel card, bool preferMenu)
+    {
+        if (preferMenu)
+        {
+            var menu = FindCardControl<Button>(card, button => button.Classes.Contains("cardMenu"));
+            if (menu is not null)
+            {
+                return menu;
+            }
+        }
+        else
+        {
+            var dateBadge = FindCardControl<Button>(card, button => button.Classes.Contains("dateBadge"));
+            if (dateBadge is not null)
+            {
+                return dateBadge;
+            }
+
+            var timeBadge = FindCardControl<Button>(card, button => button.Classes.Contains("timeBadge"));
+            if (timeBadge is not null)
+            {
+                return timeBadge;
+            }
+        }
+
+        return FindCardControl<Border>(card, border => border.Classes.Contains("card"));
+    }
+
+    private TControl? FindCardControl<TControl>(CardViewModel card, Func<TControl, bool> predicate)
+        where TControl : Control
+    {
+        return this.GetVisualDescendants()
+            .OfType<TControl>()
+            .FirstOrDefault(control => ReferenceEquals(control.DataContext, card) && predicate(control));
+    }
+
+    private void TimePickerPopup_Closed(object? sender, EventArgs e)
+    {
+        TimePickerPopup.Closed -= TimePickerPopup_Closed;
+
+        if (_pickerCard is not null && BoardTimePicker.SelectedTime is TimeSpan time)
+        {
+            _pickerCard.SetDueTime(time);
+        }
+
+        _pickerCard = null;
+    }
+
+    private static CardViewModel? GetCardFromSender(object? sender)
+    {
+        if (sender is StyledElement { DataContext: CardViewModel directCard })
+        {
+            return directCard;
+        }
+
+        if (sender is not Visual visual)
+        {
+            return null;
+        }
+
+        foreach (var ancestor in visual.GetSelfAndVisualAncestors())
+        {
+            if (ancestor is StyledElement { DataContext: CardViewModel card })
+            {
+                return card;
+            }
+        }
+
+        return null;
     }
 }

@@ -89,6 +89,50 @@
             <Setter Property="Padding" Value="6,1"/>
             <Setter Property="Margin" Value="0,0,4,4"/>
         </Style>
+        <Style Selector="Button.tagButton">
+            <Setter Property="Background" Value="#2c3b58"/>
+            <Setter Property="Foreground" Value="#d7e6ff"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="Margin" Value="0,0,4,4"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+        <Style Selector="Border.pickerPopup">
+            <Setter Property="Background" Value="#2b2b2b"/>
+            <Setter Property="BorderBrush" Value="#4a4a4a"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="8"/>
+        </Style>
+        <Style Selector="Border.pickerPopup Calendar">
+            <Setter Property="Background" Value="#2b2b2b"/>
+        </Style>
+        <Style Selector="Border.pickerPopup Calendar /template/ CalendarDayButton">
+            <Setter Property="Foreground" Value="#dcddde"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="Border.pickerPopup Calendar /template/ CalendarDayButton:pointerover">
+            <Setter Property="Background" Value="#3a3a3a"/>
+        </Style>
+        <Style Selector="Border.pickerPopup Calendar /template/ CalendarDayButton:selected">
+            <Setter Property="Background" Value="#4f6df5"/>
+            <Setter Property="Foreground" Value="#ffffff"/>
+        </Style>
+        <Style Selector="Border.pickerPopup Calendar /template/ CalendarDayButton:inactive">
+            <Setter Property="Foreground" Value="#6b6b6b"/>
+        </Style>
+        <Style Selector="Border.pickerPopup Calendar /template/ CalendarItem /template/ Button">
+            <Setter Property="Foreground" Value="#dcddde"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="Border.pickerPopup Calendar /template/ CalendarItem /template/ Button:pointerover">
+            <Setter Property="Background" Value="#3a3a3a"/>
+        </Style>
+        <Style Selector="Border.pickerPopup TimePicker">
+            <Setter Property="Foreground" Value="#dcddde"/>
+            <Setter Property="Background" Value="#2b2b2b"/>
+        </Style>
         <Style Selector="TextBlock.muted">
             <Setter Property="Foreground" Value="#9ca3af"/>
         </Style>
@@ -215,14 +259,31 @@
                                                                                TextWrapping="Wrap"
                                                                                FontSize="13"
                                                                                Margin="6,1,4,0"/>
-                                                                    <Button Grid.Column="2" Content="⋮" Padding="3">
+                                                                    <Button Grid.Column="2"
+                                                                            Classes="cardMenu"
+                                                                            Content="⋮"
+                                                                            Padding="3"
+                                                                            Tag="{Binding}"
+                                                                            PointerPressed="CardMenu_PointerPressed">
                                                                         <Button.Flyout>
                                                                             <MenuFlyout>
-                                                                                <MenuItem Header="Edit" Command="{Binding BeginEditCommand}"/>
+                                                                                <MenuItem Header="编辑卡片" Command="{Binding BeginEditCommand}"/>
                                                                                 <MenuItem Header="Move up" Command="{Binding MoveUpCommand}"/>
                                                                                 <MenuItem Header="Move down" Command="{Binding MoveDownCommand}"/>
-                                                                                <MenuItem Header="Archive" Command="{Binding ArchiveCommand}"/>
-                                                                                <MenuItem Header="Delete" Command="{Binding DeleteCommand}"/>
+                                                                                <MenuItem Header="归档卡片" Command="{Binding ArchiveCommand}"/>
+                                                                                <MenuItem Header="删除卡片" Command="{Binding DeleteCommand}"/>
+                                                                                <Separator/>
+                                                                                <MenuItem Header="{Binding DateMenuHeader}"
+                                                                                          Click="CardMenu_Date_Click"/>
+                                                                                <MenuItem Header="移除日期"
+                                                                                          Command="{Binding ClearDueDateCommand}"
+                                                                                          IsVisible="{Binding ShowRemoveDateMenu}"/>
+                                                                                <MenuItem Header="{Binding TimeMenuHeader}"
+                                                                                          Click="CardMenu_Time_Click"
+                                                                                          IsVisible="{Binding ShowTimeMenuSection}"/>
+                                                                                <MenuItem Header="移除时间"
+                                                                                          Command="{Binding ClearDueTimeCommand}"
+                                                                                          IsVisible="{Binding ShowRemoveTimeMenu}"/>
                                                                             </MenuFlyout>
                                                                         </Button.Flyout>
                                                                     </Button>
@@ -250,7 +311,15 @@
                                                                             </DataTemplate>
                                                                         </ItemsControl.ItemTemplate>
                                                                     </ItemsControl>
-                                                                    <Border Classes="tag" IsVisible="{Binding HasDueDate}">
+                                                                    <Button Classes="tagButton dateBadge"
+                                                                            Content="{Binding DateDisplayText}"
+                                                                            IsVisible="{Binding HasDueDate}"
+                                                                            Click="CardDateBadge_Click"/>
+                                                                    <Button Classes="tagButton timeBadge"
+                                                                            Content="{Binding TimeDisplayText}"
+                                                                            IsVisible="{Binding HasDueTime}"
+                                                                            Click="CardTimeBadge_Click"/>
+                                                                    <Border Classes="tag" IsVisible="{Binding ShowRelativeDueBadge}">
                                                                         <TextBlock Text="{Binding DueBadge}" FontSize="11"/>
                                                                     </Border>
                                                                 </WrapPanel>
@@ -264,10 +333,7 @@
                                                                          AcceptsReturn="True"
                                                                          MinHeight="68"
                                                                          PlaceholderText="Card details..."/>
-                                                                <Grid ColumnDefinitions="*,100" ColumnSpacing="6">
-                                                                    <TextBox Text="{Binding TagsText}" PlaceholderText="#tag"/>
-                                                                    <TextBox Grid.Column="1" Text="{Binding DueDateText}" PlaceholderText="yyyy-MM-dd"/>
-                                                                </Grid>
+                                                                <TextBox Text="{Binding TagsText}" PlaceholderText="#tag"/>
                                                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                                                     <Button Classes="accent" Content="Done" Command="{Binding EndEditCommand}"/>
                                                                     <Button Content="Archive" Command="{Binding ArchiveCommand}"/>
@@ -364,7 +430,7 @@
                                             <TextBlock Text="{Binding Title}" TextWrapping="Wrap"/>
                                             <TextBlock Grid.Column="1" Text="{Binding Description}" Classes="muted" TextWrapping="Wrap"/>
                                             <TextBlock Grid.Column="2" Text="{Binding TagsText}" Classes="muted"/>
-                                            <TextBlock Grid.Column="3" Text="{Binding DueDateText}" Classes="muted"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding DateDisplayText}" Classes="muted"/>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
@@ -434,6 +500,33 @@
                 </StackPanel>
             </Border>
         </Grid>
+
+        <Popup x:Name="DatePickerPopup"
+               IsLightDismissEnabled="True"
+               Placement="BottomEdgeAlignedLeft"
+               OverlayDismissEventPassThrough="False"
+               Closed="DatePickerPopup_Closed">
+            <ThemeVariantScope RequestedThemeVariant="Dark">
+                <Border Classes="pickerPopup">
+                    <Calendar x:Name="DatePickerCalendar"
+                              SelectionMode="SingleDate"
+                              SelectedDatesChanged="DatePickerCalendar_SelectedDatesChanged"/>
+                </Border>
+            </ThemeVariantScope>
+        </Popup>
+
+        <Popup x:Name="TimePickerPopup"
+               IsLightDismissEnabled="True"
+               Placement="BottomEdgeAlignedLeft"
+               OverlayDismissEventPassThrough="False">
+            <ThemeVariantScope RequestedThemeVariant="Dark">
+                <Border Classes="pickerPopup" MinWidth="220">
+                    <TimePicker x:Name="BoardTimePicker"
+                                ClockIdentifier="24HourClock"
+                                SelectedTimeChanged="BoardTimePicker_SelectedTimeChanged"/>
+                </Border>
+            </ThemeVariantScope>
+        </Popup>
 
         <Canvas Grid.RowSpan="3" IsHitTestVisible="False">
             <Border x:Name="DragPreview"
