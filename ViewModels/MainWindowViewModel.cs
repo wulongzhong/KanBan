@@ -9,14 +9,15 @@ using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.Input;
 using KanBan.Models;
 using KanBan.Services;
+using KanBan.Views;
 
 namespace KanBan.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly AppPreferences _preferences;
-    private JsonBoardStorage _storage;
-    private CardAttachmentService _attachments;
+    private JsonBoardStorage? _storage;
+    private CardAttachmentService? _attachments;
     private Window? _ownerWindow;
     private string _boardTitle = string.Empty;
     private string _searchQuery = string.Empty;
@@ -35,20 +36,8 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     public MainWindowViewModel(AppPreferences preferences)
-        : this(preferences, new JsonBoardStorage(JsonBoardStorage.GetBoardPath(preferences.WorkspaceFolder)))
-    {
-    }
-
-    public MainWindowViewModel(JsonBoardStorage storage)
-        : this(AppPreferences.Load(), storage)
-    {
-    }
-
-    public MainWindowViewModel(AppPreferences preferences, JsonBoardStorage storage)
     {
         _preferences = preferences;
-        _storage = storage;
-        _attachments = new CardAttachmentService(storage);
         ColumnLanes = [];
         Swimlanes = [];
         ArchiveCards = [];
@@ -64,9 +53,12 @@ public partial class MainWindowViewModel : ViewModelBase
         SaveCommand = new RelayCommand(Save);
         NewBoardCommand = new RelayCommand(NewBoard);
         SelectWorkspaceFolderCommand = new AsyncRelayCommand(SelectWorkspaceFolderAsync);
-        ResetWorkspaceFolderCommand = new RelayCommand(ResetWorkspaceFolder, () => HasCustomWorkspace);
 
-        Load();
+        if (TryInitializeStorage())
+        {
+            Load();
+        }
+
         RefreshWorkspaceProperties();
     }
 
@@ -110,14 +102,14 @@ public partial class MainWindowViewModel : ViewModelBase
         private set => SetProperty(ref _statusMessage, value);
     }
 
-    public string BoardFilePath => _storage.BoardPath;
+    public bool IsWorkspaceReady => _storage is not null;
+
+    public string BoardFilePath => IsWorkspaceReady ? _storage!.BoardPath : "（未设置工作区）";
 
     public string WorkspaceFolderDisplay =>
-        HasCustomWorkspace
+        IsWorkspaceReady
             ? _preferences.WorkspaceFolder!
-            : "默认（应用数据目录）";
-
-    public bool HasCustomWorkspace => !string.IsNullOrWhiteSpace(_preferences.WorkspaceFolder);
+            : "（未设置）";
 
     public bool ShowArchive
     {
@@ -230,7 +222,33 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public IAsyncRelayCommand SelectWorkspaceFolderCommand { get; }
 
-    public RelayCommand ResetWorkspaceFolderCommand { get; }
+    public async Task<bool> EnsureWorkspaceConfiguredAsync()
+    {
+        if (IsWorkspaceReady)
+        {
+            return true;
+        }
+
+        if (_ownerWindow is null)
+        {
+            return false;
+        }
+
+        while (!IsWorkspaceReady)
+        {
+            var prompt = new WorkspacePromptWindow();
+            await prompt.ShowDialog(_ownerWindow);
+
+            if (prompt.Result == WorkspacePromptResult.Exit)
+            {
+                return false;
+            }
+
+            await SelectWorkspaceFolderAsync();
+        }
+
+        return true;
+    }
 
     public void MoveCardBefore(string cardId, string targetCardId)
     {
@@ -293,9 +311,26 @@ public partial class MainWindowViewModel : ViewModelBase
         SaveAndRefresh("Lane moved.");
     }
 
+    private bool TryInitializeStorage()
+    {
+        if (string.IsNullOrWhiteSpace(_preferences.WorkspaceFolder))
+        {
+            return false;
+        }
+
+        _storage = new JsonBoardStorage(JsonBoardStorage.GetBoardPath(_preferences.WorkspaceFolder));
+        _attachments = new CardAttachmentService(_storage);
+        return true;
+    }
+
     private void Load()
     {
-        var data = _storage.LoadOrCreate();
+        if (!IsWorkspaceReady)
+        {
+            return;
+        }
+
+        var data = _storage!.LoadOrCreate();
         Hydrate(data.Board);
         StatusMessage = $"Loaded {BoardFilePath}";
     }
@@ -412,11 +447,12 @@ public partial class MainWindowViewModel : ViewModelBase
             RestoreCard,
             MoveCard);
 
-        cardViewModel.LoadPreviewImages(_attachments);
+        cardViewModel.LoadPreviewImages(_attachments!);
         return cardViewModel;
     }
 
-    public CardAttachmentService Attachments => _attachments;
+    public CardAttachmentService Attachments =>
+        _attachments ?? throw new InvalidOperationException("Workspace is not configured.");
 
     private void AddLane()
     {
@@ -753,9 +789,14 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void Save(string message)
     {
+        if (!IsWorkspaceReady)
+        {
+            return;
+        }
+
         try
         {
-            _storage.Save(ToData());
+            _storage!.Save(ToData());
             StatusMessage = $"{message} {DateTimeOffset.Now:t}";
             NotifyBoardProperties();
         }
@@ -799,53 +840,39 @@ public partial class MainWindowViewModel : ViewModelBase
         ApplyWorkspaceFolder(path);
     }
 
-    private void ResetWorkspaceFolder()
-    {
-        if (!HasCustomWorkspace)
-        {
-            return;
-        }
-
-        ApplyWorkspaceFolder(null);
-    }
-
-    private void ApplyWorkspaceFolder(string? workspaceFolder)
+    private void ApplyWorkspaceFolder(string workspaceFolder)
     {
         try
         {
-            Save();
-
-            if (!string.IsNullOrWhiteSpace(workspaceFolder))
+            if (IsWorkspaceReady)
             {
-                Directory.CreateDirectory(workspaceFolder);
+                Save();
             }
 
-            _preferences.WorkspaceFolder = string.IsNullOrWhiteSpace(workspaceFolder)
-                ? null
-                : workspaceFolder.Trim();
+            var trimmed = workspaceFolder.Trim();
+            Directory.CreateDirectory(trimmed);
+
+            _preferences.WorkspaceFolder = trimmed;
             _preferences.Save();
 
-            _storage = new JsonBoardStorage(JsonBoardStorage.GetBoardPath(_preferences.WorkspaceFolder));
+            _storage = new JsonBoardStorage(JsonBoardStorage.GetBoardPath(trimmed));
             _attachments = new CardAttachmentService(_storage);
             Load();
             RefreshWorkspaceProperties();
 
-            StatusMessage = HasCustomWorkspace
-                ? $"已切换到工作区：{_preferences.WorkspaceFolder}"
-                : $"已恢复默认存储位置：{BoardFilePath}";
+            StatusMessage = $"工作区：{trimmed}";
         }
         catch (Exception ex)
         {
-            StatusMessage = $"切换工作区失败：{ex.Message}";
+            StatusMessage = $"设置工作区失败：{ex.Message}";
         }
     }
 
     private void RefreshWorkspaceProperties()
     {
+        OnPropertyChanged(nameof(IsWorkspaceReady));
         OnPropertyChanged(nameof(WorkspaceFolderDisplay));
-        OnPropertyChanged(nameof(HasCustomWorkspace));
         OnPropertyChanged(nameof(BoardFilePath));
-        ResetWorkspaceFolderCommand.NotifyCanExecuteChanged();
     }
 
     private KanBanData ToData()

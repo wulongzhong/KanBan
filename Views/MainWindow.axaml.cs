@@ -44,11 +44,18 @@ public partial class MainWindow : Window
         Opened += MainWindow_Opened;
     }
 
-    private void MainWindow_Opened(object? sender, EventArgs e)
+    private async void MainWindow_Opened(object? sender, EventArgs e)
     {
-        if (DataContext is MainWindowViewModel viewModel)
+        if (DataContext is not MainWindowViewModel viewModel)
         {
-            viewModel.SetOwnerWindow(this);
+            return;
+        }
+
+        viewModel.SetOwnerWindow(this);
+
+        if (!await viewModel.EnsureWorkspaceConfiguredAsync())
+        {
+            Close();
         }
     }
 

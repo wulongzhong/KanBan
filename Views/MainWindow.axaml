@@ -250,7 +250,8 @@
         </Style>
     </Window.Styles>
 
-    <Grid RowDefinitions="Auto,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*"
+          IsEnabled="{Binding IsWorkspaceReady}">
         <Border Grid.Row="0" Classes="toolbar" Padding="10,7">
             <Grid ColumnDefinitions="260,*,Auto" ColumnSpacing="10">
                 <TextBox Classes="ghost"
@@ -704,11 +705,8 @@
                                TextWrapping="Wrap"
                                FontSize="12"
                                Classes="faint"/>
-                    <Button Content="选择工作区文件夹"
+                    <Button Content="更改工作区文件夹"
                             Command="{Binding SelectWorkspaceFolderCommand}"/>
-                    <Button Content="恢复默认位置"
-                            Command="{Binding ResetWorkspaceFolderCommand}"
-                            IsEnabled="{Binding HasCustomWorkspace}"/>
                     <Button Content="Reset sample board" Command="{Binding NewBoardCommand}"/>
                     <TextBlock Text="{Binding StatusMessage}" Classes="muted" TextWrapping="Wrap"/>
                 </StackPanel>

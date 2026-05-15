@@ -129,7 +129,18 @@ static void JsonStorageUsesWorkspaceFolder()
     try
     {
         Assert(JsonBoardStorage.GetBoardPath(workspace) == expectedPath, "Expected workspace board path.");
-        Assert(JsonBoardStorage.GetBoardPath(null) == JsonBoardStorage.GetDefaultBoardPath(), "Expected default board path.");
+
+        var threw = false;
+        try
+        {
+            JsonBoardStorage.GetBoardPath(null!);
+        }
+        catch (ArgumentException)
+        {
+            threw = true;
+        }
+
+        Assert(threw, "Expected missing workspace to throw.");
     }
     finally
     {

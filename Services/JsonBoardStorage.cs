@@ -12,11 +12,6 @@ public sealed class JsonBoardStorage
         WriteIndented = true,
     };
 
-    public JsonBoardStorage()
-        : this(GetBoardPath())
-    {
-    }
-
     public JsonBoardStorage(string boardPath)
     {
         BoardPath = boardPath;
@@ -77,19 +72,13 @@ public sealed class JsonBoardStorage
         }
     }
 
-    public static string GetBoardPath(string? workspaceFolder = null)
+    public static string GetBoardPath(string workspaceFolder)
     {
-        if (!string.IsNullOrWhiteSpace(workspaceFolder))
+        if (string.IsNullOrWhiteSpace(workspaceFolder))
         {
-            return Path.Combine(workspaceFolder.Trim(), "default-board.json");
+            throw new ArgumentException("Workspace folder is required.", nameof(workspaceFolder));
         }
 
-        return GetDefaultBoardPath();
-    }
-
-    public static string GetDefaultBoardPath()
-    {
-        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return Path.Combine(appData, "KanBan", "boards", "default-board.json");
+        return Path.Combine(workspaceFolder.Trim(), "default-board.json");
     }
 }
