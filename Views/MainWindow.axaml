@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:KanBan.ViewModels"
+        xmlns:conv="using:KanBan.Views.Converters"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="780"
@@ -18,7 +19,16 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
+    <Window.Resources>
+        <conv:FilePathToBitmapConverter x:Key="FilePathToBitmap"/>
+    </Window.Resources>
+
     <Window.Styles>
+        <Style Selector="Image.cardPreview">
+            <Setter Property="MaxHeight" Value="180"/>
+            <Setter Property="Stretch" Value="Uniform"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
         <Style Selector="TextBlock">
             <Setter Property="Foreground" Value="#dcddde"/>
         </Style>
@@ -245,9 +255,14 @@
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="vm:CardViewModel">
                                                     <Border Classes="card"
+                                                            DragDrop.AllowDrop="True"
+                                                            Focusable="True"
                                                             PointerPressed="Card_PointerPressed"
                                                             PointerMoved="Card_PointerMoved"
-                                                            DoubleTapped="Card_DoubleTapped">
+                                                            DoubleTapped="Card_DoubleTapped"
+                                                            DragDrop.DragOver="Card_DragOver"
+                                                            DragDrop.Drop="Card_Drop"
+                                                            KeyDown="Card_KeyDown">
                                                         <Grid>
                                                             <StackPanel Spacing="5" IsVisible="{Binding IsDisplayMode}">
                                                                 <Grid ColumnDefinitions="Auto,*,Auto" Margin="8,8,6,0">
@@ -289,6 +304,17 @@
                                                                     </Button>
                                                                 </Grid>
 
+                                                                <ItemsControl ItemsSource="{Binding PreviewImages}"
+                                                                              IsVisible="{Binding HasPreviewImages}"
+                                                                              Margin="34,4,10,0">
+                                                                    <ItemsControl.ItemTemplate>
+                                                                        <DataTemplate x:DataType="vm:CardImageViewModel">
+                                                                            <Image Classes="cardPreview"
+                                                                                   Source="{Binding AbsolutePath, Converter={StaticResource FilePathToBitmap}}"/>
+                                                                        </DataTemplate>
+                                                                    </ItemsControl.ItemTemplate>
+                                                                </ItemsControl>
+
                                                                 <TextBlock Text="{Binding Description}"
                                                                            Classes="muted"
                                                                            TextWrapping="Wrap"
@@ -315,6 +341,18 @@
                                                                 <TextBox Text="{Binding Title}"
                                                                          FontWeight="SemiBold"
                                                                          KeyDown="CardEdit_KeyDown"/>
+                                                                <ItemsControl ItemsSource="{Binding PreviewImages}"
+                                                                              IsVisible="{Binding HasPreviewImages}">
+                                                                    <ItemsControl.ItemTemplate>
+                                                                        <DataTemplate x:DataType="vm:CardImageViewModel">
+                                                                            <Image Classes="cardPreview"
+                                                                                   Source="{Binding AbsolutePath, Converter={StaticResource FilePathToBitmap}}"/>
+                                                                        </DataTemplate>
+                                                                    </ItemsControl.ItemTemplate>
+                                                                </ItemsControl>
+                                                                <TextBlock Text="拖放图片到卡片，或 Ctrl+V 粘贴"
+                                                                           Classes="faint"
+                                                                           FontSize="11"/>
                                                                 <TextBox Text="{Binding Description}"
                                                                          AcceptsReturn="True"
                                                                          MinHeight="68"

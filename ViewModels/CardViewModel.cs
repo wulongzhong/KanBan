@@ -1,12 +1,19 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
+using System.Linq;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.Input;
 using KanBan.Models;
+using KanBan.Services;
 
 namespace KanBan.ViewModels;
 
 public sealed class CardViewModel : ViewModelBase
 {
+    private readonly List<string> _imagePaths = [];
     private readonly Action<CardViewModel>? _onChanged;
     private readonly Action<CardViewModel>? _onArchive;
     private readonly Action<CardViewModel>? _onDelete;
@@ -39,6 +46,8 @@ public sealed class CardViewModel : ViewModelBase
         _isComplete = card.IsComplete;
         _dueDate = card.DueDate?.LocalDateTime.Date;
         _dueTime = card.DueTime;
+        _imagePaths.AddRange(card.Images);
+        PreviewImages = [];
         _onChanged = onChanged;
         _onArchive = onArchive;
         _onDelete = onDelete;
@@ -107,6 +116,10 @@ public sealed class CardViewModel : ViewModelBase
     }
 
     public bool HasDescription => !string.IsNullOrWhiteSpace(Description);
+
+    public ObservableCollection<CardImageViewModel> PreviewImages { get; }
+
+    public bool HasPreviewImages => PreviewImages.Count > 0;
 
     public bool IsComplete
     {
@@ -255,6 +268,41 @@ public sealed class CardViewModel : ViewModelBase
         NotifyDateTimeChanged();
     }
 
+    public void LoadPreviewImages(CardAttachmentService attachments)
+    {
+        PreviewImages.Clear();
+
+        foreach (var relativePath in _imagePaths)
+        {
+            var absolutePath = attachments.ResolveAbsolutePath(relativePath);
+            if (!File.Exists(absolutePath))
+            {
+                continue;
+            }
+
+            PreviewImages.Add(new CardImageViewModel(relativePath, absolutePath));
+        }
+
+        OnPropertyChanged(nameof(HasPreviewImages));
+    }
+
+    public void AddImageFromFile(CardAttachmentService attachments, string sourcePath)
+    {
+        if (!CardAttachmentService.IsImageFile(sourcePath))
+        {
+            return;
+        }
+
+        var relativePath = attachments.SaveImageFromFile(Id, sourcePath);
+        AddImagePath(attachments, relativePath);
+    }
+
+    public void AddImageFromBitmap(CardAttachmentService attachments, Bitmap bitmap)
+    {
+        var relativePath = attachments.SaveImageFromBitmap(Id, bitmap);
+        AddImagePath(attachments, relativePath);
+    }
+
     public KanbanCard ToModel()
     {
         return new KanbanCard
@@ -262,6 +310,7 @@ public sealed class CardViewModel : ViewModelBase
             Id = Id,
             Title = string.IsNullOrWhiteSpace(Title) ? "Untitled card" : Title.Trim(),
             Description = Description.Trim(),
+            Images = _imagePaths.ToList(),
             IsComplete = IsComplete,
             CheckChar = IsComplete ? "x" : " ",
             DueDate = _dueDate is null ? null : new DateTimeOffset(_dueDate.Value),
@@ -315,6 +364,18 @@ public sealed class CardViewModel : ViewModelBase
         OnPropertyChanged(nameof(ShowRelativeDueBadge));
         OnPropertyChanged(nameof(DueBadge));
         OnPropertyChanged(nameof(IsOverdue));
+        Touch();
+    }
+
+    private void AddImagePath(CardAttachmentService attachments, string relativePath)
+    {
+        if (_imagePaths.Contains(relativePath, StringComparer.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        _imagePaths.Add(relativePath);
+        LoadPreviewImages(attachments);
         Touch();
     }
 

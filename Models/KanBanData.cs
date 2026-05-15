@@ -109,6 +109,8 @@ public sealed partial class KanbanCard
 
     public string Description { get; set; } = string.Empty;
 
+    public List<string> Images { get; set; } = [];
+
     public bool IsComplete { get; set; }
 
     public string CheckChar { get; set; } = " ";

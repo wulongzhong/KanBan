@@ -10,6 +10,7 @@ namespace KanBan.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly JsonBoardStorage _storage;
+    private readonly CardAttachmentService _attachments;
     private string _boardTitle = string.Empty;
     private string _searchQuery = string.Empty;
     private string _statusMessage = string.Empty;
@@ -30,6 +31,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel(JsonBoardStorage storage)
     {
         _storage = storage;
+        _attachments = new CardAttachmentService(storage);
         Lanes = [];
         ArchiveCards = [];
         TableCards = [];
@@ -321,8 +323,11 @@ public partial class MainWindowViewModel : ViewModelBase
             MoveCard);
 
         cardViewModel.ShowCheckbox = ShowCardCheckbox;
+        cardViewModel.LoadPreviewImages(_attachments);
         return cardViewModel;
     }
+
+    public CardAttachmentService Attachments => _attachments;
 
     private void AddLane()
     {

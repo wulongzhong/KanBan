@@ -1,12 +1,15 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using KanBan.Services;
 using KanBan.ViewModels;
 
 namespace KanBan.Views;
@@ -555,6 +558,130 @@ public partial class MainWindow : Window
     private void TimePickerPopup_Closed(object? sender, EventArgs e)
     {
         ResetTimePickerState();
+    }
+
+    private void Card_DragOver(object? sender, DragEventArgs e)
+    {
+        if (sender is not Border { DataContext: CardViewModel })
+        {
+            return;
+        }
+
+        if (CardImageDropHelper.CanAccept(e.DataTransfer))
+        {
+            e.DragEffects = DragDropEffects.Copy;
+            e.Handled = true;
+        }
+    }
+
+    private void Card_Drop(object? sender, DragEventArgs e)
+    {
+        if (sender is not Border { DataContext: CardViewModel card })
+        {
+            return;
+        }
+
+        if (DataContext is not MainWindowViewModel viewModel)
+        {
+            return;
+        }
+
+        if (!CardImageDropHelper.CanAccept(e.DataTransfer))
+        {
+            return;
+        }
+
+        ImportImages(e.DataTransfer, card, viewModel);
+        e.Handled = true;
+    }
+
+    private async void Card_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.V || (e.KeyModifiers & KeyModifiers.Control) == 0)
+        {
+            return;
+        }
+
+        if (sender is not Border { DataContext: CardViewModel card })
+        {
+            return;
+        }
+
+        if (DataContext is not MainWindowViewModel viewModel)
+        {
+            return;
+        }
+
+        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        if (clipboard is null)
+        {
+            return;
+        }
+
+        var dataTransfer = await clipboard.TryGetDataAsync();
+        if (dataTransfer is null || !CardImageDropHelper.CanAccept(dataTransfer))
+        {
+            return;
+        }
+
+        await ImportImagesAsync(dataTransfer, card, viewModel);
+        e.Handled = true;
+    }
+
+    private static void ImportImages(
+        IDataTransfer dataTransfer,
+        CardViewModel card,
+        MainWindowViewModel viewModel)
+    {
+        var attachments = viewModel.Attachments;
+        var files = dataTransfer.TryGetFiles();
+        if (files is not null)
+        {
+            foreach (var file in files)
+            {
+                var path = file.Path.LocalPath;
+                if (CardAttachmentService.IsImageFile(path))
+                {
+                    card.AddImageFromFile(attachments, path);
+                }
+            }
+
+            return;
+        }
+
+        var bitmap = dataTransfer.TryGetBitmap();
+        if (bitmap is not null)
+        {
+            card.AddImageFromBitmap(attachments, bitmap);
+        }
+    }
+
+    private static async Task ImportImagesAsync(
+        IAsyncDataTransfer dataTransfer,
+        CardViewModel card,
+        MainWindowViewModel viewModel)
+    {
+        var attachments = viewModel.Attachments;
+        var files = await dataTransfer.TryGetFilesAsync();
+        if (files is not null)
+        {
+            foreach (var file in files)
+            {
+                var path = file.Path.LocalPath;
+                if (CardAttachmentService.IsImageFile(path))
+                {
+                    card.AddImageFromFile(attachments, path);
+                }
+            }
+
+            return;
+        }
+
+        var bitmap = await dataTransfer.TryGetBitmapAsync();
+        if (bitmap is not null)
+        {
+            card.AddImageFromBitmap(attachments, bitmap);
+        }
     }
 
     private static CardViewModel? GetCardFromSender(object? sender)
