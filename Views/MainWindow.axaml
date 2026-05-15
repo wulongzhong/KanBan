@@ -159,12 +159,13 @@
                                                 </Button>
                                                 <Grid VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding HeaderTitle}"
-                                                               Classes="columnTitle"
+                                                               Classes="columnTitleName"
                                                                VerticalAlignment="Center"
                                                                IsVisible="{Binding IsDisplayMode}"/>
                                                     <TextBox Text="{Binding Title}"
-                                                             FontWeight="Bold"
-                                                             FontSize="11"
+                                                             FontWeight="SemiBold"
+                                                             FontSize="13"
+                                                             Foreground="#3D4A5C"
                                                              KeyDown="LaneEdit_KeyDown"
                                                              LostFocus="LaneEdit_LostFocus"
                                                              IsVisible="{Binding IsEditing}"/>
@@ -213,7 +214,7 @@
                                                 </Button>
                                                 <TextBlock Grid.Column="1"
                                                            Text="{Binding HeaderTitle}"
-                                                           Classes="columnTitleCollapsed"
+                                                           Classes="columnTitleName ellipsis"
                                                            VerticalAlignment="Center"/>
                                             </Grid>
                                         </Grid>

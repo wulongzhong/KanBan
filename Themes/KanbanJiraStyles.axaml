@@ -368,20 +368,24 @@
     </Style>
     <Style Selector="TextBlock.columnTitle">
         <Setter Property="FontSize" Value="11"/>
-        <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="Foreground" Value="#6B7A8C"/>
-        <Setter Property="LetterSpacing" Value="0.6"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="#8A96A5"/>
+        <Setter Property="LetterSpacing" Value="0.4"/>
         <Setter Property="LineHeight" Value="14"/>
         <Setter Property="Padding" Value="0"/>
     </Style>
-    <Style Selector="TextBlock.columnTitleCollapsed">
-        <Setter Property="FontSize" Value="11"/>
-        <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="Foreground" Value="#6B7A8C"/>
-        <Setter Property="LetterSpacing" Value="0.6"/>
+    <!-- Column name in header — larger + higher contrast than WIP/readouts -->
+    <Style Selector="TextBlock.columnTitleName">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="#3D4A5C"/>
+        <Setter Property="LetterSpacing" Value="0.35"/>
+        <Setter Property="LineHeight" Value="18"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+    <Style Selector="TextBlock.columnTitleName.ellipsis">
         <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
         <Setter Property="TextWrapping" Value="NoWrap"/>
-        <Setter Property="LineHeight" Value="14"/>
     </Style>
     <Style Selector="Button.collapseToggle">
         <Setter Property="Background" Value="Transparent"/>
