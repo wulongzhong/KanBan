@@ -192,6 +192,13 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (e.Key == Key.Escape)
+        {
+            card.EndEdit();
+            e.Handled = true;
+            return;
+        }
+
         if (e.Key == Key.Enter && e.KeyModifiers == KeyModifiers.Control)
         {
             card.EndEdit();
@@ -728,12 +735,19 @@ public partial class MainWindow : Window
 
     private async void Card_KeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.Key != Key.V || (e.KeyModifiers & KeyModifiers.Control) == 0)
+        if (sender is not Border { DataContext: CardViewModel card })
         {
             return;
         }
 
-        if (sender is not Border { DataContext: CardViewModel card })
+        if (e.Key == Key.Escape && card.IsEditing)
+        {
+            card.EndEdit();
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Key != Key.V || (e.KeyModifiers & KeyModifiers.Control) == 0)
         {
             return;
         }
