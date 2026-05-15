@@ -23,6 +23,7 @@ public sealed class LaneViewModel : ViewModelBase
     private string _newCardDetails = string.Empty;
     private int? _aggregateCardCount;
     private bool _showLeadingSeparator;
+    private bool _isCollapsed;
 
     public LaneViewModel(
         KanbanLane lane,
@@ -42,6 +43,7 @@ public sealed class LaneViewModel : ViewModelBase
         _maxItemsText = lane.MaxItems?.ToString() ?? string.Empty;
         _sort = lane.Sort;
         _shouldMarkItemsComplete = lane.ShouldMarkItemsComplete;
+        _isCollapsed = lane.IsCollapsed;
         _onChanged = onChanged;
         _onAddCard = onAddCard;
         _onDelete = onDelete;
@@ -64,7 +66,13 @@ public sealed class LaneViewModel : ViewModelBase
         MoveLeftCommand = new RelayCommand(() => _onMove?.Invoke(this, -1));
         MoveRightCommand = new RelayCommand(() => _onMove?.Invoke(this, 1));
         SortCommand = new RelayCommand(() => _onSort?.Invoke(this));
+        ToggleCollapseCommand = new RelayCommand(ToggleCollapse);
     }
+
+    public const double ExpandedColumnWidth = 272;
+    public const double CollapsedColumnWidth = 44;
+    public const double ExpandedColumnGridWidth = 284;
+    public const double CollapsedColumnGridWidth = 52;
 
     public string Id { get; }
 
@@ -77,6 +85,33 @@ public sealed class LaneViewModel : ViewModelBase
         get => _showLeadingSeparator;
         set => SetProperty(ref _showLeadingSeparator, value);
     }
+
+    public bool IsCollapsed
+    {
+        get => _isCollapsed;
+        set
+        {
+            if (SetProperty(ref _isCollapsed, value))
+            {
+                OnPropertyChanged(nameof(IsExpanded));
+                OnPropertyChanged(nameof(ColumnWidth));
+                OnPropertyChanged(nameof(ColumnGridWidth));
+                OnPropertyChanged(nameof(CollapseButtonContent));
+                OnPropertyChanged(nameof(CollapseToolTip));
+                NotifyChanged();
+            }
+        }
+    }
+
+    public bool IsExpanded => !IsCollapsed;
+
+    public double ColumnWidth => IsCollapsed ? CollapsedColumnWidth : ExpandedColumnWidth;
+
+    public double ColumnGridWidth => IsCollapsed ? CollapsedColumnGridWidth : ExpandedColumnGridWidth;
+
+    public string CollapseButtonContent => IsCollapsed ? "›" : "‹";
+
+    public string CollapseToolTip => IsCollapsed ? "展开列" : "折叠列";
 
     public string Title
     {
@@ -203,6 +238,8 @@ public sealed class LaneViewModel : ViewModelBase
 
     public RelayCommand SortCommand { get; }
 
+    public RelayCommand ToggleCollapseCommand { get; }
+
     public KanbanLane ToModel()
     {
         return new KanbanLane
@@ -212,6 +249,7 @@ public sealed class LaneViewModel : ViewModelBase
             MaxItems = MaxItems,
             Sort = Sort,
             ShouldMarkItemsComplete = ShouldMarkItemsComplete,
+            IsCollapsed = IsCollapsed,
             Cards = Cards.Select(card =>
             {
                 var model = card.ToModel();
@@ -230,6 +268,7 @@ public sealed class LaneViewModel : ViewModelBase
             MaxItems = MaxItems,
             Sort = Sort,
             ShouldMarkItemsComplete = ShouldMarkItemsComplete,
+            IsCollapsed = IsCollapsed,
         };
     }
 
@@ -356,5 +395,10 @@ public sealed class LaneViewModel : ViewModelBase
     {
         IsEditing = false;
         NotifyChanged();
+    }
+
+    private void ToggleCollapse()
+    {
+        IsCollapsed = !IsCollapsed;
     }
 }

@@ -12,6 +12,7 @@ public sealed class SwimlaneViewModel : ViewModelBase
     private readonly Action<SwimlaneViewModel, int>? _onMove;
     private string _title;
     private bool _isEditing;
+    private bool _isCollapsed;
 
     public SwimlaneViewModel(
         KanbanSwimlane swimlane,
@@ -21,6 +22,7 @@ public sealed class SwimlaneViewModel : ViewModelBase
     {
         Id = swimlane.Id;
         _title = swimlane.Title;
+        _isCollapsed = swimlane.IsCollapsed;
         _onChanged = onChanged;
         _onDelete = onDelete;
         _onMove = onMove;
@@ -31,6 +33,7 @@ public sealed class SwimlaneViewModel : ViewModelBase
         DeleteSwimlaneCommand = new RelayCommand(() => _onDelete?.Invoke(this));
         MoveUpCommand = new RelayCommand(() => _onMove?.Invoke(this, -1));
         MoveDownCommand = new RelayCommand(() => _onMove?.Invoke(this, 1));
+        ToggleCollapseCommand = new RelayCommand(ToggleCollapse);
     }
 
     public string Id { get; }
@@ -63,6 +66,27 @@ public sealed class SwimlaneViewModel : ViewModelBase
 
     public bool IsDisplayMode => !IsEditing;
 
+    public bool IsCollapsed
+    {
+        get => _isCollapsed;
+        set
+        {
+            if (SetProperty(ref _isCollapsed, value))
+            {
+                OnPropertyChanged(nameof(IsExpanded));
+                OnPropertyChanged(nameof(CollapseButtonContent));
+                OnPropertyChanged(nameof(CollapseToolTip));
+                _onChanged?.Invoke(this);
+            }
+        }
+    }
+
+    public bool IsExpanded => !IsCollapsed;
+
+    public string CollapseButtonContent => IsCollapsed ? "˅" : "˄";
+
+    public string CollapseToolTip => IsCollapsed ? "展开泳道" : "折叠泳道";
+
     public RelayCommand BeginEditCommand { get; }
 
     public RelayCommand EndEditCommand { get; }
@@ -73,12 +97,15 @@ public sealed class SwimlaneViewModel : ViewModelBase
 
     public RelayCommand MoveDownCommand { get; }
 
+    public RelayCommand ToggleCollapseCommand { get; }
+
     public KanbanSwimlane ToModel()
     {
         return new KanbanSwimlane
         {
             Id = Id,
             Title = string.IsNullOrWhiteSpace(Title) ? "Untitled swimlane" : Title.Trim(),
+            IsCollapsed = IsCollapsed,
         };
     }
 
@@ -91,5 +118,10 @@ public sealed class SwimlaneViewModel : ViewModelBase
     {
         IsEditing = false;
         _onChanged?.Invoke(this);
+    }
+
+    private void ToggleCollapse()
+    {
+        IsCollapsed = !IsCollapsed;
     }
 }

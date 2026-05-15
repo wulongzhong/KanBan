@@ -369,7 +369,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private LaneViewModel CreateLane(KanbanLane lane, string swimlaneId)
     {
-        return new LaneViewModel(
+        var laneViewModel = new LaneViewModel(
             lane,
             card => CreateCard(card, isArchived: false),
             _ => SaveAndRefresh("Lane updated."),
@@ -379,6 +379,14 @@ public partial class MainWindowViewModel : ViewModelBase
             SortLane,
             swimlaneId: swimlaneId,
             isColumnHeader: false);
+
+        var header = ColumnLanes.FirstOrDefault(column => column.Id == lane.Id);
+        if (header is not null)
+        {
+            laneViewModel.IsCollapsed = header.IsCollapsed;
+        }
+
+        return laneViewModel;
     }
 
     private void OnColumnHeaderChanged(LaneViewModel headerLane)
@@ -395,6 +403,7 @@ public partial class MainWindowViewModel : ViewModelBase
             lane.MaxItemsText = headerLane.MaxItemsText;
             lane.Sort = headerLane.Sort;
             lane.ShouldMarkItemsComplete = headerLane.ShouldMarkItemsComplete;
+            lane.IsCollapsed = headerLane.IsCollapsed;
         }
 
         SaveAndRefresh("Lane updated.");

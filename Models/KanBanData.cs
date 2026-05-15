@@ -101,6 +101,8 @@ public sealed class KanbanSwimlane
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
 
     public string Title { get; set; } = "New Swimlane";
+
+    public bool IsCollapsed { get; set; }
 }
 
 public sealed class KanbanLane
@@ -114,6 +116,8 @@ public sealed class KanbanLane
     public LaneSort Sort { get; set; } = LaneSort.Manual;
 
     public bool ShouldMarkItemsComplete { get; set; }
+
+    public bool IsCollapsed { get; set; }
 
     public List<KanbanCard> Cards { get; set; } = [];
 }

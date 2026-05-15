@@ -47,6 +47,9 @@
             <Setter Property="Spacing" Value="0"/>
             <Setter Property="Margin" Value="0,0,0,12"/>
         </Style>
+        <Style Selector="StackPanel.swimlaneRow.collapsed">
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
     </Window.Styles>
 
     <Grid RowDefinitions="40,*"
@@ -124,10 +127,9 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:LaneViewModel">
-                                    <Grid Width="284" VerticalAlignment="Stretch">
+                                    <Grid Width="{Binding ColumnGridWidth}" VerticalAlignment="Stretch">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="272"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <Border Grid.Column="0"
@@ -138,26 +140,57 @@
                                                 PointerPressed="LaneHeader_PointerPressed"
                                                 PointerMoved="LaneHeader_PointerMoved"
                                                 DoubleTapped="LaneHeader_DoubleTapped">
-                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
-                                            <Grid Grid.Column="0">
+                                        <Grid ColumnDefinitions="*,Auto,Auto"
+                                              VerticalAlignment="Center">
+                                            <StackPanel Grid.Column="0"
+                                                        Orientation="Horizontal"
+                                                        Spacing="6"
+                                                        VerticalAlignment="Center">
+                                                <Button Classes="collapseToggle"
+                                                        Command="{Binding ToggleCollapseCommand}"
+                                                        ToolTip.Tip="{Binding CollapseToolTip}">
+                                                    <TextBlock Text="{Binding CollapseButtonContent}"
+                                                               Classes="collapseGlyph column"/>
+                                                </Button>
+                                                <Grid VerticalAlignment="Center"
+                                                      IsVisible="{Binding IsExpanded}">
+                                                    <TextBlock Text="{Binding HeaderTitle}"
+                                                               Classes="columnTitle"
+                                                               VerticalAlignment="Center"
+                                                               IsVisible="{Binding IsDisplayMode}"/>
+                                                    <TextBox Text="{Binding Title}"
+                                                             FontWeight="Bold"
+                                                             FontSize="11"
+                                                             KeyDown="LaneEdit_KeyDown"
+                                                             LostFocus="LaneEdit_LostFocus"
+                                                             IsVisible="{Binding IsEditing}"/>
+                                                </Grid>
                                                 <TextBlock Text="{Binding HeaderTitle}"
-                                                           Classes="columnTitle"
+                                                           Classes="columnTitleCollapsed"
                                                            VerticalAlignment="Center"
-                                                           IsVisible="{Binding IsDisplayMode}"/>
-                                                <TextBox Text="{Binding Title}"
-                                                         FontWeight="Bold"
-                                                         FontSize="11"
-                                                         KeyDown="LaneEdit_KeyDown"
-                                                         LostFocus="LaneEdit_LostFocus"
-                                                         IsVisible="{Binding IsEditing}"/>
-                                            </Grid>
+                                                           IsVisible="{Binding IsCollapsed}"/>
+                                            </StackPanel>
                                             <TextBlock Grid.Column="1"
                                                        Text="{Binding WipText}"
                                                        Classes="columnTitle"
-                                                       VerticalAlignment="Center"/>
-                                            <Button Grid.Column="2" Classes="cardMenu" Content="⋮" Padding="4">
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,2,0"
+                                                       IsVisible="{Binding IsExpanded}"/>
+                                            <Button Grid.Column="2"
+                                                    Classes="cardMenu"
+                                                    Content="⋮"
+                                                    Padding="4"
+                                                    VerticalAlignment="Center"
+                                                    IsVisible="{Binding IsExpanded}">
                                                 <Button.Flyout>
                                                     <MenuFlyout>
+                                                        <MenuItem Header="折叠列"
+                                                                  Command="{Binding ToggleCollapseCommand}"
+                                                                  IsVisible="{Binding IsExpanded}"/>
+                                                        <MenuItem Header="展开列"
+                                                                  Command="{Binding ToggleCollapseCommand}"
+                                                                  IsVisible="{Binding IsCollapsed}"/>
+                                                        <Separator/>
                                                         <MenuItem Header="Move left" Command="{Binding MoveLeftCommand}"/>
                                                         <MenuItem Header="Move right" Command="{Binding MoveRightCommand}"/>
                                                         <MenuItem Header="Sort now" Command="{Binding SortCommand}"/>
@@ -184,27 +217,48 @@
                     <ItemsControl ItemsSource="{Binding Swimlanes}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:SwimlaneViewModel">
-                                <StackPanel Classes="swimlaneRow">
+                                <StackPanel Classes="swimlaneRow"
+                                            Classes.collapsed="{Binding IsCollapsed}">
                                     <Border Classes="swimlaneBar"
                                             DoubleTapped="SwimlaneLabel_DoubleTapped">
-                                        <Grid ColumnDefinitions="*,Auto">
-                                            <TextBlock Grid.Column="0"
-                                                       Text="{Binding Title}"
-                                                       Classes="swimlaneTitle"
-                                                       IsVisible="{Binding IsDisplayMode}"/>
-                                            <TextBox Grid.Column="0"
-                                                     Text="{Binding Title}"
-                                                     Classes="swimlaneTitle"
-                                                     KeyDown="SwimlaneEdit_KeyDown"
-                                                     LostFocus="SwimlaneEdit_LostFocus"
-                                                     IsVisible="{Binding IsEditing}"/>
+                                        <Grid ColumnDefinitions="*,Auto"
+                                              VerticalAlignment="Center">
+                                            <StackPanel Grid.Column="0"
+                                                        Orientation="Horizontal"
+                                                        Spacing="6"
+                                                        VerticalAlignment="Center">
+                                                <Button Classes="collapseToggle"
+                                                        Command="{Binding ToggleCollapseCommand}"
+                                                        ToolTip.Tip="{Binding CollapseToolTip}">
+                                                    <TextBlock Text="{Binding CollapseButtonContent}"
+                                                               Classes="collapseGlyph swimlane"/>
+                                                </Button>
+                                                <TextBlock Text="{Binding Title}"
+                                                           Classes="swimlaneTitle"
+                                                           VerticalAlignment="Center"
+                                                           IsVisible="{Binding IsDisplayMode}"/>
+                                                <TextBox Text="{Binding Title}"
+                                                         Classes="swimlaneTitle"
+                                                         VerticalAlignment="Center"
+                                                         KeyDown="SwimlaneEdit_KeyDown"
+                                                         LostFocus="SwimlaneEdit_LostFocus"
+                                                         IsVisible="{Binding IsEditing}"/>
+                                            </StackPanel>
                                             <Button Grid.Column="1"
                                                     Classes="cardMenu"
                                                     Content="⋮"
                                                     Padding="3,0,0,0"
-                                                    Margin="8,0,0,0">
+                                                    Margin="8,0,0,0"
+                                                    VerticalAlignment="Center">
                                                 <Button.Flyout>
                                                     <MenuFlyout>
+                                                        <MenuItem Header="折叠泳道"
+                                                                  Command="{Binding ToggleCollapseCommand}"
+                                                                  IsVisible="{Binding IsExpanded}"/>
+                                                        <MenuItem Header="展开泳道"
+                                                                  Command="{Binding ToggleCollapseCommand}"
+                                                                  IsVisible="{Binding IsCollapsed}"/>
+                                                        <Separator/>
                                                         <MenuItem Header="Rename swimlane" Command="{Binding BeginEditCommand}"/>
                                                         <MenuItem Header="Move up" Command="{Binding MoveUpCommand}"/>
                                                         <MenuItem Header="Move down" Command="{Binding MoveDownCommand}"/>
@@ -215,7 +269,8 @@
                                         </Grid>
                                     </Border>
 
-                                    <ItemsControl ItemsSource="{Binding Lanes}">
+                                    <ItemsControl ItemsSource="{Binding Lanes}"
+                                                  IsVisible="{Binding IsExpanded}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
                                                 <StackPanel Orientation="Horizontal"/>
@@ -223,16 +278,17 @@
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="vm:LaneViewModel">
-                                <Grid Width="284" VerticalAlignment="Top">
+                                <Grid Width="{Binding ColumnGridWidth}" VerticalAlignment="Top">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="272"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <Border Grid.Column="0"
                                             Classes="columnSeparator"
                                             IsVisible="{Binding ShowLeadingSeparator}"/>
-                                <StackPanel Grid.Column="1" Width="272">
+                                <StackPanel Grid.Column="1"
+                                            Width="{Binding ColumnWidth}"
+                                            IsVisible="{Binding IsExpanded}">
                                     <Border Classes="laneCell">
                                         <Grid RowDefinitions="Auto,Auto">
                                             <Border Grid.Row="0" Padding="4,4,4,8" IsVisible="False">
@@ -416,6 +472,10 @@
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
+                                    <Border Grid.Column="1"
+                                            Width="{Binding ColumnWidth}"
+                                            Classes="columnCollapsedStrip"
+                                            IsVisible="{Binding IsCollapsed}"/>
                                 </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
