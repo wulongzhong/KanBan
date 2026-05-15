@@ -1,16 +1,19 @@
-# Builds a self-contained Windows release and packages it as an installable Setup.exe.
-# Requires: .NET 9 SDK. Installs vpk global tool if missing.
+# Builds KanBan MSI with standard install-directory wizard (WiX WixUI_InstallDir).
+# Requires: .NET 9 SDK, WiX Toolset 6 (dotnet tool install -g wix)
 param(
     [string]$Version = "1.0.0",
     [ValidateSet("win-x64", "win-arm64")]
-    [string]$Runtime = "win-x64",
-    [switch]$Msi
+    [string]$Runtime = "win-x64"
 )
 
 $ErrorActionPreference = "Stop"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..")
 $PublishDir = Join-Path $Root "dist\publish"
-$ReleaseDir = Join-Path $Root "dist\release"
+$InstallerDir = Join-Path $Root "dist\installer"
+$WixProj = Join-Path $Root "installer\KanBan.Installer.wixproj"
+
+# MSI requires x.x.x.x
+$MsiVersion = if ($Version -match '^\d+\.\d+\.\d+\.\d+$') { $Version } else { "$Version.0" }
 
 Write-Host "Publishing KanBan ($Runtime, v$Version)..." -ForegroundColor Cyan
 if (Test-Path $PublishDir) {
@@ -24,31 +27,33 @@ dotnet publish (Join-Path $Root "KanBan.csproj") `
     -p:PublishReadyToRun=true `
     -o $PublishDir
 
-if (-not (Get-Command vpk -ErrorAction SilentlyContinue)) {
-    Write-Host "Installing vpk tool..." -ForegroundColor Yellow
-    dotnet tool install -g vpk --version 0.0.1298
+if (-not (Get-Command wix -ErrorAction SilentlyContinue)) {
+    Write-Host "Installing WiX Toolset 6..." -ForegroundColor Yellow
+    dotnet tool install -g wix --version 6.0.2
+    wix extension add -g WixToolset.UI.wixext/6.0.2
 }
 
-if (Test-Path $ReleaseDir) {
-    Remove-Item $ReleaseDir -Recurse -Force
+if (Test-Path $InstallerDir) {
+    Remove-Item $InstallerDir -Recurse -Force
 }
-New-Item -ItemType Directory -Path $ReleaseDir -Force | Out-Null
+New-Item -ItemType Directory -Path $InstallerDir -Force | Out-Null
 
-$packArgs = @(
-    "pack",
-    "--packId", "KanBan",
-    "--packVersion", $Version,
-    "--packDir", $PublishDir,
-    "--mainExe", "KanBan.exe",
-    "--outputDir", $ReleaseDir
-)
-if ($Msi) {
-    $packArgs += "--msi"
+Write-Host "Building MSI..." -ForegroundColor Cyan
+dotnet build $WixProj -c Release `
+    -p:ProductVersion=$MsiVersion `
+    -p:BindPath=$PublishDir `
+    -p:HarvestDirectory=$PublishDir
+
+$msi = Get-ChildItem -Path (Join-Path $Root "installer\bin\x64\Release") -Filter "*.msi" -Recurse |
+    Select-Object -First 1
+if (-not $msi) {
+    throw "MSI was not produced. Check installer build output."
 }
 
-Write-Host "Creating installer..." -ForegroundColor Cyan
-& vpk @packArgs
+Copy-Item $msi.FullName (Join-Path $InstallerDir "KanBan.msi") -Force
 
+$sizeMb = [math]::Round((Get-Item (Join-Path $InstallerDir "KanBan.msi")).Length / 1MB, 2)
 Write-Host ""
-Write-Host "Done. Installer output:" -ForegroundColor Green
-Get-ChildItem $ReleaseDir -File | ForEach-Object { Write-Host "  $($_.FullName)" }
+Write-Host "Done:" -ForegroundColor Green
+Write-Host "  $(Join-Path $InstallerDir 'KanBan.msi')  ($sizeMb MB)" -ForegroundColor Cyan
+Write-Host "  Wizard includes install directory selection (WixUI_InstallDir)." -ForegroundColor DarkGray

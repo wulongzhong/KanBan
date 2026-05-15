@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <Package Name="KanBan"
+           Manufacturer="KanBan"
+           Version="$(var.ProductVersion)"
+           UpgradeCode="7c4e9a2b-8d1f-4e6a-9b3c-2f5d8e1a0c6b"
+           Scope="perUserOrMachine"
+           Compressed="yes"
+           Codepage="65001">
+
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="A newer version is already installed." />
+
+    <MediaTemplate EmbedCab="yes" CompressionLevel="medium" />
+
+    <Feature Id="Main" Title="KanBan" Level="1">
+      <ComponentGroupRef Id="PublishedApp" />
+      <ComponentRef Id="Shortcuts" />
+    </Feature>
+
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="KanBan" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="KanBan" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+
+    <Component Id="Shortcuts" Directory="ApplicationProgramsFolder" Guid="*">
+      <Shortcut Id="StartMenuShortcut"
+                Name="KanBan"
+                Description="KanBan"
+                Target="[INSTALLFOLDER]KanBan.exe"
+                WorkingDirectory="INSTALLFOLDER" />
+      <Shortcut Id="DesktopShortcut"
+                Directory="DesktopFolder"
+                Name="KanBan"
+                Description="KanBan"
+                Target="[INSTALLFOLDER]KanBan.exe"
+                WorkingDirectory="INSTALLFOLDER" />
+      <RegistryValue Root="HKCU"
+                     Key="Software\KanBan"
+                     Name="Installed"
+                     Type="integer"
+                     Value="1"
+                     KeyPath="yes" />
+      <RemoveFolder Id="RemoveAppProgramsFolder"
+                    Directory="ApplicationProgramsFolder"
+                    On="uninstall" />
+    </Component>
+  </Package>
+</Wix>
