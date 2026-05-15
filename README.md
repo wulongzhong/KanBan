@@ -166,3 +166,6 @@ Model（待添加于 Models/）
 - 在 `Models/` 添加看板、列、任务等类型
 - 在 `ViewModels/`、`Views/` 按功能拆分新页面，并保持 `XxxViewModel` / `Xxx` 命名配对
 - 复杂列表与命令可使用 CommunityToolkit.Mvvm 的 `[ObservableProperty]`、`RelayCommand` 等源生成特性
+
+## 发布
+powershell -ExecutionPolicy Bypass -File .\scripts\build-installer.ps1
