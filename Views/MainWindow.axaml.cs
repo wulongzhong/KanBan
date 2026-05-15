@@ -86,7 +86,7 @@ public partial class MainWindow : Window
 
         _pressedCardId = card.Id;
         _pressedLaneId = null;
-        _pressedTitle = card.Title;
+        _pressedTitle = card.DragLabel;
         _dragGrabOffset = e.GetPosition(control);
         _dragStart = e.GetPosition(this);
     }

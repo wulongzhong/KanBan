@@ -544,13 +544,12 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void AddCard(LaneViewModel lane, string title, string description)
+    private void AddCard(LaneViewModel lane, string description)
     {
         var card = CreateCard(
             new KanbanCard
             {
                 SwimlaneId = lane.SwimlaneId,
-                Title = string.IsNullOrWhiteSpace(title) ? "New card" : title.Trim(),
                 Description = description.Trim(),
                 CreatedAt = DateTimeOffset.UtcNow,
                 UpdatedAt = DateTimeOffset.UtcNow,
@@ -677,8 +676,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
         var sortedCards = lane.Sort switch
         {
-            LaneSort.TitleAsc => lane.Cards.OrderBy(card => card.Title, StringComparer.OrdinalIgnoreCase),
-            LaneSort.TitleDesc => lane.Cards.OrderByDescending(card => card.Title, StringComparer.OrdinalIgnoreCase),
+            LaneSort.TitleAsc => lane.Cards.OrderBy(card => card.Description, StringComparer.OrdinalIgnoreCase),
+            LaneSort.TitleDesc => lane.Cards.OrderByDescending(card => card.Description, StringComparer.OrdinalIgnoreCase),
             LaneSort.DateAsc => lane.Cards.OrderBy(card => card.DueDate),
             LaneSort.DateDesc => lane.Cards.OrderByDescending(card => card.DueDate),
             LaneSort.TagsAsc => lane.Cards.OrderBy(card => CardTagHelper.GetSortKey(card.Description), StringComparer.OrdinalIgnoreCase),

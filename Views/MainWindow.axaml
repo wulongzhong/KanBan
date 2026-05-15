@@ -155,9 +155,15 @@
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
         </Style>
+        <Style Selector="TextBlock.cardBody">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
         <Style Selector="TextBox.cardDetails">
             <Setter Property="AcceptsReturn" Value="True"/>
             <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="MinHeight" Value="96"/>
             <Setter Property="MaxHeight" Value="280"/>
             <Setter Property="VerticalContentAlignment" Value="Top"/>
@@ -428,10 +434,10 @@
                                                         <Grid>
                                                             <StackPanel Spacing="5" IsVisible="{Binding IsDisplayMode}">
                                                                 <Grid ColumnDefinitions="*,Auto" Margin="8,8,6,0">
-                                                                    <TextBlock Text="{Binding Title}"
-                                                                               TextWrapping="Wrap"
-                                                                               FontSize="13"
-                                                                               Margin="0,1,4,0"/>
+                                                                    <TextBlock Text="{Binding Description}"
+                                                                               Classes="cardBody"
+                                                                               Margin="0,1,4,0"
+                                                                               IsVisible="{Binding HasDescription}"/>
                                                                     <Button Grid.Column="1"
                                                                             Classes="cardMenu"
                                                                             Content="⋮"
@@ -464,7 +470,7 @@
 
                                                                 <ItemsControl ItemsSource="{Binding PreviewImages}"
                                                                               IsVisible="{Binding HasPreviewImages}"
-                                                                              Margin="34,4,10,0">
+                                                                              Margin="8,4,10,0">
                                                                     <ItemsControl.ItemTemplate>
                                                                         <DataTemplate x:DataType="vm:CardImageViewModel">
                                                                             <Image Classes="cardPreview"
@@ -474,14 +480,7 @@
                                                                     </ItemsControl.ItemTemplate>
                                                                 </ItemsControl>
 
-                                                                <TextBlock Text="{Binding Description}"
-                                                                           Classes="muted"
-                                                                           TextWrapping="Wrap"
-                                                                           Margin="34,0,10,0"
-                                                                           FontSize="12"
-                                                                           IsVisible="{Binding HasDescription}"/>
-
-                                                                <WrapPanel Margin="34,0,8,7">
+                                                                <WrapPanel Margin="8,0,8,7">
                                                                     <Button Classes="tagButton dateBadge"
                                                                             Content="{Binding DateDisplayText}"
                                                                             IsVisible="{Binding HasDueDate}"
@@ -497,9 +496,6 @@
                                                             </StackPanel>
 
                                                             <StackPanel Spacing="6" Margin="8" IsVisible="{Binding IsEditing}">
-                                                                <TextBox Text="{Binding Title}"
-                                                                         FontWeight="SemiBold"
-                                                                         KeyDown="CardEdit_KeyDown"/>
                                                                 <ItemsControl ItemsSource="{Binding PreviewImages}"
                                                                               IsVisible="{Binding HasPreviewImages}">
                                                                     <ItemsControl.ItemTemplate>
@@ -527,7 +523,8 @@
                                                                            FontSize="11"/>
                                                                 <TextBox Classes="cardDetails"
                                                                          Text="{Binding Description}"
-                                                                         PlaceholderText="Card details..."/>
+                                                                         PlaceholderText="详情..."
+                                                                         KeyDown="CardEdit_KeyDown"/>
                                                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                                                     <Button Classes="accent" Content="Done" Command="{Binding EndEditCommand}"/>
                                                                     <Button Content="Archive" Command="{Binding ArchiveCommand}"/>
@@ -545,7 +542,6 @@
                                         <StackPanel Spacing="0">
                                             <Border Padding="0,0,0,8" IsVisible="{Binding IsAddingCard}">
                                                 <StackPanel Spacing="6">
-                                                    <TextBox Text="{Binding NewCardTitle}" PlaceholderText="卡片标题..."/>
                                                     <TextBox Classes="cardDetails"
                                                              Text="{Binding NewCardDetails}"
                                                              PlaceholderText="详情..."/>
@@ -594,10 +590,9 @@
                                                 <DataTemplate x:DataType="vm:CardViewModel">
                                                     <Border BorderBrush="#3a3a3a" BorderThickness="0,1,0,0" Padding="8">
                                                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                                            <StackPanel>
-                                                                <TextBlock Text="{Binding Title}" TextWrapping="Wrap"/>
-                                                                <TextBlock Text="{Binding Description}" Classes="muted" TextWrapping="Wrap" IsVisible="{Binding HasDescription}"/>
-                                                            </StackPanel>
+                                                            <TextBlock Text="{Binding Description}"
+                                                                       Classes="cardBody"
+                                                                       IsVisible="{Binding HasDescription}"/>
                                                             <TextBlock Grid.Column="1" Text="{Binding DueBadge}" Classes="muted"/>
                                                         </Grid>
                                                     </Border>
@@ -620,20 +615,18 @@
                 <Border Classes="drawer" Padding="0">
                     <StackPanel>
                         <Border Background="#262626" Padding="10">
-                            <Grid ColumnDefinitions="2*,3*,*" ColumnSpacing="12">
-                                <TextBlock Text="Title" FontWeight="SemiBold"/>
-                                <TextBlock Grid.Column="1" Text="Description" FontWeight="SemiBold"/>
-                                <TextBlock Grid.Column="2" Text="Due" FontWeight="SemiBold"/>
+                            <Grid ColumnDefinitions="3*,*" ColumnSpacing="12">
+                                <TextBlock Text="Content" FontWeight="SemiBold"/>
+                                <TextBlock Grid.Column="1" Text="Due" FontWeight="SemiBold"/>
                             </Grid>
                         </Border>
                         <ItemsControl ItemsSource="{Binding TableCards}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:CardViewModel">
                                     <Border BorderBrush="#3a3a3a" BorderThickness="0,1,0,0" Padding="10">
-                                        <Grid ColumnDefinitions="2*,3*,*" ColumnSpacing="12">
-                                            <TextBlock Text="{Binding Title}" TextWrapping="Wrap"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding Description}" Classes="muted" TextWrapping="Wrap"/>
-                                            <TextBlock Grid.Column="2" Text="{Binding DateDisplayText}" Classes="muted"/>
+                                        <Grid ColumnDefinitions="3*,*" ColumnSpacing="12">
+                                            <TextBlock Text="{Binding Description}" Classes="cardBody"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding DateDisplayText}" Classes="muted"/>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>
@@ -664,8 +657,7 @@
                                 <DataTemplate x:DataType="vm:CardViewModel">
                                     <Border Classes="card" Padding="9">
                                         <StackPanel Spacing="6">
-                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                                            <TextBlock Text="{Binding Description}" Classes="muted" TextWrapping="Wrap" IsVisible="{Binding HasDescription}"/>
+                                            <TextBlock Text="{Binding Description}" Classes="cardBody" IsVisible="{Binding HasDescription}"/>
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <Button Content="Restore" Command="{Binding RestoreCommand}"/>
                                                 <Button Content="Delete" Command="{Binding DeleteCommand}"/>

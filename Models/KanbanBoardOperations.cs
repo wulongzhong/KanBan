@@ -113,8 +113,8 @@ public static class KanbanBoardOperations
     {
         Comparison<KanbanCard> comparison = lane.Sort switch
         {
-            LaneSort.TitleAsc => (left, right) => string.Compare(left.Title, right.Title, StringComparison.OrdinalIgnoreCase),
-            LaneSort.TitleDesc => (left, right) => string.Compare(right.Title, left.Title, StringComparison.OrdinalIgnoreCase),
+            LaneSort.TitleAsc => (left, right) => string.Compare(left.Description, right.Description, StringComparison.OrdinalIgnoreCase),
+            LaneSort.TitleDesc => (left, right) => string.Compare(right.Description, left.Description, StringComparison.OrdinalIgnoreCase),
             LaneSort.DateAsc => CompareDatesAscending,
             LaneSort.DateDesc => (left, right) => CompareDatesAscending(right, left),
             LaneSort.TagsAsc => (left, right) => string.Compare(CardTagHelper.GetSortKey(left.Description), CardTagHelper.GetSortKey(right.Description), StringComparison.OrdinalIgnoreCase),

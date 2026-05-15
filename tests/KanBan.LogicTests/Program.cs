@@ -28,13 +28,13 @@ static void MoveCardAcrossLanes()
             {
                 Id = "todo",
                 Title = "Todo",
-                Cards = [new KanbanCard { Id = "a", Title = "A" }],
+                Cards = [new KanbanCard { Id = "a", Description = "A" }],
             },
             new KanbanLane
             {
                 Id = "done",
                 Title = "Done",
-                Cards = [new KanbanCard { Id = "b", Title = "B" }],
+                Cards = [new KanbanCard { Id = "b", Description = "B" }],
             },
         ],
     };
@@ -58,8 +58,8 @@ static void ArchiveCardTrimsArchive()
                 Id = "todo",
                 Cards =
                 [
-                    new KanbanCard { Id = "a", Title = "A" },
-                    new KanbanCard { Id = "b", Title = "B" },
+                    new KanbanCard { Id = "a", Description = "A" },
+                    new KanbanCard { Id = "b", Description = "B" },
                 ],
             },
         ],
@@ -79,7 +79,7 @@ static void EnsureSwimlanesMigratesLegacyBoards()
         [
             new KanbanLane
             {
-                Cards = [new KanbanCard { Id = "a", Title = "A" }],
+                Cards = [new KanbanCard { Id = "a", Description = "A" }],
             },
         ],
     };
@@ -104,7 +104,7 @@ static void MoveCardUpdatesSwimlane()
             new KanbanLane
             {
                 Id = "todo",
-                Cards = [new KanbanCard { Id = "a", Title = "A", SwimlaneId = "s1" }],
+                Cards = [new KanbanCard { Id = "a", Description = "A", SwimlaneId = "s1" }],
             },
             new KanbanLane
             {
@@ -139,7 +139,7 @@ static void JsonStorageRoundTrips()
                     new KanbanLane
                     {
                         Title = "Lane",
-                        Cards = [new KanbanCard { Title = "Card", Description = "#test", SwimlaneId = "s1" }],
+                        Cards = [new KanbanCard { Description = "Card #test", SwimlaneId = "s1" }],
                     },
                 ],
             },

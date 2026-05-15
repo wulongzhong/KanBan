@@ -9,7 +9,7 @@ namespace KanBan.ViewModels;
 public sealed class LaneViewModel : ViewModelBase
 {
     private readonly Action<LaneViewModel>? _onChanged;
-    private readonly Action<LaneViewModel, string, string>? _onAddCard;
+    private readonly Action<LaneViewModel, string>? _onAddCard;
     private readonly Action<LaneViewModel>? _onDelete;
     private readonly Action<LaneViewModel, int>? _onMove;
     private readonly Action<LaneViewModel>? _onSort;
@@ -20,7 +20,6 @@ public sealed class LaneViewModel : ViewModelBase
     private string _activeQuery = string.Empty;
     private bool _isEditing;
     private bool _isAddingCard;
-    private string _newCardTitle = string.Empty;
     private string _newCardDetails = string.Empty;
     private int? _aggregateCardCount;
 
@@ -28,7 +27,7 @@ public sealed class LaneViewModel : ViewModelBase
         KanbanLane lane,
         Func<KanbanCard, CardViewModel> cardFactory,
         Action<LaneViewModel>? onChanged = null,
-        Action<LaneViewModel, string, string>? onAddCard = null,
+        Action<LaneViewModel, string>? onAddCard = null,
         Action<LaneViewModel>? onDelete = null,
         Action<LaneViewModel, int>? onMove = null,
         Action<LaneViewModel>? onSort = null,
@@ -169,12 +168,6 @@ public sealed class LaneViewModel : ViewModelBase
     }
 
     public bool IsAddCardButtonVisible => !IsAddingCard;
-
-    public string NewCardTitle
-    {
-        get => _newCardTitle;
-        set => SetProperty(ref _newCardTitle, value);
-    }
 
     public string NewCardDetails
     {
@@ -321,28 +314,25 @@ public sealed class LaneViewModel : ViewModelBase
 
     private void BeginAddCard()
     {
-        NewCardTitle = string.Empty;
         NewCardDetails = string.Empty;
         IsAddingCard = true;
     }
 
     private void CommitAddCard()
     {
-        if (string.IsNullOrWhiteSpace(NewCardTitle) && string.IsNullOrWhiteSpace(NewCardDetails))
+        if (string.IsNullOrWhiteSpace(NewCardDetails))
         {
             IsAddingCard = false;
             return;
         }
 
-        _onAddCard?.Invoke(this, NewCardTitle, NewCardDetails);
-        NewCardTitle = string.Empty;
+        _onAddCard?.Invoke(this, NewCardDetails);
         NewCardDetails = string.Empty;
         IsAddingCard = false;
     }
 
     private void CancelAddCard()
     {
-        NewCardTitle = string.Empty;
         NewCardDetails = string.Empty;
         IsAddingCard = false;
     }

@@ -55,8 +55,7 @@ public sealed class KanbanBoard
                         new KanbanCard
                         {
                             SwimlaneId = defaultSwimlaneId,
-                            Title = "Capture ideas",
-                            Description = "Drop tasks here before they are ready to start. #inbox",
+                            Description = "Capture ideas\nDrop tasks here before they are ready to start. #inbox",
                             CreatedAt = now,
                             UpdatedAt = now,
                         },
@@ -71,8 +70,7 @@ public sealed class KanbanBoard
                         new KanbanCard
                         {
                             SwimlaneId = defaultSwimlaneId,
-                            Title = "Build the board",
-                            Description = "Columns, cards, search, archive, settings, and local JSON storage. #kanban #desktop",
+                            Description = "Build the board\nColumns, cards, search, archive, settings, and local JSON storage. #kanban #desktop",
                             DueDate = now.AddDays(2),
                             CreatedAt = now,
                             UpdatedAt = now,
@@ -87,8 +85,7 @@ public sealed class KanbanBoard
                         new KanbanCard
                         {
                             SwimlaneId = defaultSwimlaneId,
-                            Title = "Create project shell",
-                            Description = "#setup",
+                            Description = "Create project shell\n#setup",
                             CreatedAt = now,
                             UpdatedAt = now,
                         },

@@ -19,7 +19,6 @@ public sealed class CardViewModel : ViewModelBase
     private readonly Action<CardViewModel>? _onDelete;
     private readonly Action<CardViewModel>? _onRestore;
     private readonly Action<CardViewModel, int>? _onMove;
-    private string _title;
     private string _description;
     private DateTime? _dueDate;
     private TimeSpan? _dueTime;
@@ -41,8 +40,7 @@ public sealed class CardViewModel : ViewModelBase
         CreatedAt = card.CreatedAt;
         _updatedAt = card.UpdatedAt;
         _archivedAt = card.ArchivedAt;
-        _title = card.Title;
-        _description = card.Description;
+        _description = NormalizeDescription(card);
         _dueDate = card.DueDate?.LocalDateTime.Date;
         _dueTime = card.DueTime;
         _imagePaths.AddRange(card.Images);
@@ -95,18 +93,6 @@ public sealed class CardViewModel : ViewModelBase
 
     public bool IsArchived => ArchivedAt is not null;
 
-    public string Title
-    {
-        get => _title;
-        set
-        {
-            if (SetProperty(ref _title, value))
-            {
-                Touch();
-            }
-        }
-    }
-
     public string Description
     {
         get => _description;
@@ -121,6 +107,21 @@ public sealed class CardViewModel : ViewModelBase
     }
 
     public bool HasDescription => !string.IsNullOrWhiteSpace(Description);
+
+    public string DragLabel
+    {
+        get
+        {
+            var text = Description.Trim();
+            if (text.Length == 0)
+            {
+                return "Card";
+            }
+
+            var line = text.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)[0].Trim();
+            return line.Length > 48 ? $"{line[..48]}…" : line;
+        }
+    }
 
     public ObservableCollection<CardImageViewModel> PreviewImages { get; }
 
@@ -309,7 +310,7 @@ public sealed class CardViewModel : ViewModelBase
         {
             Id = Id,
             SwimlaneId = SwimlaneId,
-            Title = string.IsNullOrWhiteSpace(Title) ? "Untitled card" : Title.Trim(),
+            Title = string.Empty,
             Description = Description.Trim(),
             Images = _imagePaths.ToList(),
             DueDate = _dueDate is null ? null : new DateTimeOffset(_dueDate.Value),
@@ -327,8 +328,18 @@ public sealed class CardViewModel : ViewModelBase
             return true;
         }
 
-        var haystack = $"{Title} {Description} {DateDisplayText} {TimeDisplayText}";
+        var haystack = $"{Description} {DateDisplayText} {TimeDisplayText}";
         return haystack.Contains(query, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizeDescription(KanbanCard card)
+    {
+        if (!string.IsNullOrWhiteSpace(card.Description))
+        {
+            return card.Description;
+        }
+
+        return card.Title?.Trim() ?? string.Empty;
     }
 
     public void MarkChanged()

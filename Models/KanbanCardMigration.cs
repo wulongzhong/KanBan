@@ -12,6 +12,13 @@ public sealed partial class KanbanCard
 
     public void NormalizeLegacyFields()
     {
+        if (string.IsNullOrWhiteSpace(Description) && !string.IsNullOrWhiteSpace(Title))
+        {
+            Description = Title.Trim();
+        }
+
+        Title = string.Empty;
+
         if (LegacyTags is not { Count: > 0 } legacyTags)
         {
             return;
