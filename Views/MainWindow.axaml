@@ -464,7 +464,7 @@
                                                                 <TextBox Classes="cardDetails"
                                                                          Text="{Binding Description}"
                                                                          PlaceholderText="详情..."
-                                                                         KeyDown="CardEdit_KeyDown"/>
+                                                                         Loaded="CardDetailsEditor_Loaded"/>
                                                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                                                     <Button Classes="accent" Content="Done" Command="{Binding EndEditCommand}"/>
                                                                     <Button Content="Archive" Command="{Binding ArchiveCommand}"/>

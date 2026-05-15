@@ -17,6 +17,8 @@ namespace KanBan.Views;
 
 public partial class MainWindow : Window
 {
+    private const string CardDetailsPasteTunnelTag = "__KanBanCardDetailsPasteTunnel__";
+
     private enum DragKind
     {
         None,
@@ -223,7 +225,23 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
-    private void CardEdit_KeyDown(object? sender, KeyEventArgs e)
+    private void CardDetailsEditor_Loaded(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not TextBox editor)
+        {
+            return;
+        }
+
+        if (Equals(editor.Tag, CardDetailsPasteTunnelTag))
+        {
+            return;
+        }
+
+        editor.Tag = CardDetailsPasteTunnelTag;
+        editor.AddHandler(KeyDownEvent, CardEdit_KeyDown, RoutingStrategies.Tunnel);
+    }
+
+    private async void CardEdit_KeyDown(object? sender, KeyEventArgs e)
     {
         if (sender is not TextBox || sender is not Control { DataContext: CardViewModel card })
         {
@@ -240,6 +258,22 @@ public partial class MainWindow : Window
         if (e.Key == Key.Enter && e.KeyModifiers == KeyModifiers.Control)
         {
             card.EndEdit();
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Key != Key.V || (e.KeyModifiers & KeyModifiers.Control) == 0)
+        {
+            return;
+        }
+
+        if (DataContext is not MainWindowViewModel viewModel)
+        {
+            return;
+        }
+
+        if (await TryPasteCardImagesFromClipboardAsync(card, viewModel))
+        {
             e.Handled = true;
         }
     }
@@ -795,20 +829,28 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (await TryPasteCardImagesFromClipboardAsync(card, viewModel))
+        {
+            e.Handled = true;
+        }
+    }
+
+    private async Task<bool> TryPasteCardImagesFromClipboardAsync(CardViewModel card, MainWindowViewModel viewModel)
+    {
         var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
         if (clipboard is null)
         {
-            return;
+            return false;
         }
 
         var dataTransfer = await clipboard.TryGetDataAsync();
         if (dataTransfer is null || !CardImageDropHelper.CanAccept(dataTransfer))
         {
-            return;
+            return false;
         }
 
         await ImportImagesAsync(dataTransfer, card, viewModel);
-        e.Handled = true;
+        return true;
     }
 
     private static void ImportImages(
