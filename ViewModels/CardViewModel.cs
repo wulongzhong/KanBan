@@ -8,6 +8,7 @@ using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.Input;
 using KanBan.Models;
 using KanBan.Services;
+using KanBan.Services.Localization;
 
 namespace KanBan.ViewModels;
 
@@ -63,6 +64,8 @@ public sealed class CardViewModel : ViewModelBase
         MoveDownCommand = new RelayCommand(() => _onMove?.Invoke(this, 1));
         ClearDueDateCommand = new RelayCommand(ClearDueDate);
         ClearDueTimeCommand = new RelayCommand(ClearDueTime);
+
+        SubscribeLocalization(RefreshLocalizedStrings);
     }
 
     public string Id { get; }
@@ -132,7 +135,7 @@ public sealed class CardViewModel : ViewModelBase
             var text = Description.Trim();
             if (text.Length == 0)
             {
-                return "Card";
+                return LocalizationService.Get(UiKeys.CardDragLabel);
             }
 
             var line = text.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)[0].Trim();
@@ -160,9 +163,13 @@ public sealed class CardViewModel : ViewModelBase
 
     public bool ShowRelativeDueBadge => HasDueDate && !HasDueTime;
 
-    public string DateMenuHeader => HasDueDate ? "编辑日期" : "添加日期";
+    public string DateMenuHeader => HasDueDate
+        ? LocalizationService.Get(UiKeys.CardEditDate)
+        : LocalizationService.Get(UiKeys.CardAddDate);
 
-    public string TimeMenuHeader => HasDueTime ? "编辑时间" : "添加时间";
+    public string TimeMenuHeader => HasDueTime
+        ? LocalizationService.Get(UiKeys.CardEditTime)
+        : LocalizationService.Get(UiKeys.CardAddTime);
 
     public string DateDisplayText =>
         HasDueDate ? _dueDate!.Value.ToString("yyyy-MM-dd", CultureInfo.CurrentCulture) : string.Empty;
@@ -191,21 +198,23 @@ public sealed class CardViewModel : ViewModelBase
 
             if (date == today)
             {
-                return "今天";
+                return LocalizationService.Get(UiKeys.CardToday);
             }
 
             var days = (date - today).Days;
             if (days == -1)
             {
-                return "昨天";
+                return LocalizationService.Get(UiKeys.CardYesterday);
             }
 
             if (days == 1)
             {
-                return "明天";
+                return LocalizationService.Get(UiKeys.CardTomorrow);
             }
 
-            return days > 0 ? $"{days}天后" : $"{Math.Abs(days)}天前";
+            return days > 0
+                ? LocalizationService.Format(UiKeys.CardDaysAfter, days)
+                : LocalizationService.Format(UiKeys.CardDaysBefore, Math.Abs(days));
         }
     }
 
@@ -428,5 +437,13 @@ public sealed class CardViewModel : ViewModelBase
     {
         UpdatedAt = DateTimeOffset.UtcNow;
         _onChanged?.Invoke(this);
+    }
+
+    private void RefreshLocalizedStrings()
+    {
+        OnPropertyChanged(nameof(DragLabel));
+        OnPropertyChanged(nameof(DateMenuHeader));
+        OnPropertyChanged(nameof(TimeMenuHeader));
+        OnPropertyChanged(nameof(DueBadge));
     }
 }

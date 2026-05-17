@@ -3,13 +3,14 @@
         xmlns:vm="using:KanBan.ViewModels"
         xmlns:ctrl="using:KanBan.Views.Controls"
         xmlns:conv="using:KanBan.Views.Converters"
+        xmlns:loc="using:KanBan.Markup"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="780"
         x:Class="KanBan.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="KanBan"
+        Title="{loc:Loc Key=App.Title}"
         Width="1280"
         Height="780"
         MinWidth="980"
@@ -80,18 +81,18 @@
                         VerticalAlignment="Center">
                 <Button Classes="toolbarGhost"
                         Classes.active="{Binding ShowArchive}"
-                        Content="Archive"
+                        Content="{loc:Loc Key=Toolbar.Archive}"
                         Command="{Binding ToggleArchiveCommand}"/>
                 <Button Classes="toolbarGhost"
                         Classes.active="{Binding ShowSettings}"
-                        Content="Settings"
+                        Content="{loc:Loc Key=Toolbar.Settings}"
                         Command="{Binding ToggleSettingsCommand}"/>
                 <Button Classes="toolbarLink"
-                        Content="Swimlane"
+                        Content="{loc:Loc Key=Toolbar.Swimlane}"
                         Command="{Binding AddSwimlaneCommand}"
-                        ToolTip.Tip="Add swimlane"/>
+                        ToolTip.Tip="{loc:Loc Key=Toolbar.AddSwimlane.Tooltip}"/>
                 <Button Classes="toolbarLink"
-                        Content="Create list"
+                        Content="{loc:Loc Key=Toolbar.CreateList}"
                         Command="{Binding AddLaneCommand}"/>
             </StackPanel>
 
@@ -108,11 +109,11 @@
                         <TextBox Grid.Column="1"
                                  Classes="searchInline"
                                  Text="{Binding SearchQuery}"
-                                 PlaceholderText="Search cards"/>
+                                 PlaceholderText="{loc:Loc Key=Toolbar.SearchPlaceholder}"/>
                     </Grid>
                 </Border>
                 <Border Classes="statBadge" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding TotalCards, StringFormat='{}{0} cards'}"/>
+                    <TextBlock Text="{Binding TotalCardsText}"/>
                 </Border>
             </StackPanel>
         </Grid>
@@ -190,17 +191,17 @@
                                                     VerticalAlignment="Center">
                                                 <Button.Flyout>
                                                     <MenuFlyout>
-                                                        <MenuItem Header="折叠列"
+                                                        <MenuItem Header="{loc:Loc Key=Lane.Collapse}"
                                                                   Command="{Binding ToggleCollapseCommand}"
                                                                   IsVisible="{Binding IsExpanded}"/>
-                                                        <MenuItem Header="展开列"
+                                                        <MenuItem Header="{loc:Loc Key=Lane.Expand}"
                                                                   Command="{Binding ToggleCollapseCommand}"
                                                                   IsVisible="{Binding IsCollapsed}"/>
                                                         <Separator/>
-                                                        <MenuItem Header="Move left" Command="{Binding MoveLeftCommand}"/>
-                                                        <MenuItem Header="Move right" Command="{Binding MoveRightCommand}"/>
-                                                        <MenuItem Header="Sort now" Command="{Binding SortCommand}"/>
-                                                        <MenuItem Header="Delete list" Command="{Binding DeleteLaneCommand}"/>
+                                                        <MenuItem Header="{loc:Loc Key=Lane.MoveLeft}" Command="{Binding MoveLeftCommand}"/>
+                                                        <MenuItem Header="{loc:Loc Key=Lane.MoveRight}" Command="{Binding MoveRightCommand}"/>
+                                                        <MenuItem Header="{loc:Loc Key=Lane.SortNow}" Command="{Binding SortCommand}"/>
+                                                        <MenuItem Header="{loc:Loc Key=Lane.DeleteList}" Command="{Binding DeleteLaneCommand}"/>
                                                     </MenuFlyout>
                                                 </Button.Flyout>
                                             </Button>
@@ -283,17 +284,17 @@
                                                     VerticalAlignment="Center">
                                                 <Button.Flyout>
                                                     <MenuFlyout>
-                                                        <MenuItem Header="折叠泳道"
+                                                        <MenuItem Header="{loc:Loc Key=Swimlane.Collapse}"
                                                                   Command="{Binding ToggleCollapseCommand}"
                                                                   IsVisible="{Binding IsExpanded}"/>
-                                                        <MenuItem Header="展开泳道"
+                                                        <MenuItem Header="{loc:Loc Key=Swimlane.Expand}"
                                                                   Command="{Binding ToggleCollapseCommand}"
                                                                   IsVisible="{Binding IsCollapsed}"/>
                                                         <Separator/>
-                                                        <MenuItem Header="Rename swimlane" Command="{Binding BeginEditCommand}"/>
-                                                        <MenuItem Header="Move up" Command="{Binding MoveUpCommand}"/>
-                                                        <MenuItem Header="Move down" Command="{Binding MoveDownCommand}"/>
-                                                        <MenuItem Header="Delete swimlane" Command="{Binding DeleteSwimlaneCommand}"/>
+                                                        <MenuItem Header="{loc:Loc Key=Swimlane.Rename}" Command="{Binding BeginEditCommand}"/>
+                                                        <MenuItem Header="{loc:Loc Key=Swimlane.MoveUp}" Command="{Binding MoveUpCommand}"/>
+                                                        <MenuItem Header="{loc:Loc Key=Swimlane.MoveDown}" Command="{Binding MoveDownCommand}"/>
+                                                        <MenuItem Header="{loc:Loc Key=Swimlane.Delete}" Command="{Binding DeleteSwimlaneCommand}"/>
                                                     </MenuFlyout>
                                                 </Button.Flyout>
                                             </Button>
@@ -331,8 +332,8 @@
                                                     <Button Grid.Column="1" Classes="cardMenu" Content="⋮" Padding="4">
                                                         <Button.Flyout>
                                                             <MenuFlyout>
-                                                                <MenuItem Header="Add a card" Command="{Binding AddCardCommand}"/>
-                                                                <MenuItem Header="Sort now" Command="{Binding SortCommand}"/>
+                                                                <MenuItem Header="{loc:Loc Key=Lane.AddCard}" Command="{Binding AddCardCommand}"/>
+                                                                <MenuItem Header="{loc:Loc Key=Lane.SortNow}" Command="{Binding SortCommand}"/>
                                                             </MenuFlyout>
                                                         </Button.Flyout>
                                                     </Button>
@@ -416,21 +417,21 @@
                                                                     PointerPressed="CardMenu_PointerPressed">
                                                                 <Button.Flyout>
                                                                     <MenuFlyout>
-                                                                        <MenuItem Header="编辑卡片" Command="{Binding BeginEditCommand}"/>
-                                                                        <MenuItem Header="Move up" Command="{Binding MoveUpCommand}"/>
-                                                                        <MenuItem Header="Move down" Command="{Binding MoveDownCommand}"/>
-                                                                        <MenuItem Header="归档卡片" Command="{Binding ArchiveCommand}"/>
-                                                                        <MenuItem Header="删除卡片" Command="{Binding DeleteCommand}"/>
+                                                                        <MenuItem Header="{loc:Loc Key=Card.Edit}" Command="{Binding BeginEditCommand}"/>
+                                                                        <MenuItem Header="{loc:Loc Key=Card.MoveUp}" Command="{Binding MoveUpCommand}"/>
+                                                                        <MenuItem Header="{loc:Loc Key=Card.MoveDown}" Command="{Binding MoveDownCommand}"/>
+                                                                        <MenuItem Header="{loc:Loc Key=Card.Archive}" Command="{Binding ArchiveCommand}"/>
+                                                                        <MenuItem Header="{loc:Loc Key=Card.Delete}" Command="{Binding DeleteCommand}"/>
                                                                         <Separator/>
                                                                         <MenuItem Header="{Binding DateMenuHeader}"
                                                                                   Click="CardMenu_Date_Click"/>
-                                                                        <MenuItem Header="移除日期"
+                                                                        <MenuItem Header="{loc:Loc Key=Card.RemoveDate}"
                                                                                   Command="{Binding ClearDueDateCommand}"
                                                                                   IsVisible="{Binding ShowRemoveDateMenu}"/>
                                                                         <MenuItem Header="{Binding TimeMenuHeader}"
                                                                                   Click="CardMenu_Time_Click"
                                                                                   IsVisible="{Binding ShowTimeMenuSection}"/>
-                                                                        <MenuItem Header="移除时间"
+                                                                        <MenuItem Header="{loc:Loc Key=Card.RemoveTime}"
                                                                                   Command="{Binding ClearDueTimeCommand}"
                                                                                   IsVisible="{Binding ShowRemoveTimeMenu}"/>
                                                                     </MenuFlyout>
@@ -440,9 +441,9 @@
                                                             <StackPanel Spacing="6" Margin="8" IsVisible="{Binding IsEditing}">
                                                                 <TextBox Classes="cardDetails"
                                                                          Text="{Binding Description}"
-                                                                         PlaceholderText="详情..."
+                                                                         PlaceholderText="{loc:Loc Key=Card.DetailsPlaceholder}"
                                                                          Loaded="CardDetailsEditor_Loaded"/>
-                                                                <TextBlock Text="拖放图片到卡片，或 Ctrl+V 粘贴"
+                                                                <TextBlock Text="{loc:Loc Key=Card.DropImagesOnCard}"
                                                                            Classes="faint"
                                                                            FontSize="11"/>
                                                                 <ItemsControl ItemsSource="{Binding PreviewImages}"
@@ -458,7 +459,7 @@
                                                                                            Source="{Binding AbsolutePath, Converter={StaticResource FilePathToBitmap}}"
                                                                                            DoubleTapped="CardImage_DoubleTapped"/>
                                                                                     <Button Classes="cardImageRemove"
-                                                                                            ToolTip.Tip="移除图片"
+                                                                                            ToolTip.Tip="{loc:Loc Key=Card.RemoveImage.Tooltip}"
                                                                                             Command="{Binding RemoveCommand}">
                                                                                         <Path Classes="cardImageRemoveIcon"/>
                                                                                     </Button>
@@ -468,9 +469,9 @@
                                                                     </ItemsControl.ItemTemplate>
                                                                 </ItemsControl>
                                                                 <StackPanel Orientation="Horizontal" Spacing="6">
-                                                                    <Button Classes="accent" Content="Done" Command="{Binding EndEditCommand}"/>
-                                                                    <Button Content="Archive" Command="{Binding ArchiveCommand}"/>
-                                                                    <Button Content="Delete" Command="{Binding DeleteCommand}"/>
+                                                                    <Button Classes="accent" Content="{loc:Loc Key=Card.Done}" Command="{Binding EndEditCommand}"/>
+                                                                    <Button Content="{loc:Loc Key=Card.ArchiveButton}" Command="{Binding ArchiveCommand}"/>
+                                                                    <Button Content="{loc:Loc Key=Card.DeleteButton}" Command="{Binding DeleteCommand}"/>
                                                                 </StackPanel>
                                                             </StackPanel>
                                                         </Grid>
@@ -490,9 +491,9 @@
                                                 <StackPanel Spacing="6">
                                                     <TextBox Classes="cardDetails"
                                                              Text="{Binding NewCardDetails}"
-                                                             PlaceholderText="详情..."
+                                                             PlaceholderText="{loc:Loc Key=Card.DetailsPlaceholder}"
                                                              Loaded="NewCardComposerEditor_Loaded"/>
-                                                    <TextBlock Text="拖放图片到此处，或 Ctrl+V 粘贴"
+                                                    <TextBlock Text="{loc:Loc Key=Card.DropImagesHere}"
                                                                Classes="faint"
                                                                FontSize="11"/>
                                                     <ItemsControl ItemsSource="{Binding NewCardPreviewImages}"
@@ -508,7 +509,7 @@
                                                                                Source="{Binding AbsolutePath, Converter={StaticResource FilePathToBitmap}}"
                                                                                DoubleTapped="CardImage_DoubleTapped"/>
                                                                         <Button Classes="cardImageRemove"
-                                                                                ToolTip.Tip="移除图片"
+                                                                                ToolTip.Tip="{loc:Loc Key=Card.RemoveImage.Tooltip}"
                                                                                 Command="{Binding RemoveCommand}">
                                                                             <Path Classes="cardImageRemoveIcon"/>
                                                                         </Button>
@@ -518,13 +519,13 @@
                                                         </ItemsControl.ItemTemplate>
                                                     </ItemsControl>
                                                     <StackPanel Orientation="Horizontal" Spacing="6">
-                                                        <Button Classes="accent" Content="添加" Command="{Binding CommitAddCardCommand}"/>
-                                                        <Button Content="取消" Command="{Binding CancelAddCardCommand}"/>
+                                                        <Button Classes="accent" Content="{loc:Loc Key=Card.Add}" Command="{Binding CommitAddCardCommand}"/>
+                                                        <Button Content="{loc:Loc Key=Card.Cancel}" Command="{Binding CancelAddCardCommand}"/>
                                                     </StackPanel>
                                                 </StackPanel>
                                             </Border>
                                             <Button Classes="laneAddCard"
-                                                    Content="+ 添加卡片"
+                                                    Content="{loc:Loc Key=Card.AddCardButton}"
                                                     Command="{Binding AddCardCommand}"
                                                     IsVisible="{Binding IsAddCardButtonVisible}"/>
                                         </StackPanel>
@@ -556,8 +557,8 @@
                 <Grid RowDefinitions="Auto,*">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel>
-                            <TextBlock Text="Archive" FontSize="18" FontWeight="SemiBold"/>
-                            <TextBlock Text="{Binding ArchiveCount, StringFormat='{}{0} archived cards'}" Classes="muted"/>
+                            <TextBlock Text="{loc:Loc Key=Archive.Title}" FontSize="18" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding ArchiveCountText}" Classes="muted"/>
                         </StackPanel>
                         <Button Grid.Column="1" Content="×" Command="{Binding ToggleArchiveCommand}"/>
                     </Grid>
@@ -569,8 +570,8 @@
                                         <StackPanel Spacing="6">
                                             <TextBlock Text="{Binding Description}" Classes="cardBody" IsVisible="{Binding HasDescription}"/>
                                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <Button Content="Restore" Command="{Binding RestoreCommand}"/>
-                                                <Button Content="Delete" Command="{Binding DeleteCommand}"/>
+                                                <Button Content="{loc:Loc Key=Archive.Restore}" Command="{Binding RestoreCommand}"/>
+                                                <Button Content="{loc:Loc Key=Card.DeleteButton}" Command="{Binding DeleteCommand}"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </Border>
@@ -590,27 +591,36 @@
                     IsVisible="{Binding ShowSettings}">
                 <StackPanel Spacing="10">
                     <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Text="Board settings" FontSize="18" FontWeight="SemiBold"/>
+                        <TextBlock Text="{loc:Loc Key=Settings.Title}" FontSize="18" FontWeight="SemiBold"/>
                         <Button Grid.Column="1" Content="×" Command="{Binding ToggleSettingsCommand}"/>
                     </Grid>
-                    <CheckBox Content="Show relative dates" IsChecked="{Binding ShowRelativeDates}"/>
-                    <CheckBox Content="Prepend new cards" IsChecked="{Binding PrependNewCards}"/>
-                    <TextBlock Text="Maximum archive size" Classes="muted"/>
+                    <TextBlock Text="{loc:Loc Key=Settings.Language}" Classes="muted"/>
+                    <ComboBox ItemsSource="{Binding AvailableLanguages}"
+                              SelectedItem="{Binding SelectedLanguage}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:LanguageOption">
+                                <TextBlock Text="{Binding DisplayName}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <CheckBox Content="{loc:Loc Key=Settings.ShowRelativeDates}" IsChecked="{Binding ShowRelativeDates}"/>
+                    <CheckBox Content="{loc:Loc Key=Settings.PrependNewCards}" IsChecked="{Binding PrependNewCards}"/>
+                    <TextBlock Text="{loc:Loc Key=Settings.MaxArchiveSize}" Classes="muted"/>
                     <TextBox Text="{Binding MaxArchiveSizeText}"/>
-                    <TextBlock Text="Date format" Classes="muted"/>
+                    <TextBlock Text="{loc:Loc Key=Settings.DateFormat}" Classes="muted"/>
                     <TextBox Text="{Binding DateFormat}"/>
-                    <TextBlock Text="工作区文件夹" Classes="muted"/>
+                    <TextBlock Text="{loc:Loc Key=Settings.WorkspaceFolder}" Classes="muted"/>
                     <TextBlock Text="{Binding WorkspaceFolderDisplay}"
                                TextWrapping="Wrap"
                                FontSize="12"/>
-                    <TextBlock Text="看板文件" Classes="muted"/>
+                    <TextBlock Text="{loc:Loc Key=Settings.BoardFile}" Classes="muted"/>
                     <TextBlock Text="{Binding BoardFilePath}"
                                TextWrapping="Wrap"
                                FontSize="12"
                                Classes="faint"/>
-                    <Button Content="更改工作区文件夹"
+                    <Button Content="{loc:Loc Key=Settings.ChangeWorkspace}"
                             Command="{Binding SelectWorkspaceFolderCommand}"/>
-                    <Button Content="Reset sample board" Command="{Binding NewBoardCommand}"/>
+                    <Button Content="{loc:Loc Key=Settings.ResetSampleBoard}" Command="{Binding NewBoardCommand}"/>
                     <TextBlock Text="{Binding StatusMessage}" Classes="muted" TextWrapping="Wrap"/>
                 </StackPanel>
             </Border>
@@ -642,11 +652,11 @@
                                     ClockIdentifier="24HourClock"/>
                         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                             <Button Grid.Column="1"
-                                    Content="取消"
+                                    Content="{loc:Loc Key=Common.Cancel}"
                                     Click="TimePickerCancel_Click"/>
                             <Button Grid.Column="2"
                                     Classes="accent"
-                                    Content="确认"
+                                    Content="{loc:Loc Key=Common.Confirm}"
                                     Click="TimePickerConfirm_Click"/>
                         </Grid>
                     </StackPanel>
@@ -707,7 +717,7 @@
                 </Grid>
                 <Button Grid.Row="2"
                         Classes="imageLightboxClose"
-                        Content="关闭"
+                        Content="{loc:Loc Key=Common.Close}"
                         HorizontalAlignment="Center"
                         Margin="0,4,0,20"
                         Click="ImageLightbox_Close_Click"/>

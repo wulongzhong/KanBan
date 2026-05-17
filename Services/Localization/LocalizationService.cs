@@ -1,0 +1,116 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
+using System.Text.Json;
+
+namespace KanBan.Services.Localization;
+
+public sealed class LocalizationService : INotifyPropertyChanged
+{
+    public const string English = "en";
+    public const string Chinese = "zh-CN";
+
+    public static LocalizationService Instance { get; } = new();
+
+    private readonly Dictionary<string, string> _strings = new(StringComparer.Ordinal);
+    private string _cultureName = English;
+
+    private LocalizationService()
+    {
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public string CultureName => _cultureName;
+
+    public bool IsChinese => string.Equals(_cultureName, Chinese, StringComparison.Ordinal);
+
+    public string this[string key]
+    {
+        get
+        {
+            if (_strings.TryGetValue(key, out var value))
+            {
+                return value;
+            }
+
+            return key;
+        }
+    }
+
+    public static string Get(string key) => Instance[key];
+
+    public static string Format(string key, params object[] args) =>
+        string.Format(CultureInfo.CurrentCulture, Instance[key], args);
+
+    public void ApplyCulture(string? cultureName)
+    {
+        var normalized = NormalizeCulture(cultureName);
+        if (string.Equals(_cultureName, normalized, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _cultureName = normalized;
+        LoadStrings(normalized);
+        ApplyThreadCulture(normalized);
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
+    }
+
+    public static string NormalizeCulture(string? cultureName) =>
+        string.Equals(cultureName, Chinese, StringComparison.OrdinalIgnoreCase)
+            ? Chinese
+            : English;
+
+    private void LoadStrings(string cultureName)
+    {
+        _strings.Clear();
+
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = $"KanBan.Assets.Localization.{cultureName}.json";
+        using var stream = assembly.GetManifestResourceStream(resourceName);
+        if (stream is null && !string.Equals(cultureName, English, StringComparison.Ordinal))
+        {
+            using var fallback = assembly.GetManifestResourceStream("KanBan.Assets.Localization.en.json");
+            if (fallback is not null)
+            {
+                MergeJson(fallback);
+            }
+
+            return;
+        }
+
+        if (stream is null)
+        {
+            return;
+        }
+
+        MergeJson(stream);
+    }
+
+    private void MergeJson(Stream stream)
+    {
+        using var reader = new StreamReader(stream);
+        var json = reader.ReadToEnd();
+        var parsed = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+        if (parsed is null)
+        {
+            return;
+        }
+
+        foreach (var pair in parsed)
+        {
+            _strings[pair.Key] = pair.Value;
+        }
+    }
+
+    private static void ApplyThreadCulture(string cultureName)
+    {
+        var culture = CultureInfo.GetCultureInfo(cultureName);
+        CultureInfo.CurrentCulture = culture;
+        CultureInfo.CurrentUICulture = culture;
+    }
+}

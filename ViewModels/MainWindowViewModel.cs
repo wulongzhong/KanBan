@@ -9,6 +9,7 @@ using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.Input;
 using KanBan.Models;
 using KanBan.Services;
+using KanBan.Services.Localization;
 using KanBan.Views;
 
 namespace KanBan.ViewModels;
@@ -29,6 +30,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _prependNewCards;
     private string _maxArchiveSizeText = "200";
     private string _dateFormat = "yyyy-MM-dd";
+    private LanguageOption? _selectedLanguage;
 
     public MainWindowViewModel()
         : this(AppPreferences.Load())
@@ -49,6 +51,12 @@ public partial class MainWindowViewModel : ViewModelBase
         SaveCommand = new RelayCommand(Save);
         NewBoardCommand = new RelayCommand(NewBoard);
         SelectWorkspaceFolderCommand = new AsyncRelayCommand(SelectWorkspaceFolderAsync);
+
+        RefreshLanguageOptions();
+        _selectedLanguage = AvailableLanguages.First(option =>
+            option.CultureName == LocalizationService.NormalizeCulture(_preferences.UiLanguage));
+
+        SubscribeLocalization(RefreshLocalizedProperties);
 
         if (TryInitializeStorage())
         {
@@ -134,12 +142,38 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public bool IsWorkspaceReady => _storage is not null;
 
-    public string BoardFilePath => IsWorkspaceReady ? _storage!.BoardPath : "（未设置工作区）";
+    public string BoardFilePath => IsWorkspaceReady
+        ? _storage!.BoardPath
+        : LocalizationService.Get(UiKeys.WorkspaceNotConfigured);
 
     public string WorkspaceFolderDisplay =>
         IsWorkspaceReady
             ? _preferences.WorkspaceFolder!
-            : "（未设置）";
+            : LocalizationService.Get(UiKeys.WorkspaceNotSet);
+
+    public IReadOnlyList<LanguageOption> AvailableLanguages { get; private set; } = [];
+
+    public LanguageOption? SelectedLanguage
+    {
+        get => _selectedLanguage;
+        set
+        {
+            if (value is null || !SetProperty(ref _selectedLanguage, value))
+            {
+                return;
+            }
+
+            var culture = LocalizationService.NormalizeCulture(value.CultureName);
+            if (string.Equals(_preferences.UiLanguage, culture, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            _preferences.UiLanguage = culture;
+            _preferences.Save();
+            LocalizationService.Instance.ApplyCulture(culture);
+        }
+    }
 
     public bool ShowArchive
     {
@@ -210,6 +244,10 @@ public partial class MainWindowViewModel : ViewModelBase
         .Count();
 
     public int ArchiveCount => ArchiveCards.Count;
+
+    public string TotalCardsText => LocalizationService.Format(UiKeys.ToolbarCardCount, TotalCards);
+
+    public string ArchiveCountText => LocalizationService.Format("Archive.Count", ArchiveCount);
 
     public RelayCommand AddLaneCommand { get; }
 
@@ -312,7 +350,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ColumnLanes.Insert(newIndex, lane);
         ReorderSwimlaneLanes(laneId, beforeLaneId);
         RefreshColumnSeparators();
-        SaveAndRefresh("Lane moved.");
+        SaveAndRefresh(UiKeys.StatusLaneMoved);
     }
 
     private bool TryInitializeStorage()
@@ -336,7 +374,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         var data = _storage!.LoadOrCreate();
         Hydrate(data.Board);
-        StatusMessage = $"Loaded {BoardFilePath}";
+        StatusMessage = LocalizationService.Format(UiKeys.StatusLoaded, BoardFilePath);
     }
 
     private void Hydrate(KanbanBoard board)
@@ -378,7 +416,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         var swimlaneViewModel = new SwimlaneViewModel(
             swimlane,
-            _ => SaveAndRefresh("Swimlane updated."),
+            _ => SaveAndRefresh(UiKeys.StatusSwimlaneUpdated),
             DeleteSwimlane,
             MoveSwimlane);
 
@@ -409,7 +447,7 @@ public partial class MainWindowViewModel : ViewModelBase
         var laneViewModel = new LaneViewModel(
             lane,
             card => CreateCard(card, isArchived: false),
-            _ => SaveAndRefresh("Lane updated."),
+            _ => SaveAndRefresh(UiKeys.StatusLaneUpdated),
             AddCard,
             DiscardNewCardDraft,
             DeleteLane,
@@ -444,7 +482,7 @@ public partial class MainWindowViewModel : ViewModelBase
             lane.IsCollapsed = headerLane.IsCollapsed;
         }
 
-        SaveAndRefresh("Lane updated.");
+        SaveAndRefresh(UiKeys.StatusLaneUpdated);
     }
 
     private CardViewModel CreateCard(KanbanCard card, bool isArchived)
@@ -471,7 +509,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void AddLane()
     {
-        var laneModel = new KanbanLane { Title = $"Lane {ColumnLanes.Count + 1}" };
+        var laneModel = new KanbanLane
+        {
+            Title = LocalizationService.Format(UiKeys.LaneDefaultTitle, ColumnLanes.Count + 1),
+        };
         ColumnLanes.Add(CreateColumnHeader(laneModel));
 
         foreach (var swimlane in Swimlanes)
@@ -480,15 +521,18 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         RefreshColumnSeparators();
-        SaveAndRefresh("Lane added.");
+        SaveAndRefresh(UiKeys.StatusLaneAdded);
     }
 
     private void AddSwimlane()
     {
-        var swimlane = new KanbanSwimlane { Title = $"Swimlane {Swimlanes.Count + 1}" };
+        var swimlane = new KanbanSwimlane
+        {
+            Title = LocalizationService.Format(UiKeys.SwimlaneDefaultTitle, Swimlanes.Count + 1),
+        };
         var swimlaneViewModel = CreateSwimlane(swimlane, ColumnLanes.Select(column => column.ToMetadataModel()).ToList());
         Swimlanes.Add(swimlaneViewModel);
-        SaveAndRefresh("Swimlane added.");
+        SaveAndRefresh(UiKeys.StatusSwimlaneAdded);
     }
 
     private void DeleteSwimlane(SwimlaneViewModel swimlane)
@@ -512,7 +556,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         Swimlanes.Remove(swimlane);
-        SaveAndRefresh("Swimlane deleted.");
+        SaveAndRefresh(UiKeys.StatusSwimlaneDeleted);
     }
 
     private void MoveSwimlane(SwimlaneViewModel swimlane, int offset)
@@ -526,7 +570,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         Swimlanes.Move(oldIndex, newIndex);
-        SaveAndRefresh("Swimlane moved.");
+        SaveAndRefresh(UiKeys.StatusSwimlaneMoved);
     }
 
     private void DeleteLane(LaneViewModel lane)
@@ -559,7 +603,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         RefreshColumnSeparators();
-        SaveAndRefresh("Lane deleted. Cards moved to archive.");
+        SaveAndRefresh(UiKeys.StatusLaneDeletedArchived);
     }
 
     private void MoveLane(LaneViewModel lane, int offset)
@@ -581,7 +625,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ColumnLanes.Move(oldIndex, newIndex);
         ReorderSwimlaneLanesByOffset(lane.Id, offset);
         RefreshColumnSeparators();
-        SaveAndRefresh("Lane moved.");
+        SaveAndRefresh(UiKeys.StatusLaneMoved);
     }
 
     private void RefreshColumnSeparators()
@@ -662,7 +706,7 @@ public partial class MainWindowViewModel : ViewModelBase
             isArchived: false);
 
         lane.AddCard(card, PrependNewCards ? 0 : null);
-        SaveAndRefresh("Card added.");
+        SaveAndRefresh(UiKeys.StatusCardAdded);
     }
 
     private void DiscardNewCardDraft(LaneViewModel lane, IReadOnlyList<string> imagePaths)
@@ -685,7 +729,7 @@ public partial class MainWindowViewModel : ViewModelBase
         card.ArchivedAt = DateTimeOffset.UtcNow;
         ArchiveCards.Add(card);
         TrimArchive();
-        SaveAndRefresh("Card archived.");
+        SaveAndRefresh(UiKeys.StatusCardArchived);
     }
 
     private void RestoreCard(CardViewModel card)
@@ -709,7 +753,7 @@ public partial class MainWindowViewModel : ViewModelBase
             card.ArchivedAt = null;
             card.SwimlaneId = targetLane.SwimlaneId;
             targetLane.AddCard(card);
-            SaveAndRefresh("Card restored.");
+            SaveAndRefresh(UiKeys.StatusCardRestored);
         }
     }
 
@@ -725,7 +769,7 @@ public partial class MainWindowViewModel : ViewModelBase
             ArchiveCards.Remove(card);
         }
 
-        SaveAndRefresh("Card deleted.");
+        SaveAndRefresh(UiKeys.StatusCardDeleted);
     }
 
     private void MoveCard(CardViewModel card, int offset)
@@ -746,7 +790,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         lane.Cards.Move(oldIndex, newIndex);
         lane.RefreshFilter(SearchQuery);
-        SaveAndRefresh("Card moved.");
+        SaveAndRefresh(UiKeys.StatusCardMoved);
     }
 
     private void MoveCardToLane(CardViewModel card, LaneViewModel targetLane, int index)
@@ -762,7 +806,7 @@ public partial class MainWindowViewModel : ViewModelBase
         card.SwimlaneId = targetLane.SwimlaneId;
         var targetIndex = Math.Clamp(index, 0, targetLane.Cards.Count);
         targetLane.AddCard(card, targetIndex);
-        SaveAndRefresh("Card moved.");
+        SaveAndRefresh(UiKeys.StatusCardMoved);
     }
 
     private void SortLane(LaneViewModel lane)
@@ -783,7 +827,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         if (lane.Sort == LaneSort.Manual)
         {
-            SaveAndRefresh("Manual order enabled.");
+            SaveAndRefresh(UiKeys.StatusManualOrderEnabled);
             return;
         }
 
@@ -806,32 +850,32 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         lane.RefreshFilter(SearchQuery);
-        SaveAndRefresh("Lane sorted.");
+        SaveAndRefresh(UiKeys.StatusLaneSorted);
     }
 
     private void OnCardContentChanged(CardViewModel card)
     {
         if (card.IsEditing)
         {
-            Save("Saved.");
+            Save(UiKeys.StatusSaved);
             return;
         }
 
-        SaveAndRefresh("Card updated.");
+        SaveAndRefresh(UiKeys.StatusCardUpdated);
     }
 
-    private void SaveAndRefresh(string message)
+    private void SaveAndRefresh(string messageKey)
     {
         RefreshFilters();
-        Save(message);
+        Save(messageKey);
     }
 
     private void Save()
     {
-        Save("Saved.");
+        Save(UiKeys.StatusSaved);
     }
 
-    private void Save(string message)
+    private void Save(string messageKey)
     {
         if (!IsWorkspaceReady)
         {
@@ -841,19 +885,19 @@ public partial class MainWindowViewModel : ViewModelBase
         try
         {
             _storage!.Save(ToData());
-            StatusMessage = $"{message} {DateTimeOffset.Now:t}";
+            StatusMessage = $"{LocalizationService.Get(messageKey)} {DateTimeOffset.Now:t}";
             NotifyBoardProperties();
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Save failed: {ex.Message}";
+            StatusMessage = LocalizationService.Format(UiKeys.StatusSaveFailed, ex.Message);
         }
     }
 
     private void NewBoard()
     {
         Hydrate(KanbanBoard.CreateDefault());
-        SaveAndRefresh("New board created.");
+        SaveAndRefresh(UiKeys.StatusNewBoardCreated);
     }
 
     private async Task SelectWorkspaceFolderAsync()
@@ -865,7 +909,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         var folders = await _ownerWindow.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            Title = "选择工作区文件夹",
+            Title = LocalizationService.Get(UiKeys.WorkspacePickerTitle),
             AllowMultiple = false,
         });
 
@@ -877,7 +921,7 @@ public partial class MainWindowViewModel : ViewModelBase
         var path = folders[0].TryGetLocalPath();
         if (string.IsNullOrWhiteSpace(path))
         {
-            StatusMessage = "无法读取所选文件夹路径。";
+            StatusMessage = LocalizationService.Get(UiKeys.WorkspaceCannotReadPath);
             return;
         }
 
@@ -904,11 +948,11 @@ public partial class MainWindowViewModel : ViewModelBase
             Load();
             RefreshWorkspaceProperties();
 
-            StatusMessage = $"工作区：{trimmed}";
+            StatusMessage = LocalizationService.Format(UiKeys.WorkspaceSet, trimmed);
         }
         catch (Exception ex)
         {
-            StatusMessage = $"设置工作区失败：{ex.Message}";
+            StatusMessage = LocalizationService.Format(UiKeys.WorkspaceSetFailed, ex.Message);
         }
     }
 
@@ -1031,7 +1075,45 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(MaxArchiveSizeText));
         OnPropertyChanged(nameof(DateFormat));
         OnPropertyChanged(nameof(TotalCards));
+        OnPropertyChanged(nameof(TotalCardsText));
         OnPropertyChanged(nameof(ArchiveCount));
+        OnPropertyChanged(nameof(ArchiveCountText));
         OnPropertyChanged(nameof(SwimlaneCount));
+    }
+
+    private void RefreshLanguageOptions()
+    {
+        AvailableLanguages =
+        [
+            new LanguageOption(LocalizationService.English, LocalizationService.Get("Settings.Language.English")),
+            new LanguageOption(LocalizationService.Chinese, LocalizationService.Get("Settings.Language.Chinese")),
+        ];
+        OnPropertyChanged(nameof(AvailableLanguages));
+    }
+
+    private void RefreshLocalizedProperties()
+    {
+        var selectedCulture = _selectedLanguage?.CultureName ?? LocalizationService.Instance.CultureName;
+        RefreshLanguageOptions();
+        _selectedLanguage = AvailableLanguages.First(option =>
+            option.CultureName == LocalizationService.NormalizeCulture(selectedCulture));
+        OnPropertyChanged(nameof(SelectedLanguage));
+        OnPropertyChanged(nameof(BoardFilePath));
+        OnPropertyChanged(nameof(WorkspaceFolderDisplay));
+        OnPropertyChanged(nameof(TotalCardsText));
+        OnPropertyChanged(nameof(ArchiveCountText));
+
+        foreach (var swimlane in Swimlanes)
+        {
+            foreach (var lane in swimlane.Lanes)
+            {
+                lane.NotifyCounts();
+            }
+        }
+
+        foreach (var header in ColumnLanes)
+        {
+            header.NotifyCounts();
+        }
     }
 }

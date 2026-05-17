@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using KanBan.Models;
+using KanBan.Services.Localization;
 
 namespace KanBan.ViewModels;
 
@@ -34,6 +35,8 @@ public sealed class SwimlaneViewModel : ViewModelBase
         MoveUpCommand = new RelayCommand(() => _onMove?.Invoke(this, -1));
         MoveDownCommand = new RelayCommand(() => _onMove?.Invoke(this, 1));
         ToggleCollapseCommand = new RelayCommand(ToggleCollapse);
+
+        SubscribeLocalization(() => OnPropertyChanged(nameof(CollapseToolTip)));
     }
 
     public string Id { get; }
@@ -85,7 +88,9 @@ public sealed class SwimlaneViewModel : ViewModelBase
 
     public string CollapseButtonContent => IsCollapsed ? "˅" : "˄";
 
-    public string CollapseToolTip => IsCollapsed ? "展开泳道" : "折叠泳道";
+    public string CollapseToolTip => IsCollapsed
+        ? LocalizationService.Get(UiKeys.SwimlaneExpand)
+        : LocalizationService.Get(UiKeys.SwimlaneCollapse);
 
     public RelayCommand BeginEditCommand { get; }
 
@@ -104,7 +109,7 @@ public sealed class SwimlaneViewModel : ViewModelBase
         return new KanbanSwimlane
         {
             Id = Id,
-            Title = string.IsNullOrWhiteSpace(Title) ? "Untitled swimlane" : Title.Trim(),
+            Title = string.IsNullOrWhiteSpace(Title) ? LocalizationService.Get(UiKeys.SwimlaneUntitled) : Title.Trim(),
             IsCollapsed = IsCollapsed,
         };
     }
@@ -128,7 +133,7 @@ public sealed class SwimlaneViewModel : ViewModelBase
 
     public void CommitTitle()
     {
-        var trimmed = string.IsNullOrWhiteSpace(Title) ? "Untitled swimlane" : Title.Trim();
+        var trimmed = string.IsNullOrWhiteSpace(Title) ? LocalizationService.Get(UiKeys.SwimlaneUntitled) : Title.Trim();
         if (trimmed != Title)
         {
             Title = trimmed;

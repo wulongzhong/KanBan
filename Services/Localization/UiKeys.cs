@@ -1,0 +1,58 @@
+namespace KanBan.Services.Localization;
+
+public static class UiKeys
+{
+    public const string AppTitle = "App.Title";
+    public const string ToolbarArchive = "Toolbar.Archive";
+    public const string ToolbarSettings = "Toolbar.Settings";
+    public const string ToolbarSwimlane = "Toolbar.Swimlane";
+    public const string ToolbarAddSwimlaneTooltip = "Toolbar.AddSwimlane.Tooltip";
+    public const string ToolbarCreateList = "Toolbar.CreateList";
+    public const string ToolbarSearchPlaceholder = "Toolbar.SearchPlaceholder";
+    public const string ToolbarCardCount = "Toolbar.CardCount";
+    public const string LaneCollapse = "Lane.Collapse";
+    public const string LaneExpand = "Lane.Expand";
+    public const string LaneUntitled = "Lane.Untitled";
+    public const string LaneDefaultTitle = "Lane.DefaultTitle";
+    public const string SwimlaneCollapse = "Swimlane.Collapse";
+    public const string SwimlaneExpand = "Swimlane.Expand";
+    public const string SwimlaneUntitled = "Swimlane.Untitled";
+    public const string SwimlaneDefaultTitle = "Swimlane.DefaultTitle";
+    public const string CardAddDate = "Card.AddDate";
+    public const string CardEditDate = "Card.EditDate";
+    public const string CardAddTime = "Card.AddTime";
+    public const string CardEditTime = "Card.EditTime";
+    public const string CardDragLabel = "Card.DragLabel";
+    public const string CardToday = "Card.Today";
+    public const string CardYesterday = "Card.Yesterday";
+    public const string CardTomorrow = "Card.Tomorrow";
+    public const string CardDaysAfter = "Card.DaysAfter";
+    public const string CardDaysBefore = "Card.DaysBefore";
+    public const string WorkspaceNotConfigured = "Workspace.NotConfigured";
+    public const string WorkspaceNotSet = "Workspace.NotSet";
+    public const string WorkspacePickerTitle = "Workspace.PickerTitle";
+    public const string WorkspaceCannotReadPath = "Workspace.CannotReadPath";
+    public const string WorkspaceSet = "Workspace.Set";
+    public const string WorkspaceSetFailed = "Workspace.SetFailed";
+    public const string StatusLaneMoved = "Status.LaneMoved";
+    public const string StatusLoaded = "Status.Loaded";
+    public const string StatusSwimlaneUpdated = "Status.SwimlaneUpdated";
+    public const string StatusLaneUpdated = "Status.LaneUpdated";
+    public const string StatusLaneAdded = "Status.LaneAdded";
+    public const string StatusSwimlaneAdded = "Status.SwimlaneAdded";
+    public const string StatusSwimlaneDeleted = "Status.SwimlaneDeleted";
+    public const string StatusSwimlaneMoved = "Status.SwimlaneMoved";
+    public const string StatusLaneDeletedArchived = "Status.LaneDeletedArchived";
+    public const string StatusCardAdded = "Status.CardAdded";
+    public const string StatusCardArchived = "Status.CardArchived";
+    public const string StatusCardRestored = "Status.CardRestored";
+    public const string StatusCardDeleted = "Status.CardDeleted";
+    public const string StatusCardMoved = "Status.CardMoved";
+    public const string StatusManualOrderEnabled = "Status.ManualOrderEnabled";
+    public const string StatusLaneSorted = "Status.LaneSorted";
+    public const string StatusSaved = "Status.Saved";
+    public const string StatusCardUpdated = "Status.CardUpdated";
+    public const string StatusSaveFailed = "Status.SaveFailed";
+    public const string StatusNewBoardCreated = "Status.NewBoardCreated";
+    public const string DragListPrefix = "Drag.ListPrefix";
+}

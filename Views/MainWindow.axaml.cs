@@ -12,6 +12,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using KanBan.Services;
+using KanBan.Services.Localization;
 using KanBan.ViewModels;
 using KanBan.Views.Controls;
 
@@ -771,7 +772,9 @@ public partial class MainWindow : Window
         _pressedTitle = null;
 
         DragPreview.Width = kind == DragKind.Lane ? 244 : 232;
-        DragPreviewText.Text = kind == DragKind.Lane ? $"List: {title}" : title;
+        DragPreviewText.Text = kind == DragKind.Lane
+            ? LocalizationService.Format(UiKeys.DragListPrefix, title)
+            : title;
         DragPreview.IsVisible = true;
         MoveDragPreview(e);
 

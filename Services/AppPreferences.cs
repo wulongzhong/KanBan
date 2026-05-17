@@ -9,6 +9,8 @@ public sealed class AppPreferences
 {
     public string? WorkspaceFolder { get; set; }
 
+    public string UiLanguage { get; set; } = "en";
+
     public static string PreferencesPath
     {
         get

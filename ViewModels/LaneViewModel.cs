@@ -7,6 +7,7 @@ using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.Input;
 using KanBan.Models;
 using KanBan.Services;
+using KanBan.Services.Localization;
 
 namespace KanBan.ViewModels;
 
@@ -77,6 +78,12 @@ public sealed class LaneViewModel : ViewModelBase
         MoveRightCommand = new RelayCommand(() => _onMove?.Invoke(this, 1));
         SortCommand = new RelayCommand(() => _onSort?.Invoke(this));
         ToggleCollapseCommand = new RelayCommand(ToggleCollapse);
+
+        SubscribeLocalization(() =>
+        {
+            OnPropertyChanged(nameof(CollapseToolTip));
+            OnPropertyChanged(nameof(CountText));
+        });
     }
 
     public const double ExpandedColumnWidth = 272;
@@ -121,7 +128,9 @@ public sealed class LaneViewModel : ViewModelBase
 
     public string CollapseButtonContent => IsCollapsed ? "›" : "‹";
 
-    public string CollapseToolTip => IsCollapsed ? "展开列" : "折叠列";
+    public string CollapseToolTip => IsCollapsed
+        ? LocalizationService.Get(UiKeys.LaneExpand)
+        : LocalizationService.Get(UiKeys.LaneCollapse);
 
     public string Title
     {
@@ -190,7 +199,7 @@ public sealed class LaneViewModel : ViewModelBase
         ? aggregateCount
         : Cards.Count;
 
-    public string CountText => $"{DisplayCardCount} cards";
+    public string CountText => LocalizationService.Format(UiKeys.ToolbarCardCount, DisplayCardCount);
 
     public string WipText => MaxItems is { } maxItems ? $"{DisplayCardCount}/{maxItems}" : DisplayCardCount.ToString();
 
@@ -259,7 +268,7 @@ public sealed class LaneViewModel : ViewModelBase
         return new KanbanLane
         {
             Id = Id,
-            Title = string.IsNullOrWhiteSpace(Title) ? "Untitled lane" : Title.Trim(),
+            Title = string.IsNullOrWhiteSpace(Title) ? LocalizationService.Get(UiKeys.LaneUntitled) : Title.Trim(),
             MaxItems = MaxItems,
             Sort = Sort,
             ShouldMarkItemsComplete = ShouldMarkItemsComplete,
@@ -278,7 +287,7 @@ public sealed class LaneViewModel : ViewModelBase
         return new KanbanLane
         {
             Id = Id,
-            Title = string.IsNullOrWhiteSpace(Title) ? "Untitled lane" : Title.Trim(),
+            Title = string.IsNullOrWhiteSpace(Title) ? LocalizationService.Get(UiKeys.LaneUntitled) : Title.Trim(),
             MaxItems = MaxItems,
             Sort = Sort,
             ShouldMarkItemsComplete = ShouldMarkItemsComplete,
@@ -504,7 +513,7 @@ public sealed class LaneViewModel : ViewModelBase
 
     public void CommitTitle()
     {
-        var trimmed = string.IsNullOrWhiteSpace(Title) ? "Untitled lane" : Title.Trim();
+        var trimmed = string.IsNullOrWhiteSpace(Title) ? LocalizationService.Get(UiKeys.LaneUntitled) : Title.Trim();
         if (trimmed != Title)
         {
             Title = trimmed;
