@@ -434,6 +434,13 @@
                                                             </Button>
 
                                                             <StackPanel Spacing="6" Margin="8" IsVisible="{Binding IsEditing}">
+                                                                <TextBox Classes="cardDetails"
+                                                                         Text="{Binding Description}"
+                                                                         PlaceholderText="详情..."
+                                                                         Loaded="CardDetailsEditor_Loaded"/>
+                                                                <TextBlock Text="拖放图片到卡片，或 Ctrl+V 粘贴"
+                                                                           Classes="faint"
+                                                                           FontSize="11"/>
                                                                 <ItemsControl ItemsSource="{Binding PreviewImages}"
                                                                               IsVisible="{Binding HasPreviewImages}">
                                                                     <ItemsControl.ItemTemplate>
@@ -456,13 +463,6 @@
                                                                         </DataTemplate>
                                                                     </ItemsControl.ItemTemplate>
                                                                 </ItemsControl>
-                                                                <TextBlock Text="拖放图片到卡片，或 Ctrl+V 粘贴"
-                                                                           Classes="faint"
-                                                                           FontSize="11"/>
-                                                                <TextBox Classes="cardDetails"
-                                                                         Text="{Binding Description}"
-                                                                         PlaceholderText="详情..."
-                                                                         Loaded="CardDetailsEditor_Loaded"/>
                                                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                                                     <Button Classes="accent" Content="Done" Command="{Binding EndEditCommand}"/>
                                                                     <Button Content="Archive" Command="{Binding ArchiveCommand}"/>
@@ -484,6 +484,13 @@
                                                     DragDrop.Drop="NewCardComposer_Drop"
                                                     KeyDown="NewCardComposer_KeyDown">
                                                 <StackPanel Spacing="6">
+                                                    <TextBox Classes="cardDetails"
+                                                             Text="{Binding NewCardDetails}"
+                                                             PlaceholderText="详情..."
+                                                             Loaded="NewCardComposerEditor_Loaded"/>
+                                                    <TextBlock Text="拖放图片到此处，或 Ctrl+V 粘贴"
+                                                               Classes="faint"
+                                                               FontSize="11"/>
                                                     <ItemsControl ItemsSource="{Binding NewCardPreviewImages}"
                                                                   IsVisible="{Binding HasNewCardPreviewImages}">
                                                         <ItemsControl.ItemTemplate>
@@ -506,13 +513,6 @@
                                                             </DataTemplate>
                                                         </ItemsControl.ItemTemplate>
                                                     </ItemsControl>
-                                                    <TextBlock Text="拖放图片到此处，或 Ctrl+V 粘贴"
-                                                               Classes="faint"
-                                                               FontSize="11"/>
-                                                    <TextBox Classes="cardDetails"
-                                                             Text="{Binding NewCardDetails}"
-                                                             PlaceholderText="详情..."
-                                                             Loaded="NewCardComposerEditor_Loaded"/>
                                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                                         <Button Classes="accent" Content="添加" Command="{Binding CommitAddCardCommand}"/>
                                                         <Button Content="取消" Command="{Binding CancelAddCardCommand}"/>
