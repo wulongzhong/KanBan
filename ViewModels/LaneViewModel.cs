@@ -492,8 +492,23 @@ public sealed class LaneViewModel : ViewModelBase
 
     public void EndEdit()
     {
+        if (!IsEditing)
+        {
+            return;
+        }
+
+        CommitTitle();
         IsEditing = false;
         NotifyChanged();
+    }
+
+    public void CommitTitle()
+    {
+        var trimmed = string.IsNullOrWhiteSpace(Title) ? "Untitled lane" : Title.Trim();
+        if (trimmed != Title)
+        {
+            Title = trimmed;
+        }
     }
 
     private void ToggleCollapse()

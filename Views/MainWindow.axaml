@@ -178,8 +178,8 @@
                                                              FontWeight="SemiBold"
                                                              FontSize="13"
                                                              Foreground="#3D4A5C"
-                                                             KeyDown="LaneEdit_KeyDown"
-                                                             LostFocus="LaneEdit_LostFocus"
+                                                             Loaded="LaneTitleEditor_Loaded"
+                                                             LostFocus="LaneTitleEdit_LostFocus"
                                                              IsVisible="{Binding IsEditing}"/>
                                                 </Grid>
                                             </Grid>
@@ -278,8 +278,8 @@
                                                 <TextBox Text="{Binding Title}"
                                                          Classes="swimlaneTitle"
                                                          VerticalAlignment="Center"
-                                                         KeyDown="SwimlaneEdit_KeyDown"
-                                                         LostFocus="SwimlaneEdit_LostFocus"
+                                                         Loaded="SwimlaneTitleEditor_Loaded"
+                                                         LostFocus="SwimlaneTitleEdit_LostFocus"
                                                          IsVisible="{Binding IsEditing}"/>
                                             </StackPanel>
                                             <Button Grid.Column="1"

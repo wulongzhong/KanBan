@@ -80,6 +80,8 @@ public partial class MainWindow : Window
     }
 
     private const string BoardTitleKeyTunnelTag = "__KanBanBoardTitleKeyTunnel__";
+    private const string LaneTitleKeyTunnelTag = "__KanBanLaneTitleKeyTunnel__";
+    private const string SwimlaneTitleKeyTunnelTag = "__KanBanSwimlaneTitleKeyTunnel__";
 
     private void BoardTitleLabel_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
@@ -649,20 +651,60 @@ public partial class MainWindow : Window
         }
     }
 
-    private void LaneEdit_KeyDown(object? sender, KeyEventArgs e)
+    private void LaneTitleEditor_Loaded(object? sender, RoutedEventArgs e)
     {
-        if (sender is Control { DataContext: LaneViewModel lane } && e.Key == Key.Enter)
+        if (sender is not TextBox editor || Equals(editor.Tag, LaneTitleKeyTunnelTag))
         {
-            lane.EndEdit();
-            e.Handled = true;
+            return;
         }
+
+        editor.Tag = LaneTitleKeyTunnelTag;
+        editor.AddHandler(KeyDownEvent, LaneTitleEdit_KeyDown, RoutingStrategies.Tunnel);
     }
 
-    private void LaneEdit_LostFocus(object? sender, RoutedEventArgs e)
+    private void LaneTitleEdit_KeyDown(object? sender, KeyEventArgs e)
     {
-        if (sender is Control { DataContext: LaneViewModel lane })
+        if (e.Key is not (Key.Enter or Key.Return or Key.Escape))
         {
-            lane.EndEdit();
+            return;
+        }
+
+        if (sender is TextBox editor && editor.DataContext is LaneViewModel lane)
+        {
+            FinishLaneTitleEdit(editor, lane);
+        }
+
+        e.Handled = true;
+    }
+
+    private void LaneTitleEdit_LostFocus(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not TextBox editor ||
+            editor.DataContext is not LaneViewModel { IsEditing: true } lane)
+        {
+            return;
+        }
+
+        FinishLaneTitleEdit(editor, lane);
+    }
+
+    private static void FinishLaneTitleEdit(TextBox editor, LaneViewModel lane)
+    {
+        if (!lane.IsEditing)
+        {
+            return;
+        }
+
+        SyncLaneTitleFromEditor(editor, lane);
+        lane.EndEdit();
+    }
+
+    private static void SyncLaneTitleFromEditor(TextBox editor, LaneViewModel lane)
+    {
+        var text = editor.Text ?? string.Empty;
+        if (!string.Equals(lane.Title, text, StringComparison.Ordinal))
+        {
+            lane.Title = text;
         }
     }
 
@@ -675,20 +717,60 @@ public partial class MainWindow : Window
         }
     }
 
-    private void SwimlaneEdit_KeyDown(object? sender, KeyEventArgs e)
+    private void SwimlaneTitleEditor_Loaded(object? sender, RoutedEventArgs e)
     {
-        if (sender is Control { DataContext: SwimlaneViewModel swimlane } && e.Key == Key.Enter)
+        if (sender is not TextBox editor || Equals(editor.Tag, SwimlaneTitleKeyTunnelTag))
         {
-            swimlane.EndEdit();
-            e.Handled = true;
+            return;
         }
+
+        editor.Tag = SwimlaneTitleKeyTunnelTag;
+        editor.AddHandler(KeyDownEvent, SwimlaneTitleEdit_KeyDown, RoutingStrategies.Tunnel);
     }
 
-    private void SwimlaneEdit_LostFocus(object? sender, RoutedEventArgs e)
+    private void SwimlaneTitleEdit_KeyDown(object? sender, KeyEventArgs e)
     {
-        if (sender is Control { DataContext: SwimlaneViewModel swimlane })
+        if (e.Key is not (Key.Enter or Key.Return or Key.Escape))
         {
-            swimlane.EndEdit();
+            return;
+        }
+
+        if (sender is TextBox editor && editor.DataContext is SwimlaneViewModel swimlane)
+        {
+            FinishSwimlaneTitleEdit(editor, swimlane);
+        }
+
+        e.Handled = true;
+    }
+
+    private void SwimlaneTitleEdit_LostFocus(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not TextBox editor ||
+            editor.DataContext is not SwimlaneViewModel { IsEditing: true } swimlane)
+        {
+            return;
+        }
+
+        FinishSwimlaneTitleEdit(editor, swimlane);
+    }
+
+    private static void FinishSwimlaneTitleEdit(TextBox editor, SwimlaneViewModel swimlane)
+    {
+        if (!swimlane.IsEditing)
+        {
+            return;
+        }
+
+        SyncSwimlaneTitleFromEditor(editor, swimlane);
+        swimlane.EndEdit();
+    }
+
+    private static void SyncSwimlaneTitleFromEditor(TextBox editor, SwimlaneViewModel swimlane)
+    {
+        var text = editor.Text ?? string.Empty;
+        if (!string.Equals(swimlane.Title, text, StringComparison.Ordinal))
+        {
+            swimlane.Title = text;
         }
     }
 

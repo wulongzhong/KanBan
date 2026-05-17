@@ -116,8 +116,23 @@ public sealed class SwimlaneViewModel : ViewModelBase
 
     public void EndEdit()
     {
+        if (!IsEditing)
+        {
+            return;
+        }
+
+        CommitTitle();
         IsEditing = false;
         _onChanged?.Invoke(this);
+    }
+
+    public void CommitTitle()
+    {
+        var trimmed = string.IsNullOrWhiteSpace(Title) ? "Untitled swimlane" : Title.Trim();
+        if (trimmed != Title)
+        {
+            Title = trimmed;
+        }
     }
 
     private void ToggleCollapse()
