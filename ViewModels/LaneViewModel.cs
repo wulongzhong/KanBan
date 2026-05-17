@@ -1,15 +1,20 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.Input;
 using KanBan.Models;
+using KanBan.Services;
 
 namespace KanBan.ViewModels;
 
 public sealed class LaneViewModel : ViewModelBase
 {
     private readonly Action<LaneViewModel>? _onChanged;
-    private readonly Action<LaneViewModel, string>? _onAddCard;
+    private readonly Action<LaneViewModel, NewCardCommit>? _onAddCard;
+    private readonly Action<LaneViewModel, IReadOnlyList<string>>? _onDiscardNewCardDraft;
     private readonly Action<LaneViewModel>? _onDelete;
     private readonly Action<LaneViewModel, int>? _onMove;
     private readonly Action<LaneViewModel>? _onSort;
@@ -21,6 +26,8 @@ public sealed class LaneViewModel : ViewModelBase
     private bool _isEditing;
     private bool _isAddingCard;
     private string _newCardDetails = string.Empty;
+    private string? _newCardDraftId;
+    private readonly List<string> _newCardDraftImagePaths = [];
     private int? _aggregateCardCount;
     private bool _showLeadingSeparator;
     private bool _isCollapsed;
@@ -29,7 +36,8 @@ public sealed class LaneViewModel : ViewModelBase
         KanbanLane lane,
         Func<KanbanCard, CardViewModel> cardFactory,
         Action<LaneViewModel>? onChanged = null,
-        Action<LaneViewModel, string>? onAddCard = null,
+        Action<LaneViewModel, NewCardCommit>? onAddCard = null,
+        Action<LaneViewModel, IReadOnlyList<string>>? onDiscardNewCardDraft = null,
         Action<LaneViewModel>? onDelete = null,
         Action<LaneViewModel, int>? onMove = null,
         Action<LaneViewModel>? onSort = null,
@@ -46,6 +54,7 @@ public sealed class LaneViewModel : ViewModelBase
         _isCollapsed = lane.IsCollapsed;
         _onChanged = onChanged;
         _onAddCard = onAddCard;
+        _onDiscardNewCardDraft = onDiscardNewCardDraft;
         _onDelete = onDelete;
         _onMove = onMove;
         _onSort = onSort;
@@ -56,6 +65,7 @@ public sealed class LaneViewModel : ViewModelBase
 
         Cards = new ObservableCollection<CardViewModel>(laneCards.Select(cardFactory));
         FilteredCards = new ObservableCollection<CardViewModel>(Cards);
+        NewCardPreviewImages = [];
 
         AddCardCommand = new RelayCommand(BeginAddCard);
         CommitAddCardCommand = new RelayCommand(CommitAddCard);
@@ -220,6 +230,10 @@ public sealed class LaneViewModel : ViewModelBase
         set => SetProperty(ref _newCardDetails, value);
     }
 
+    public ObservableCollection<CardImageViewModel> NewCardPreviewImages { get; }
+
+    public bool HasNewCardPreviewImages => NewCardPreviewImages.Count > 0;
+
     public RelayCommand AddCardCommand { get; }
 
     public RelayCommand CommitAddCardCommand { get; }
@@ -363,20 +377,26 @@ public sealed class LaneViewModel : ViewModelBase
 
     private void BeginAddCard()
     {
+        DiscardNewCardDraft();
         NewCardDetails = string.Empty;
+        _newCardDraftId = Guid.NewGuid().ToString("N");
         IsAddingCard = true;
     }
 
     private void CommitAddCard()
     {
-        if (string.IsNullOrWhiteSpace(NewCardDetails))
+        var description = NewCardDetails.Trim();
+        if (string.IsNullOrWhiteSpace(description) && _newCardDraftImagePaths.Count == 0)
         {
             IsAddingCard = false;
+            DiscardNewCardDraft();
             return;
         }
 
-        _onAddCard?.Invoke(this, NewCardDetails);
+        var cardId = EnsureNewCardDraftId();
+        _onAddCard?.Invoke(this, new NewCardCommit(cardId, description, _newCardDraftImagePaths.ToList()));
         NewCardDetails = string.Empty;
+        ResetNewCardDraftState();
         IsAddingCard = false;
     }
 
@@ -384,6 +404,85 @@ public sealed class LaneViewModel : ViewModelBase
     {
         NewCardDetails = string.Empty;
         IsAddingCard = false;
+        DiscardNewCardDraft();
+    }
+
+    public void AddDraftImageFromFile(CardAttachmentService attachments, string sourcePath)
+    {
+        if (!CardAttachmentService.IsImageFile(sourcePath))
+        {
+            return;
+        }
+
+        var relativePath = attachments.SaveImageFromFile(EnsureNewCardDraftId(), sourcePath);
+        AddDraftImagePath(attachments, relativePath);
+    }
+
+    public void AddDraftImageFromBitmap(CardAttachmentService attachments, Bitmap bitmap)
+    {
+        var relativePath = attachments.SaveImageFromBitmap(EnsureNewCardDraftId(), bitmap);
+        AddDraftImagePath(attachments, relativePath);
+    }
+
+    public void RemoveDraftImage(CardAttachmentService attachments, string relativePath)
+    {
+        _newCardDraftImagePaths.RemoveAll(existing =>
+            string.Equals(existing, relativePath, StringComparison.OrdinalIgnoreCase));
+        attachments.DeleteImage(relativePath);
+        LoadNewCardPreviewImages(attachments);
+    }
+
+    private void AddDraftImagePath(CardAttachmentService attachments, string relativePath)
+    {
+        if (_newCardDraftImagePaths.Contains(relativePath, StringComparer.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        _newCardDraftImagePaths.Add(relativePath);
+        LoadNewCardPreviewImages(attachments);
+    }
+
+    private void LoadNewCardPreviewImages(CardAttachmentService attachments)
+    {
+        NewCardPreviewImages.Clear();
+
+        foreach (var relativePath in _newCardDraftImagePaths)
+        {
+            var absolutePath = attachments.ResolveAbsolutePath(relativePath);
+            if (!File.Exists(absolutePath))
+            {
+                continue;
+            }
+
+            var path = relativePath;
+            NewCardPreviewImages.Add(new CardImageViewModel(
+                path,
+                absolutePath,
+                new RelayCommand(() => RemoveDraftImage(attachments, path))));
+        }
+
+        OnPropertyChanged(nameof(HasNewCardPreviewImages));
+    }
+
+    private string EnsureNewCardDraftId() => _newCardDraftId ??= Guid.NewGuid().ToString("N");
+
+    private void DiscardNewCardDraft()
+    {
+        if (_newCardDraftImagePaths.Count > 0)
+        {
+            _onDiscardNewCardDraft?.Invoke(this, _newCardDraftImagePaths.ToList());
+        }
+
+        ResetNewCardDraftState();
+    }
+
+    private void ResetNewCardDraftState()
+    {
+        _newCardDraftId = null;
+        _newCardDraftImagePaths.Clear();
+        NewCardPreviewImages.Clear();
+        OnPropertyChanged(nameof(HasNewCardPreviewImages));
     }
 
     public void BeginEdit()
@@ -402,3 +501,5 @@ public sealed class LaneViewModel : ViewModelBase
         IsCollapsed = !IsCollapsed;
     }
 }
+
+public sealed record NewCardCommit(string CardId, string Description, IReadOnlyList<string> ImagePaths);

@@ -19,6 +19,7 @@ namespace KanBan.Views;
 public partial class MainWindow : Window
 {
     private const string CardDetailsPasteTunnelTag = "__KanBanCardDetailsPasteTunnel__";
+    private const string NewCardComposerPasteTunnelTag = "__KanBanNewCardComposerPasteTunnel__";
 
     private enum DragKind
     {
@@ -392,6 +393,103 @@ public partial class MainWindow : Window
         {
             e.Handled = true;
         }
+    }
+
+    private void NewCardComposerEditor_Loaded(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not TextBox editor)
+        {
+            return;
+        }
+
+        if (Equals(editor.Tag, NewCardComposerPasteTunnelTag))
+        {
+            return;
+        }
+
+        editor.Tag = NewCardComposerPasteTunnelTag;
+        editor.AddHandler(KeyDownEvent, NewCardComposerEdit_KeyDown, RoutingStrategies.Tunnel);
+    }
+
+    private async void NewCardComposerEdit_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (sender is not TextBox || sender is not Control { DataContext: LaneViewModel lane })
+        {
+            return;
+        }
+
+        if (e.Key != Key.V || (e.KeyModifiers & KeyModifiers.Control) == 0)
+        {
+            return;
+        }
+
+        if (DataContext is not MainWindowViewModel viewModel)
+        {
+            return;
+        }
+
+        if (await TryPasteNewCardImagesFromClipboardAsync(lane, viewModel))
+        {
+            e.Handled = true;
+        }
+    }
+
+    private async void NewCardComposer_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (sender is not Control { DataContext: LaneViewModel lane })
+        {
+            return;
+        }
+
+        if (e.Key != Key.V || (e.KeyModifiers & KeyModifiers.Control) == 0)
+        {
+            return;
+        }
+
+        if (DataContext is not MainWindowViewModel viewModel)
+        {
+            return;
+        }
+
+        if (await TryPasteNewCardImagesFromClipboardAsync(lane, viewModel))
+        {
+            e.Handled = true;
+        }
+    }
+
+    private void NewCardComposer_DragOver(object? sender, DragEventArgs e)
+    {
+        if (sender is not Control { DataContext: LaneViewModel })
+        {
+            return;
+        }
+
+        if (CardImageDropHelper.CanAccept(e.DataTransfer))
+        {
+            e.DragEffects = DragDropEffects.Copy;
+            e.Handled = true;
+        }
+    }
+
+    private void NewCardComposer_Drop(object? sender, DragEventArgs e)
+    {
+        if (sender is not Control { DataContext: LaneViewModel lane })
+        {
+            return;
+        }
+
+        if (DataContext is not MainWindowViewModel viewModel)
+        {
+            return;
+        }
+
+        if (!CardImageDropHelper.CanAccept(e.DataTransfer))
+        {
+            return;
+        }
+
+        ImportNewCardImages(e.DataTransfer, lane, viewModel);
+        e.Handled = true;
     }
 
     private void LaneHeader_PointerPressed(object? sender, PointerPressedEventArgs e)
@@ -969,6 +1067,24 @@ public partial class MainWindow : Window
         return true;
     }
 
+    private async Task<bool> TryPasteNewCardImagesFromClipboardAsync(LaneViewModel lane, MainWindowViewModel viewModel)
+    {
+        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+        if (clipboard is null)
+        {
+            return false;
+        }
+
+        var dataTransfer = await clipboard.TryGetDataAsync();
+        if (dataTransfer is null || !CardImageDropHelper.CanAccept(dataTransfer))
+        {
+            return false;
+        }
+
+        await ImportNewCardImagesAsync(dataTransfer, lane, viewModel);
+        return true;
+    }
+
     private static void ImportImages(
         IDataTransfer dataTransfer,
         CardViewModel card,
@@ -1022,6 +1138,62 @@ public partial class MainWindow : Window
         if (bitmap is not null)
         {
             card.AddImageFromBitmap(attachments, bitmap);
+        }
+    }
+
+    private static void ImportNewCardImages(
+        IDataTransfer dataTransfer,
+        LaneViewModel lane,
+        MainWindowViewModel viewModel)
+    {
+        var attachments = viewModel.Attachments;
+        var files = dataTransfer.TryGetFiles();
+        if (files is not null)
+        {
+            foreach (var file in files)
+            {
+                var path = file.Path.LocalPath;
+                if (CardAttachmentService.IsImageFile(path))
+                {
+                    lane.AddDraftImageFromFile(attachments, path);
+                }
+            }
+
+            return;
+        }
+
+        var bitmap = dataTransfer.TryGetBitmap();
+        if (bitmap is not null)
+        {
+            lane.AddDraftImageFromBitmap(attachments, bitmap);
+        }
+    }
+
+    private static async Task ImportNewCardImagesAsync(
+        IAsyncDataTransfer dataTransfer,
+        LaneViewModel lane,
+        MainWindowViewModel viewModel)
+    {
+        var attachments = viewModel.Attachments;
+        var files = await dataTransfer.TryGetFilesAsync();
+        if (files is not null)
+        {
+            foreach (var file in files)
+            {
+                var path = file.Path.LocalPath;
+                if (CardAttachmentService.IsImageFile(path))
+                {
+                    lane.AddDraftImageFromFile(attachments, path);
+                }
+            }
+
+            return;
+        }
+
+        var bitmap = await dataTransfer.TryGetBitmapAsync();
+        if (bitmap is not null)
+        {
+            lane.AddDraftImageFromBitmap(attachments, bitmap);
         }
     }
 

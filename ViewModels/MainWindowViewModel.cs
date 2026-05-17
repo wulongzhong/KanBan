@@ -374,6 +374,7 @@ public partial class MainWindowViewModel : ViewModelBase
             card => CreateCard(card, isArchived: false),
             _ => SaveAndRefresh("Lane updated."),
             AddCard,
+            DiscardNewCardDraft,
             DeleteLane,
             MoveLane,
             SortLane,
@@ -609,13 +610,15 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void AddCard(LaneViewModel lane, string description)
+    private void AddCard(LaneViewModel lane, NewCardCommit commit)
     {
         var card = CreateCard(
             new KanbanCard
             {
+                Id = commit.CardId,
                 SwimlaneId = lane.SwimlaneId,
-                Description = description.Trim(),
+                Description = commit.Description.Trim(),
+                Images = commit.ImagePaths.ToList(),
                 CreatedAt = DateTimeOffset.UtcNow,
                 UpdatedAt = DateTimeOffset.UtcNow,
             },
@@ -623,6 +626,14 @@ public partial class MainWindowViewModel : ViewModelBase
 
         lane.AddCard(card, PrependNewCards ? 0 : null);
         SaveAndRefresh("Card added.");
+    }
+
+    private void DiscardNewCardDraft(LaneViewModel lane, IReadOnlyList<string> imagePaths)
+    {
+        foreach (var relativePath in imagePaths)
+        {
+            Attachments.DeleteImage(relativePath);
+        }
     }
 
     private void ArchiveCard(CardViewModel card)

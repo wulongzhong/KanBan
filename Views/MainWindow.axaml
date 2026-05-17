@@ -478,11 +478,41 @@
                                     </Border>
                                     <Border Classes="laneCellFooter">
                                         <StackPanel Spacing="0">
-                                            <Border Padding="0,0,0,8" IsVisible="{Binding IsAddingCard}">
+                                            <Border Padding="0,0,0,8"
+                                                    IsVisible="{Binding IsAddingCard}"
+                                                    DragDrop.DragOver="NewCardComposer_DragOver"
+                                                    DragDrop.Drop="NewCardComposer_Drop"
+                                                    KeyDown="NewCardComposer_KeyDown">
                                                 <StackPanel Spacing="6">
+                                                    <ItemsControl ItemsSource="{Binding NewCardPreviewImages}"
+                                                                  IsVisible="{Binding HasNewCardPreviewImages}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate x:DataType="vm:CardImageViewModel">
+                                                                <Border Margin="0,0,0,6"
+                                                                        CornerRadius="4"
+                                                                        ClipToBounds="True"
+                                                                        Classes="cardImagePlaceholder">
+                                                                    <Grid>
+                                                                        <Image Classes="cardPreview"
+                                                                               Source="{Binding AbsolutePath, Converter={StaticResource FilePathToBitmap}}"
+                                                                               DoubleTapped="CardImage_DoubleTapped"/>
+                                                                        <Button Classes="cardImageRemove"
+                                                                                ToolTip.Tip="移除图片"
+                                                                                Command="{Binding RemoveCommand}">
+                                                                            <Path Classes="cardImageRemoveIcon"/>
+                                                                        </Button>
+                                                                    </Grid>
+                                                                </Border>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                    <TextBlock Text="拖放图片到此处，或 Ctrl+V 粘贴"
+                                                               Classes="faint"
+                                                               FontSize="11"/>
                                                     <TextBox Classes="cardDetails"
                                                              Text="{Binding NewCardDetails}"
-                                                             PlaceholderText="详情..."/>
+                                                             PlaceholderText="详情..."
+                                                             Loaded="NewCardComposerEditor_Loaded"/>
                                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                                         <Button Classes="accent" Content="添加" Command="{Binding CommitAddCardCommand}"/>
                                                         <Button Content="取消" Command="{Binding CancelAddCardCommand}"/>
