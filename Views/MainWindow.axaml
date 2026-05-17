@@ -595,8 +595,10 @@
                         <Button Grid.Column="1" Content="×" Command="{Binding ToggleSettingsCommand}"/>
                     </Grid>
                     <TextBlock Text="{loc:Loc Key=Settings.Language}" Classes="muted"/>
-                    <ComboBox ItemsSource="{Binding AvailableLanguages}"
-                              SelectedItem="{Binding SelectedLanguage}">
+                    <ComboBox x:Name="LanguageComboBox"
+                              ItemsSource="{Binding AvailableLanguages}"
+                              SelectedIndex="{Binding SelectedLanguageIndex, Mode=OneWay}"
+                              SelectionChanged="LanguageComboBox_SelectionChanged">
                         <ComboBox.ItemTemplate>
                             <DataTemplate x:DataType="vm:LanguageOption">
                                 <TextBlock Text="{Binding DisplayName}"/>

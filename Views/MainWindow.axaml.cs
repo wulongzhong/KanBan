@@ -43,6 +43,7 @@ public partial class MainWindow : Window
     private bool _suppressDateSelectionChanged;
 
     private bool _isBoardScrollSyncing;
+    private bool _languageComboReady;
 
     private const double LightboxMinZoom = 0.25;
     private const double LightboxMaxZoom = 8.0;
@@ -66,6 +67,22 @@ public partial class MainWindow : Window
         Opened += MainWindow_Opened;
     }
 
+    private void LanguageComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (!_languageComboReady
+            || DataContext is not MainWindowViewModel viewModel
+            || sender is not ComboBox combo
+            || combo.SelectedIndex < 0
+            || viewModel.IsSyncingLanguageCombo)
+        {
+            return;
+        }
+
+        viewModel.ApplyUiLanguage(combo.SelectedIndex == 1
+            ? LocalizationService.Chinese
+            : LocalizationService.English);
+    }
+
     private async void MainWindow_Opened(object? sender, EventArgs e)
     {
         if (DataContext is not MainWindowViewModel viewModel)
@@ -79,6 +96,8 @@ public partial class MainWindow : Window
         {
             Close();
         }
+
+        Dispatcher.UIThread.Post(() => _languageComboReady = true, DispatcherPriority.Loaded);
     }
 
     private void BoardTitleRename_BeginEditRequested(object? sender, EventArgs e)

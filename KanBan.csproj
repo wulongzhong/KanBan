@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Remove="Assets\Localization\**" />
     <AvaloniaResource Include="Themes\**" />
     <EmbeddedResource Include="Assets\Localization\*.json" />
   </ItemGroup>

@@ -9,9 +9,8 @@ public sealed class LocExtension : MarkupExtension
 {
     public string Key { get; set; } = string.Empty;
 
-    public override object ProvideValue(IServiceProvider serviceProvider)
-    {
-        return new Binding
+    public override object ProvideValue(IServiceProvider serviceProvider) =>
+        new Binding
         {
             Path = nameof(LocalizationService.Revision),
             Source = LocalizationService.Instance,
@@ -19,5 +18,4 @@ public sealed class LocExtension : MarkupExtension
             ConverterParameter = Key,
             Mode = BindingMode.OneWay,
         };
-    }
 }

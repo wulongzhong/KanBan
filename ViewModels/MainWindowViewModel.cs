@@ -30,7 +30,11 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _prependNewCards;
     private string _maxArchiveSizeText = "200";
     private string _dateFormat = "yyyy-MM-dd";
-    private LanguageOption? _selectedLanguage;
+    private int _selectedLanguageIndex;
+    private bool _isApplyingLanguage;
+    private bool _isSyncingLanguageCombo;
+    private readonly LanguageOption _englishOption = new(LocalizationService.English, "English");
+    private readonly LanguageOption _chineseOption = new(LocalizationService.Chinese, "中文");
 
     public MainWindowViewModel()
         : this(AppPreferences.Load())
@@ -52,11 +56,11 @@ public partial class MainWindowViewModel : ViewModelBase
         NewBoardCommand = new RelayCommand(NewBoard);
         SelectWorkspaceFolderCommand = new AsyncRelayCommand(SelectWorkspaceFolderAsync);
 
-        RefreshLanguageOptions();
-        _selectedLanguage = AvailableLanguages.First(option =>
-            option.CultureName == LocalizationService.Instance.CultureName);
+        AvailableLanguages.Add(_englishOption);
+        AvailableLanguages.Add(_chineseOption);
+        _selectedLanguageIndex = LocalizationService.Instance.CultureName == LocalizationService.Chinese ? 1 : 0;
 
-        SubscribeLocalization(RefreshLocalizedProperties);
+        SubscribeLocalization(OnLocalizationChanged);
 
         if (TryInitializeStorage())
         {
@@ -67,6 +71,8 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     public void SetOwnerWindow(Window window) => _ownerWindow = window;
+
+    public bool IsSyncingLanguageCombo => _isSyncingLanguageCombo;
 
     public ObservableCollection<LaneViewModel> ColumnLanes { get; }
 
@@ -151,28 +157,38 @@ public partial class MainWindowViewModel : ViewModelBase
             ? _preferences.WorkspaceFolder!
             : LocalizationService.Get(UiKeys.WorkspaceNotSet);
 
-    public IReadOnlyList<LanguageOption> AvailableLanguages { get; private set; } = [];
+    public ObservableCollection<LanguageOption> AvailableLanguages { get; } = [];
 
-    public LanguageOption? SelectedLanguage
+    public int SelectedLanguageIndex => _selectedLanguageIndex;
+
+    public void ApplyUiLanguage(string culture)
     {
-        get => _selectedLanguage;
-        set
+        culture = LocalizationService.NormalizeCulture(culture);
+
+        if (string.Equals(_preferences.UiLanguage, culture, StringComparison.Ordinal)
+            && string.Equals(LocalizationService.Instance.CultureName, culture, StringComparison.Ordinal))
         {
-            if (value is null || !SetProperty(ref _selectedLanguage, value))
-            {
-                return;
-            }
+            SyncLanguageSelection();
+            return;
+        }
 
-            var culture = LocalizationService.NormalizeCulture(value.CultureName);
-            if (string.Equals(_preferences.UiLanguage, culture, StringComparison.Ordinal)
-                && LocalizationService.Instance.CultureName == culture)
-            {
-                return;
-            }
+        if (_isApplyingLanguage)
+        {
+            return;
+        }
 
+        _isApplyingLanguage = true;
+        try
+        {
             _preferences.UiLanguage = culture;
             _preferences.Save();
             LocalizationService.Instance.ApplyCulture(culture);
+            SyncLanguageSelection();
+            RefreshLocalizedProperties();
+        }
+        finally
+        {
+            _isApplyingLanguage = false;
         }
     }
 
@@ -1082,22 +1098,39 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(SwimlaneCount));
     }
 
-    private void RefreshLanguageOptions()
+    private void OnLocalizationChanged()
     {
-        AvailableLanguages =
-        [
-            new LanguageOption(LocalizationService.English, LocalizationService.Get("Settings.Language.English")),
-            new LanguageOption(LocalizationService.Chinese, LocalizationService.Get("Settings.Language.Chinese")),
-        ];
-        OnPropertyChanged(nameof(AvailableLanguages));
+        if (_isApplyingLanguage)
+        {
+            return;
+        }
+
+        RefreshLocalizedProperties();
+    }
+
+    private void SyncLanguageSelection()
+    {
+        var index = LocalizationService.Instance.CultureName == LocalizationService.Chinese ? 1 : 0;
+        if (_selectedLanguageIndex == index)
+        {
+            return;
+        }
+
+        _isSyncingLanguageCombo = true;
+        try
+        {
+            _selectedLanguageIndex = index;
+            OnPropertyChanged(nameof(SelectedLanguageIndex));
+        }
+        finally
+        {
+            _isSyncingLanguageCombo = false;
+        }
     }
 
     private void RefreshLocalizedProperties()
     {
-        RefreshLanguageOptions();
-        _selectedLanguage = AvailableLanguages.First(option =>
-            option.CultureName == LocalizationService.Instance.CultureName);
-        OnPropertyChanged(nameof(SelectedLanguage));
+        SyncLanguageSelection();
         OnPropertyChanged(nameof(BoardFilePath));
         OnPropertyChanged(nameof(WorkspaceFolderDisplay));
         OnPropertyChanged(nameof(TotalCardsText));
