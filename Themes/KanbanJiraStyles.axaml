@@ -615,7 +615,7 @@
         <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
     <Style Selector="TextBox.cardDetails">
-        <Setter Property="AcceptsReturn" Value="True"/>
+        <Setter Property="AcceptsReturn" Value="False"/>
         <Setter Property="TextWrapping" Value="Wrap"/>
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontWeight" Value="SemiBold"/>

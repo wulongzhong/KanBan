@@ -117,13 +117,7 @@ public sealed class CardViewModel : ViewModelBase
         get
         {
             var stripped = CardTagHelper.StripTags(Description);
-            if (string.IsNullOrWhiteSpace(stripped))
-            {
-                return string.Empty;
-            }
-
-            var line = stripped.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)[0].Trim();
-            return line;
+            return string.IsNullOrWhiteSpace(stripped) ? string.Empty : stripped;
         }
     }
 

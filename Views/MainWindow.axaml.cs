@@ -360,7 +360,7 @@ public partial class MainWindow : Window
 
     private async void CardEdit_KeyDown(object? sender, KeyEventArgs e)
     {
-        if (sender is not TextBox || sender is not Control { DataContext: CardViewModel card })
+        if (sender is not TextBox editor || sender is not Control { DataContext: CardViewModel card })
         {
             return;
         }
@@ -372,10 +372,8 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (e.Key == Key.Enter && e.KeyModifiers == KeyModifiers.Control)
+        if (TryHandleCardDetailsEnterKey(editor, e, card.EndEdit))
         {
-            card.EndEdit();
-            e.Handled = true;
             return;
         }
 
@@ -413,7 +411,12 @@ public partial class MainWindow : Window
 
     private async void NewCardComposerEdit_KeyDown(object? sender, KeyEventArgs e)
     {
-        if (sender is not TextBox || sender is not Control { DataContext: LaneViewModel lane })
+        if (sender is not TextBox editor || sender is not Control { DataContext: LaneViewModel lane })
+        {
+            return;
+        }
+
+        if (TryHandleCardDetailsEnterKey(editor, e, () => lane.CommitAddCardCommand.Execute(null)))
         {
             return;
         }
@@ -432,6 +435,34 @@ public partial class MainWindow : Window
         {
             e.Handled = true;
         }
+    }
+
+    private static bool TryHandleCardDetailsEnterKey(TextBox editor, KeyEventArgs e, Action confirm)
+    {
+        if (e.Key != Key.Enter)
+        {
+            return false;
+        }
+
+        if ((e.KeyModifiers & KeyModifiers.Shift) != 0)
+        {
+            InsertNewlineAtCaret(editor);
+            e.Handled = true;
+            return true;
+        }
+
+        confirm();
+        e.Handled = true;
+        return true;
+    }
+
+    private static void InsertNewlineAtCaret(TextBox editor)
+    {
+        var caret = Math.Clamp(editor.CaretIndex, 0, editor.Text?.Length ?? 0);
+        var text = editor.Text ?? string.Empty;
+        const string newline = "\n";
+        editor.Text = text.Insert(caret, newline);
+        editor.CaretIndex = caret + newline.Length;
     }
 
     private async void NewCardComposer_KeyDown(object? sender, KeyEventArgs e)
