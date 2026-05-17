@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:KanBan.ViewModels"
+        xmlns:ctrl="using:KanBan.Views.Controls"
         xmlns:conv="using:KanBan.Views.Converters"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -60,21 +61,18 @@
               Margin="8,0,152,0"
               WindowDecorationProperties.ElementRole="User"
               PointerPressed="TitleBar_PointerPressed">
-            <Grid HorizontalAlignment="Left"
-                  VerticalAlignment="Center"
-                  Height="20">
-                <TextBlock x:Name="BoardTitleLabel"
-                           Text="{Binding BoardTitle}"
-                           Classes="boardTitleDisplay"
-                           IsVisible="{Binding IsBoardTitleDisplayMode}"
-                           PointerPressed="BoardTitleLabel_PointerPressed"/>
-                <TextBox x:Name="BoardTitleTextBox"
-                         Classes="ghost boardTitle"
-                         Text="{Binding BoardTitle}"
-                         IsVisible="{Binding IsBoardTitleEditing}"
-                         Loaded="BoardTitleTextBox_Loaded"
-                         LostFocus="BoardTitleEdit_LostFocus"/>
-            </Grid>
+            <ctrl:InlineRenameHost x:Name="BoardTitleRename"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding BoardTitle}"
+                                   IsEditing="{Binding IsBoardTitleEditing}"
+                                   EnableClickToEdit="True"
+                                   MinHitWidth="72"
+                                   MaxHitWidth="180"
+                                   DisplayClasses="boardTitleDisplay"
+                                   EditorClasses="ghost boardTitle"
+                                   BeginEditRequested="BoardTitleRename_BeginEditRequested"
+                                   EditorKeyDown="BoardTitleEdit_KeyDown"
+                                   EditorLostFocus="BoardTitleEdit_LostFocus"/>
 
             <StackPanel Orientation="Horizontal"
                         Spacing="2"
@@ -168,20 +166,17 @@
                                                         </Panel>
                                                     </Viewbox>
                                                 </Button>
-                                                <Grid Grid.Column="1"
-                                                      VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding HeaderTitle}"
-                                                               Classes="columnTitleName"
-                                                               VerticalAlignment="Center"
-                                                               IsVisible="{Binding IsDisplayMode}"/>
-                                                    <TextBox Text="{Binding Title}"
-                                                             FontWeight="SemiBold"
-                                                             FontSize="13"
-                                                             Foreground="#3D4A5C"
-                                                             Loaded="LaneTitleEditor_Loaded"
-                                                             LostFocus="LaneTitleEdit_LostFocus"
-                                                             IsVisible="{Binding IsEditing}"/>
-                                                </Grid>
+                                                <ctrl:InlineRenameHost Grid.Column="1"
+                                                                       FillAvailableSpace="True"
+                                                                       VerticalAlignment="Center"
+                                                                       MinHitWidth="48"
+                                                                       Text="{Binding Title}"
+                                                                       DisplayText="{Binding HeaderTitle}"
+                                                                       IsEditing="{Binding IsEditing}"
+                                                                       DisplayClasses="columnTitleName"
+                                                                       EditorClasses="columnTitleEditor"
+                                                                       EditorKeyDown="LaneTitleEdit_KeyDown"
+                                                                       EditorLostFocus="LaneTitleEdit_LostFocus"/>
                                             </Grid>
                                             <TextBlock Grid.Column="1"
                                                        Text="{Binding WipText}"
@@ -271,16 +266,14 @@
                                                         </Panel>
                                                     </Viewbox>
                                                 </Button>
-                                                <TextBlock Text="{Binding Title}"
-                                                           Classes="swimlaneTitle"
-                                                           VerticalAlignment="Center"
-                                                           IsVisible="{Binding IsDisplayMode}"/>
-                                                <TextBox Text="{Binding Title}"
-                                                         Classes="swimlaneTitle"
-                                                         VerticalAlignment="Center"
-                                                         Loaded="SwimlaneTitleEditor_Loaded"
-                                                         LostFocus="SwimlaneTitleEdit_LostFocus"
-                                                         IsVisible="{Binding IsEditing}"/>
+                                                <ctrl:InlineRenameHost Text="{Binding Title}"
+                                                                       IsEditing="{Binding IsEditing}"
+                                                                       MinHitWidth="96"
+                                                                       MaxHitWidth="320"
+                                                                       DisplayClasses="swimlaneTitle"
+                                                                       EditorClasses="swimlaneTitle"
+                                                                       EditorKeyDown="SwimlaneTitleEdit_KeyDown"
+                                                                       EditorLostFocus="SwimlaneTitleEdit_LostFocus"/>
                                             </StackPanel>
                                             <Button Grid.Column="1"
                                                     Classes="cardMenu"

@@ -13,6 +13,7 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using KanBan.Services;
 using KanBan.ViewModels;
+using KanBan.Views.Controls;
 
 namespace KanBan.Views;
 
@@ -79,40 +80,12 @@ public partial class MainWindow : Window
         }
     }
 
-    private const string BoardTitleKeyTunnelTag = "__KanBanBoardTitleKeyTunnel__";
-    private const string LaneTitleKeyTunnelTag = "__KanBanLaneTitleKeyTunnel__";
-    private const string SwimlaneTitleKeyTunnelTag = "__KanBanSwimlaneTitleKeyTunnel__";
-
-    private void BoardTitleLabel_PointerPressed(object? sender, PointerPressedEventArgs e)
+    private void BoardTitleRename_BeginEditRequested(object? sender, EventArgs e)
     {
-        if (!e.GetCurrentPoint(BoardTitleLabel).Properties.IsLeftButtonPressed)
+        if (DataContext is MainWindowViewModel viewModel)
         {
-            return;
+            viewModel.BeginBoardTitleEdit();
         }
-
-        if (DataContext is not MainWindowViewModel viewModel)
-        {
-            return;
-        }
-
-        viewModel.BeginBoardTitleEdit();
-        e.Handled = true;
-        Dispatcher.UIThread.Post(() =>
-        {
-            BoardTitleTextBox.Focus();
-            BoardTitleTextBox.SelectAll();
-        }, DispatcherPriority.Input);
-    }
-
-    private void BoardTitleTextBox_Loaded(object? sender, RoutedEventArgs e)
-    {
-        if (sender is not TextBox editor || Equals(editor.Tag, BoardTitleKeyTunnelTag))
-        {
-            return;
-        }
-
-        editor.Tag = BoardTitleKeyTunnelTag;
-        editor.AddHandler(KeyDownEvent, BoardTitleEdit_KeyDown, RoutingStrategies.Tunnel);
     }
 
     private void BoardTitleEdit_KeyDown(object? sender, KeyEventArgs e)
@@ -133,7 +106,7 @@ public partial class MainWindow : Window
     private void BoardTitleEdit_LostFocus(object? sender, RoutedEventArgs e)
     {
         if (sender is not TextBox editor ||
-            !ReferenceEquals(editor, BoardTitleTextBox) ||
+            !ReferenceEquals(editor, BoardTitleRename.EditorControl) ||
             DataContext is not MainWindowViewModel { IsBoardTitleEditing: true })
         {
             return;
@@ -151,6 +124,7 @@ public partial class MainWindow : Window
 
         SyncBoardTitleFromEditor(editor, viewModel);
         viewModel.EndBoardTitleEdit();
+        ClearEditorFocus(editor);
     }
 
     private static void SyncBoardTitleFromEditor(TextBox editor, MainWindowViewModel viewModel)
@@ -651,17 +625,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void LaneTitleEditor_Loaded(object? sender, RoutedEventArgs e)
-    {
-        if (sender is not TextBox editor || Equals(editor.Tag, LaneTitleKeyTunnelTag))
-        {
-            return;
-        }
-
-        editor.Tag = LaneTitleKeyTunnelTag;
-        editor.AddHandler(KeyDownEvent, LaneTitleEdit_KeyDown, RoutingStrategies.Tunnel);
-    }
-
     private void LaneTitleEdit_KeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key is not (Key.Enter or Key.Return or Key.Escape))
@@ -669,7 +632,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (sender is TextBox editor && editor.DataContext is LaneViewModel lane)
+        if (sender is TextBox editor && ResolveLane(editor) is LaneViewModel lane)
         {
             FinishLaneTitleEdit(editor, lane);
         }
@@ -680,7 +643,7 @@ public partial class MainWindow : Window
     private void LaneTitleEdit_LostFocus(object? sender, RoutedEventArgs e)
     {
         if (sender is not TextBox editor ||
-            editor.DataContext is not LaneViewModel { IsEditing: true } lane)
+            ResolveLane(editor) is not LaneViewModel { IsEditing: true } lane)
         {
             return;
         }
@@ -697,6 +660,7 @@ public partial class MainWindow : Window
 
         SyncLaneTitleFromEditor(editor, lane);
         lane.EndEdit();
+        ClearEditorFocus(editor);
     }
 
     private static void SyncLaneTitleFromEditor(TextBox editor, LaneViewModel lane)
@@ -717,17 +681,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void SwimlaneTitleEditor_Loaded(object? sender, RoutedEventArgs e)
-    {
-        if (sender is not TextBox editor || Equals(editor.Tag, SwimlaneTitleKeyTunnelTag))
-        {
-            return;
-        }
-
-        editor.Tag = SwimlaneTitleKeyTunnelTag;
-        editor.AddHandler(KeyDownEvent, SwimlaneTitleEdit_KeyDown, RoutingStrategies.Tunnel);
-    }
-
     private void SwimlaneTitleEdit_KeyDown(object? sender, KeyEventArgs e)
     {
         if (e.Key is not (Key.Enter or Key.Return or Key.Escape))
@@ -735,7 +688,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (sender is TextBox editor && editor.DataContext is SwimlaneViewModel swimlane)
+        if (sender is TextBox editor && ResolveSwimlane(editor) is SwimlaneViewModel swimlane)
         {
             FinishSwimlaneTitleEdit(editor, swimlane);
         }
@@ -746,7 +699,7 @@ public partial class MainWindow : Window
     private void SwimlaneTitleEdit_LostFocus(object? sender, RoutedEventArgs e)
     {
         if (sender is not TextBox editor ||
-            editor.DataContext is not SwimlaneViewModel { IsEditing: true } swimlane)
+            ResolveSwimlane(editor) is not SwimlaneViewModel { IsEditing: true } swimlane)
         {
             return;
         }
@@ -763,6 +716,7 @@ public partial class MainWindow : Window
 
         SyncSwimlaneTitleFromEditor(editor, swimlane);
         swimlane.EndEdit();
+        ClearEditorFocus(editor);
     }
 
     private static void SyncSwimlaneTitleFromEditor(TextBox editor, SwimlaneViewModel swimlane)
@@ -902,6 +856,22 @@ public partial class MainWindow : Window
         _pressedLaneId = null;
         _pressedTitle = null;
     }
+
+    private static void ClearEditorFocus(TextBox editor)
+    {
+        if (TopLevel.GetTopLevel(editor) is { } topLevel)
+        {
+            topLevel.FocusManager?.Focus(null);
+        }
+    }
+
+    private static LaneViewModel? ResolveLane(TextBox editor) =>
+        editor.FindAncestorOfType<InlineRenameHost>()?.DataContext as LaneViewModel
+        ?? editor.DataContext as LaneViewModel;
+
+    private static SwimlaneViewModel? ResolveSwimlane(TextBox editor) =>
+        editor.FindAncestorOfType<InlineRenameHost>()?.DataContext as SwimlaneViewModel
+        ?? editor.DataContext as SwimlaneViewModel;
 
     private static bool IsInteractiveSource(object? source)
     {

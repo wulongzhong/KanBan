@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="KanBan.Views.Controls.InlineRenameHost"
+             x:Name="Root">
+    <Border x:Name="HitHost"
+            Background="Transparent"
+            Padding="0"
+            PointerPressed="HitHost_PointerPressed">
+        <Grid>
+            <TextBlock x:Name="DisplayLabel"
+                       VerticalAlignment="Center"
+                       IsVisible="{Binding !IsEditing, ElementName=Root}"
+                       IsHitTestVisible="False"/>
+            <TextBox x:Name="Editor"
+                     Text="{Binding Text, ElementName=Root, Mode=TwoWay}"
+                     VerticalAlignment="Center"
+                     HorizontalAlignment="Stretch"
+                     IsVisible="{Binding IsEditing, ElementName=Root}"
+                     LostFocus="Editor_LostFocus"
+                     Loaded="Editor_Loaded"/>
+        </Grid>
+    </Border>
+</UserControl>

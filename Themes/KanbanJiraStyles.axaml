@@ -1,5 +1,6 @@
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:KanBan.Views.Controls">
 
     <!-- Fluent window chrome: align caption buttons with warm paper palette (not Win32 black / red) -->
     <Styles.Resources>
@@ -82,27 +83,38 @@
     <Style Selector="TextBlock.boardTitleDisplay">
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="MinWidth" Value="72"/>
-        <Setter Property="MaxWidth" Value="180"/>
         <Setter Property="Height" Value="20"/>
         <Setter Property="LineHeight" Value="20"/>
         <Setter Property="Padding" Value="2,0"/>
         <Setter Property="Foreground" Value="#3D4A5C"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="Cursor" Value="IBeam"/>
     </Style>
     <Style Selector="TextBox.ghost.boardTitle">
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="MinWidth" Value="72"/>
-        <Setter Property="MaxWidth" Value="180"/>
         <Setter Property="Height" Value="20"/>
         <Setter Property="MinHeight" Value="20"/>
         <Setter Property="Padding" Value="2,0"/>
         <Setter Property="Foreground" Value="#3D4A5C"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="controls|InlineRenameHost">
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="controls|InlineRenameHost[FillAvailableSpace=True]">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="MinWidth" Value="0"/>
+    </Style>
+    <Style Selector="controls|InlineRenameHost TextBox">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </Style>
+    <Style Selector="controls|InlineRenameHost TextBox /template/ Border">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
     </Style>
     <Style Selector="TextBox.ghost.boardTitle /template/ Border">
         <Setter Property="Background" Value="Transparent"/>
@@ -625,6 +637,7 @@
         <Setter Property="Foreground" Value="#556575"/>
         <Setter Property="LineHeight" Value="16"/>
         <Setter Property="Padding" Value="0"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
     <Style Selector="TextBox.swimlaneTitle">
@@ -635,6 +648,28 @@
         <Setter Property="Padding" Value="0,0,0,0"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </Style>
+    <Style Selector="TextBox.columnTitleEditor">
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Foreground" Value="#3D4A5C"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="MinHeight" Value="0"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    </Style>
+    <Style Selector="TextBox.columnTitleEditor /template/ Border">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="TextBox.columnTitleEditor:pointerover /template/ Border,
+                     TextBox.columnTitleEditor:focus /template/ Border,
+                     TextBox.columnTitleEditor:focus-within /template/ Border">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
     </Style>
     <Style Selector="TextBox.swimlaneTitle /template/ Border">
         <Setter Property="Background" Value="Transparent"/>
