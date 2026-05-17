@@ -671,15 +671,15 @@
     <!-- Card surface: warm mid-tone parchment (avoid near-white glare) -->
     <Style Selector="Border.card">
         <Setter Property="Background" Value="#E6E1D7"/>
-        <Setter Property="BorderBrush" Value="#C9C4BA"/>
+        <Setter Property="BorderBrush" Value="#DDD8CF"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="6"/>
         <Setter Property="Margin" Value="0,0,0,8"/>
-        <Setter Property="BoxShadow" Value="0 2 5 0 #3D4A5C18"/>
+        <Setter Property="BoxShadow" Value="0 1 4 0 #3D4A5C10"/>
     </Style>
     <Style Selector="Border.card:pointerover">
         <Setter Property="Background" Value="#DDD7CB"/>
-        <Setter Property="BorderBrush" Value="#B8B3A8"/>
+        <Setter Property="BorderBrush" Value="#D5D0C5"/>
     </Style>
     <Style Selector="Border.drawer">
         <Setter Property="Background" Value="#FDFCFA"/>
