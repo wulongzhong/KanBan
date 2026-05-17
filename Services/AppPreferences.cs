@@ -9,7 +9,8 @@ public sealed class AppPreferences
 {
     public string? WorkspaceFolder { get; set; }
 
-    public string UiLanguage { get; set; } = "en";
+    /// <summary>null = follow system UI language until the user picks one in settings.</summary>
+    public string? UiLanguage { get; set; }
 
     public static string PreferencesPath
     {

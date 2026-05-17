@@ -54,7 +54,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         RefreshLanguageOptions();
         _selectedLanguage = AvailableLanguages.First(option =>
-            option.CultureName == LocalizationService.NormalizeCulture(_preferences.UiLanguage));
+            option.CultureName == LocalizationService.Instance.CultureName);
 
         SubscribeLocalization(RefreshLocalizedProperties);
 
@@ -164,7 +164,8 @@ public partial class MainWindowViewModel : ViewModelBase
             }
 
             var culture = LocalizationService.NormalizeCulture(value.CultureName);
-            if (string.Equals(_preferences.UiLanguage, culture, StringComparison.Ordinal))
+            if (string.Equals(_preferences.UiLanguage, culture, StringComparison.Ordinal)
+                && LocalizationService.Instance.CultureName == culture)
             {
                 return;
             }
@@ -1093,10 +1094,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void RefreshLocalizedProperties()
     {
-        var selectedCulture = _selectedLanguage?.CultureName ?? LocalizationService.Instance.CultureName;
         RefreshLanguageOptions();
         _selectedLanguage = AvailableLanguages.First(option =>
-            option.CultureName == LocalizationService.NormalizeCulture(selectedCulture));
+            option.CultureName == LocalizationService.Instance.CultureName);
         OnPropertyChanged(nameof(SelectedLanguage));
         OnPropertyChanged(nameof(BoardFilePath));
         OnPropertyChanged(nameof(WorkspaceFolderDisplay));

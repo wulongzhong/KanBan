@@ -13,8 +13,10 @@ public sealed class LocExtension : MarkupExtension
     {
         return new Binding
         {
-            Path = $"[{Key}]",
+            Path = nameof(LocalizationService.Revision),
             Source = LocalizationService.Instance,
+            Converter = LocConverter.Instance,
+            ConverterParameter = Key,
             Mode = BindingMode.OneWay,
         };
     }

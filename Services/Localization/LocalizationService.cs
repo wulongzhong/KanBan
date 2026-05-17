@@ -17,6 +17,7 @@ public sealed class LocalizationService : INotifyPropertyChanged
 
     private readonly Dictionary<string, string> _strings = new(StringComparer.Ordinal);
     private string _cultureName = English;
+    private int _revision;
 
     private LocalizationService()
     {
@@ -25,6 +26,8 @@ public sealed class LocalizationService : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public string CultureName => _cultureName;
+
+    public int Revision => _revision;
 
     public bool IsChinese => string.Equals(_cultureName, Chinese, StringComparison.Ordinal);
 
@@ -48,22 +51,53 @@ public sealed class LocalizationService : INotifyPropertyChanged
 
     public void ApplyCulture(string? cultureName)
     {
-        var normalized = NormalizeCulture(cultureName);
-        if (string.Equals(_cultureName, normalized, StringComparison.Ordinal))
+        var normalized = ResolveCulture(cultureName);
+        if (string.Equals(_cultureName, normalized, StringComparison.Ordinal) && _strings.Count > 0)
         {
+            ApplyThreadCulture(normalized);
             return;
         }
 
         _cultureName = normalized;
         LoadStrings(normalized);
         ApplyThreadCulture(normalized);
+        _revision++;
+        OnPropertyChanged(nameof(Revision));
+        OnPropertyChanged(nameof(CultureName));
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
     }
 
+    public static string ResolveCulture(string? cultureName)
+    {
+        if (string.IsNullOrWhiteSpace(cultureName))
+        {
+            return DetectSystemCulture();
+        }
+
+        return NormalizeCulture(cultureName);
+    }
+
     public static string NormalizeCulture(string? cultureName) =>
-        string.Equals(cultureName, Chinese, StringComparison.OrdinalIgnoreCase)
+        cultureName?.StartsWith("zh", StringComparison.OrdinalIgnoreCase) == true
             ? Chinese
             : English;
+
+    public static string DetectSystemCulture()
+    {
+        try
+        {
+            var ui = CultureInfo.CurrentUICulture;
+            if (ui.TwoLetterISOLanguageName.Equals("zh", StringComparison.OrdinalIgnoreCase))
+            {
+                return Chinese;
+            }
+        }
+        catch (CultureNotFoundException)
+        {
+        }
+
+        return English;
+    }
 
     private void LoadStrings(string cultureName)
     {
@@ -113,4 +147,7 @@ public sealed class LocalizationService : INotifyPropertyChanged
         CultureInfo.CurrentCulture = culture;
         CultureInfo.CurrentUICulture = culture;
     }
+
+    private void OnPropertyChanged(string propertyName) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
