@@ -1,33 +1,66 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:loc="using:KanBan.Markup"
-        x:Class="KanBan.Views.WorkspacePromptWindow"
-        Title="{loc:Loc Key=WorkspacePrompt.Title}"
-        Width="420"
-        SizeToContent="Height"
-        CanResize="False"
-        WindowStartupLocation="CenterOwner"
-        RequestedThemeVariant="Light">
-    <StackPanel Margin="24" Spacing="16">
-        <TextBlock Text="{loc:Loc Key=WorkspacePrompt.Heading}"
-                   FontSize="15"
-                   FontWeight="SemiBold"
-                   TextWrapping="Wrap"/>
-        <TextBlock Classes="muted"
-                   Text="{loc:Loc Key=WorkspacePrompt.Body}"
-                   TextWrapping="Wrap"
-                   LineHeight="20"/>
-        <StackPanel Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Spacing="8"
-                    Margin="0,8,0,0">
-            <Button Content="{loc:Loc Key=WorkspacePrompt.Exit}"
-                    MinWidth="88"
-                    Click="Exit_Click"/>
-            <Button Content="{loc:Loc Key=WorkspacePrompt.SelectFolder}"
-                    Classes="accent"
-                    MinWidth="108"
-                    Click="Select_Click"/>
-        </StackPanel>
-    </StackPanel>
-</Window>
+<Window xmlns="https://github.com/avaloniaui"
+
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+
+        xmlns:loc="using:KanBan.Markup"
+
+        x:Class="KanBan.Views.WorkspacePromptWindow"
+
+        Title="{loc:Loc Key=WorkspacePrompt.Title}"
+
+        Width="420"
+
+        SizeToContent="Height"
+
+        CanResize="False"
+
+        WindowStartupLocation="CenterOwner"
+
+        RequestedThemeVariant="Light">
+
+    <StackPanel Margin="24" Spacing="16">
+
+        <TextBlock Text="{loc:Loc Key=WorkspacePrompt.Heading}"
+
+                   FontSize="15"
+
+                   FontWeight="SemiBold"
+
+                   TextWrapping="Wrap"/>
+
+        <TextBlock Classes="muted"
+
+                   Text="{loc:Loc Key=WorkspacePrompt.Body}"
+
+                   TextWrapping="Wrap"
+
+                   LineHeight="20"/>
+
+        <StackPanel Orientation="Horizontal"
+
+                    HorizontalAlignment="Right"
+
+                    Spacing="8"
+
+                    Margin="0,8,0,0">
+
+            <Button Content="{loc:Loc Key=WorkspacePrompt.Exit}"
+
+                    MinWidth="88"
+
+                    Click="Exit_Click"/>
+
+            <Button Content="{loc:Loc Key=WorkspacePrompt.SelectFolder}"
+
+                    Classes="accent"
+
+                    MinWidth="108"
+
+                    Click="Select_Click"/>
+
+        </StackPanel>
+
+    </StackPanel>
+
+</Window>
+

@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using KanBan.Models;
 using KanBan.Services;
 
 namespace KanBan.Serialization;
 
+[JsonSerializable(typeof(Dictionary<string, string>))]
 [JsonSerializable(typeof(AppPreferences))]
 [JsonSerializable(typeof(KanBanData))]
 [JsonSerializable(typeof(KanbanBoard))]

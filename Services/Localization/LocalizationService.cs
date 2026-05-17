@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
+using KanBan.Serialization;
 
 namespace KanBan.Services.Localization;
 
@@ -129,7 +130,7 @@ public sealed class LocalizationService : INotifyPropertyChanged
     {
         using var reader = new StreamReader(stream);
         var json = reader.ReadToEnd();
-        var parsed = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+        var parsed = JsonSerializer.Deserialize(json, KanBanJsonContext.Default.DictionaryStringString);
         if (parsed is null)
         {
             return;
