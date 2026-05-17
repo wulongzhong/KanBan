@@ -60,9 +60,9 @@
         <Setter Property="Foreground" Value="#3D4A5C"/>
     </Style>
 
-    <!-- TextBox -->
+    <!-- TextBox — warm surface tones (search uses transparent on searchShell) -->
     <Style Selector="TextBox">
-        <Setter Property="Background" Value="#FAF8F5"/>
+        <Setter Property="Background" Value="#ECEAE4"/>
         <Setter Property="Foreground" Value="#3D4A5C"/>
         <Setter Property="BorderBrush" Value="#D8D4CC"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -188,7 +188,7 @@
         <Setter Property="Foreground" Value="#5B7C99"/>
     </Style>
     <Style Selector="TextBox /template/ Border">
-        <Setter Property="Background" Value="#FAF8F5"/>
+        <Setter Property="Background" Value="#ECEAE4"/>
         <Setter Property="BorderBrush" Value="#D8D4CC"/>
     </Style>
     <Style Selector="TextBox.ghost /template/ Border">
@@ -197,7 +197,7 @@
         <Setter Property="BorderThickness" Value="0"/>
     </Style>
     <Style Selector="TextBox:pointerover /template/ Border">
-        <Setter Property="Background" Value="#FDFCFA"/>
+        <Setter Property="Background" Value="#E3E0D8"/>
         <Setter Property="BorderBrush" Value="#C4BFB5"/>
     </Style>
     <Style Selector="TextBox.ghost:pointerover /template/ Border">
@@ -351,7 +351,7 @@
         <Setter Property="Foreground" Value="#3D4A5C"/>
     </Style>
     <Style Selector="CheckBox /template/ Border">
-        <Setter Property="Background" Value="#FAF8F5"/>
+        <Setter Property="Background" Value="#ECEAE4"/>
         <Setter Property="BorderBrush" Value="#D8D4CC"/>
     </Style>
     <Style Selector="CheckBox:checked /template/ Border">
@@ -607,6 +607,34 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Background" Value="Transparent"/>
     </Style>
+    <Style Selector="TextBox.swimlaneTitle /template/ Border">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="TextBox.swimlaneTitle:pointerover /template/ Border,
+                     TextBox.swimlaneTitle:focus /template/ Border,
+                     TextBox.swimlaneTitle:focus-within /template/ Border">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+    </Style>
+    <Style Selector="Border.boardColumnHeaderHost TextBox">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="MinHeight" Value="0"/>
+    </Style>
+    <Style Selector="Border.boardColumnHeaderHost TextBox /template/ Border">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="Border.boardColumnHeaderHost TextBox:pointerover /template/ Border,
+                     Border.boardColumnHeaderHost TextBox:focus /template/ Border,
+                     Border.boardColumnHeaderHost TextBox:focus-within /template/ Border">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+    </Style>
     <Style Selector="TextBlock.cardBody">
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
@@ -627,6 +655,18 @@
         <Setter Property="Padding" Value="8,6"/>
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+        <!-- Lighter than card (#E6E1D7) for clearer edit affordance; no border ring -->
+        <Setter Property="Background" Value="#F4EFE6"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+    <Style Selector="TextBox.cardDetails /template/ Border,
+                     TextBox.cardDetails:pointerover /template/ Border,
+                     TextBox.cardDetails:focus /template/ Border,
+                     TextBox.cardDetails:focus-within /template/ Border">
+        <Setter Property="Background" Value="#F4EFE6"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
     </Style>
     <!-- Card surface: warm mid-tone parchment (avoid near-white glare) -->
     <Style Selector="Border.card">
