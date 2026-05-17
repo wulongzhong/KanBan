@@ -79,6 +79,87 @@ public partial class MainWindow : Window
         }
     }
 
+    private const string BoardTitleKeyTunnelTag = "__KanBanBoardTitleKeyTunnel__";
+
+    private void BoardTitleLabel_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (!e.GetCurrentPoint(BoardTitleLabel).Properties.IsLeftButtonPressed)
+        {
+            return;
+        }
+
+        if (DataContext is not MainWindowViewModel viewModel)
+        {
+            return;
+        }
+
+        viewModel.BeginBoardTitleEdit();
+        e.Handled = true;
+        Dispatcher.UIThread.Post(() =>
+        {
+            BoardTitleTextBox.Focus();
+            BoardTitleTextBox.SelectAll();
+        }, DispatcherPriority.Input);
+    }
+
+    private void BoardTitleTextBox_Loaded(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not TextBox editor || Equals(editor.Tag, BoardTitleKeyTunnelTag))
+        {
+            return;
+        }
+
+        editor.Tag = BoardTitleKeyTunnelTag;
+        editor.AddHandler(KeyDownEvent, BoardTitleEdit_KeyDown, RoutingStrategies.Tunnel);
+    }
+
+    private void BoardTitleEdit_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key is not (Key.Enter or Key.Return or Key.Escape))
+        {
+            return;
+        }
+
+        if (sender is TextBox editor)
+        {
+            FinishBoardTitleEdit(editor);
+        }
+
+        e.Handled = true;
+    }
+
+    private void BoardTitleEdit_LostFocus(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not TextBox editor ||
+            !ReferenceEquals(editor, BoardTitleTextBox) ||
+            DataContext is not MainWindowViewModel { IsBoardTitleEditing: true })
+        {
+            return;
+        }
+
+        FinishBoardTitleEdit(editor);
+    }
+
+    private void FinishBoardTitleEdit(TextBox editor)
+    {
+        if (DataContext is not MainWindowViewModel viewModel || !viewModel.IsBoardTitleEditing)
+        {
+            return;
+        }
+
+        SyncBoardTitleFromEditor(editor, viewModel);
+        viewModel.EndBoardTitleEdit();
+    }
+
+    private static void SyncBoardTitleFromEditor(TextBox editor, MainWindowViewModel viewModel)
+    {
+        var text = editor.Text ?? string.Empty;
+        if (!string.Equals(viewModel.BoardTitle, text, StringComparison.Ordinal))
+        {
+            viewModel.BoardTitle = text;
+        }
+    }
+
     private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
@@ -86,7 +167,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (e.Source is TextBox or Button)
+        if (e.Source is TextBox or Button or TextBlock)
         {
             return;
         }

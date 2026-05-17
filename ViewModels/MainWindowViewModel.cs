@@ -20,6 +20,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private CardAttachmentService? _attachments;
     private Window? _ownerWindow;
     private string _boardTitle = string.Empty;
+    private bool _isBoardTitleEditing;
     private string _searchQuery = string.Empty;
     private string _statusMessage = string.Empty;
     private bool _showArchive;
@@ -74,6 +75,42 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 Save();
             }
+        }
+    }
+
+    public bool IsBoardTitleEditing
+    {
+        get => _isBoardTitleEditing;
+        private set
+        {
+            if (SetProperty(ref _isBoardTitleEditing, value))
+            {
+                OnPropertyChanged(nameof(IsBoardTitleDisplayMode));
+            }
+        }
+    }
+
+    public bool IsBoardTitleDisplayMode => !IsBoardTitleEditing;
+
+    public void BeginBoardTitleEdit() => IsBoardTitleEditing = true;
+
+    public void EndBoardTitleEdit()
+    {
+        if (!IsBoardTitleEditing)
+        {
+            return;
+        }
+
+        CommitBoardTitle();
+        IsBoardTitleEditing = false;
+    }
+
+    public void CommitBoardTitle()
+    {
+        var trimmed = string.IsNullOrWhiteSpace(BoardTitle) ? "KanBan" : BoardTitle.Trim();
+        if (trimmed != BoardTitle)
+        {
+            BoardTitle = trimmed;
         }
     }
 

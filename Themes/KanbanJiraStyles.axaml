@@ -79,13 +79,42 @@
         <Setter Property="FontSize" Value="20"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
+    <Style Selector="TextBlock.boardTitleDisplay">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="MinWidth" Value="72"/>
+        <Setter Property="MaxWidth" Value="180"/>
+        <Setter Property="Height" Value="20"/>
+        <Setter Property="LineHeight" Value="20"/>
+        <Setter Property="Padding" Value="2,0"/>
+        <Setter Property="Foreground" Value="#3D4A5C"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Cursor" Value="IBeam"/>
+    </Style>
     <Style Selector="TextBox.ghost.boardTitle">
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="MinWidth" Value="72"/>
         <Setter Property="MaxWidth" Value="180"/>
+        <Setter Property="Height" Value="20"/>
+        <Setter Property="MinHeight" Value="20"/>
         <Setter Property="Padding" Value="2,0"/>
         <Setter Property="Foreground" Value="#3D4A5C"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="TextBox.ghost.boardTitle /template/ Border">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="TextBox.ghost.boardTitle:pointerover /template/ Border,
+                     TextBox.ghost.boardTitle:focus /template/ Border,
+                     TextBox.ghost.boardTitle:focus-within /template/ Border">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
     </Style>
     <Style Selector="Border.navSegmented">
         <Setter Property="Background" Value="#ECEAE4"/>

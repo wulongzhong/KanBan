@@ -60,10 +60,21 @@
               Margin="8,0,152,0"
               WindowDecorationProperties.ElementRole="User"
               PointerPressed="TitleBar_PointerPressed">
-            <TextBox Classes="ghost boardTitle"
-                     Text="{Binding BoardTitle}"
-                     HorizontalAlignment="Left"
-                     VerticalAlignment="Center"/>
+            <Grid HorizontalAlignment="Left"
+                  VerticalAlignment="Center"
+                  Height="20">
+                <TextBlock x:Name="BoardTitleLabel"
+                           Text="{Binding BoardTitle}"
+                           Classes="boardTitleDisplay"
+                           IsVisible="{Binding IsBoardTitleDisplayMode}"
+                           PointerPressed="BoardTitleLabel_PointerPressed"/>
+                <TextBox x:Name="BoardTitleTextBox"
+                         Classes="ghost boardTitle"
+                         Text="{Binding BoardTitle}"
+                         IsVisible="{Binding IsBoardTitleEditing}"
+                         Loaded="BoardTitleTextBox_Loaded"
+                         LostFocus="BoardTitleEdit_LostFocus"/>
+            </Grid>
 
             <StackPanel Orientation="Horizontal"
                         Spacing="2"
