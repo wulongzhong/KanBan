@@ -9,7 +9,7 @@ using KanBan.Services.Localization;
 namespace KanBan.Services;
 
 /// <summary>
-/// Windows system tray: minimize/close hides the main window; restore from tray icon or menu.
+/// Windows system tray: close hides the main window; minimize keeps the window in the taskbar.
 /// </summary>
 public sealed class TrayIconService : IDisposable
 {
@@ -41,7 +41,6 @@ public sealed class TrayIconService : IDisposable
         RefreshLocalizedText();
 
         window.Closing += OnWindowClosing;
-        window.PropertyChanged += OnWindowPropertyChanged;
         LocalizationService.Instance.PropertyChanged += OnLocalizationChanged;
     }
 
@@ -86,7 +85,6 @@ public sealed class TrayIconService : IDisposable
         if (_window is not null)
         {
             _window.Closing -= OnWindowClosing;
-            _window.PropertyChanged -= OnWindowPropertyChanged;
         }
 
         LocalizationService.Instance.PropertyChanged -= OnLocalizationChanged;
@@ -145,15 +143,6 @@ public sealed class TrayIconService : IDisposable
 
         e.Cancel = true;
         HideToTray();
-    }
-
-    private void OnWindowPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-    {
-        if (e.Property == Window.WindowStateProperty
-            && e.NewValue is WindowState.Minimized)
-        {
-            HideToTray();
-        }
     }
 
     private void OnLocalizationChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e) =>
