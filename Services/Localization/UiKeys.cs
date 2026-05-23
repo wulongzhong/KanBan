@@ -3,6 +3,8 @@ namespace KanBan.Services.Localization;
 public static class UiKeys
 {
     public const string AppTitle = "App.Title";
+    public const string TrayShow = "Tray.Show";
+    public const string TrayExit = "Tray.Exit";
     public const string ToolbarArchive = "Toolbar.Archive";
     public const string ToolbarSettings = "Toolbar.Settings";
     public const string ToolbarSwimlane = "Toolbar.Swimlane";

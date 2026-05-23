@@ -1,5 +1,7 @@
 {
   "App.Title": "KanBan",
+  "Tray.Show": "Show KanBan",
+  "Tray.Exit": "Exit",
   "Toolbar.Archive": "Archive",
   "Toolbar.Settings": "Settings",
   "Toolbar.Swimlane": "Swimlane",

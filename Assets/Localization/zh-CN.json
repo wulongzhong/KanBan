@@ -1,5 +1,7 @@
 {
   "App.Title": "KanBan",
+  "Tray.Show": "显示 KanBan",
+  "Tray.Exit": "退出",
   "Toolbar.Archive": "归档",
   "Toolbar.Settings": "设置",
   "Toolbar.Swimlane": "泳道",

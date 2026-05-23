@@ -95,8 +95,10 @@ public partial class MainWindow : Window
         if (!await viewModel.EnsureWorkspaceConfiguredAsync())
         {
             Close();
+            return;
         }
 
+        TrayIconService.Instance.Enable(this);
         Dispatcher.UIThread.Post(() => _languageComboReady = true, DispatcherPriority.Loaded);
     }
 
