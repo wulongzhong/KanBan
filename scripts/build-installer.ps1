@@ -1,7 +1,7 @@
 # Builds KanBan MSI with standard install-directory wizard (WiX WixUI_InstallDir).
 # Requires: .NET 9 SDK, WiX Toolset 6 (dotnet tool install -g wix)
 param(
-    [string]$Version = "1.0.0",
+    [string]$Version = "1.0.1",
     [ValidateSet("win-x64", "win-arm64")]
     [string]$Runtime = "win-x64"
 )

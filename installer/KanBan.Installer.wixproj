@@ -3,7 +3,7 @@
     <OutputName>KanBan</OutputName>
     <OutputType>Package</OutputType>
     <Platform>x64</Platform>
-    <ProductVersion>1.0.0.0</ProductVersion>
+    <ProductVersion>1.0.1.0</ProductVersion>
     <DefineConstants>ProductVersion=$(ProductVersion)</DefineConstants>
     <SuppressIces>ICE82</SuppressIces>
   </PropertyGroup>

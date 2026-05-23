@@ -154,7 +154,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\build-installer.ps1
 ```
 
 ```powershell
-.\scripts\build-installer.ps1 -Version 1.0.0 -Runtime win-x64
+.\scripts\build-installer.ps1 -Version 1.0.1 -Runtime win-x64
 .\scripts\build-installer.ps1 -Runtime win-arm64
 ```
 
