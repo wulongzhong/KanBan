@@ -52,6 +52,9 @@
         <Style Selector="StackPanel.swimlaneRow.collapsed">
             <Setter Property="Margin" Value="0,0,0,4"/>
         </Style>
+        <Style Selector="ItemsControl.laneColumns > ContentPresenter">
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+        </Style>
     </Window.Styles>
 
     <Grid RowDefinitions="40,*"
@@ -301,7 +304,8 @@
                                         </Grid>
                                     </Border>
 
-                                    <ItemsControl ItemsSource="{Binding Lanes}"
+                                    <ItemsControl Classes="laneColumns"
+                                                  ItemsSource="{Binding Lanes}"
                                                   IsVisible="{Binding IsExpanded}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
@@ -310,7 +314,7 @@
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="vm:LaneViewModel">
-                                <Grid Width="{Binding ColumnGridWidth}" VerticalAlignment="Top">
+                                <Grid Width="{Binding ColumnGridWidth}" VerticalAlignment="Stretch">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
@@ -318,9 +322,12 @@
                                     <Border Grid.Column="0"
                                             Classes="columnSeparator"
                                             IsVisible="{Binding ShowLeadingSeparator}"/>
-                                <StackPanel Grid.Column="1"
-                                            Width="{Binding ColumnWidth}"
-                                            IsVisible="{Binding IsExpanded}">
+                                <Grid Grid.Column="1"
+                                      Width="{Binding ColumnWidth}"
+                                      RowDefinitions="Auto,*"
+                                      VerticalAlignment="Stretch"
+                                      IsVisible="{Binding IsExpanded}">
+                                    <StackPanel Grid.Row="0">
                                     <Border Classes="laneCell">
                                         <Grid RowDefinitions="Auto,Auto">
                                             <Border Grid.Row="0" Padding="4,4,4,8" IsVisible="False">
@@ -530,7 +537,11 @@
                                                     IsVisible="{Binding IsAddCardButtonVisible}"/>
                                         </StackPanel>
                                     </Border>
-                                </StackPanel>
+                                    </StackPanel>
+                                    <Border Grid.Row="1"
+                                            Classes="laneDropZone"
+                                            Background="Transparent"/>
+                                </Grid>
                                     <Border Grid.Column="1"
                                             Width="{Binding ColumnWidth}"
                                             Classes="columnCollapsedStrip"

@@ -631,6 +631,11 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="4,0,4,8"/>
     </Style>
+    <Style Selector="Border.laneDropZone">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="MinHeight" Value="1"/>
+    </Style>
     <Style Selector="TextBlock.swimlaneTitle">
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="FontSize" Value="12"/>

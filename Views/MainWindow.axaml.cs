@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
@@ -829,8 +830,7 @@ public partial class MainWindow : Window
         if (_dragKind == DragKind.Card)
         {
             var targetCard = elements
-                .Select(control => control.DataContext)
-                .OfType<CardViewModel>()
+                .SelectMany(ResolveCardFromControl)
                 .FirstOrDefault(card => card.Id != _draggingId);
 
             if (targetCard is not null)
@@ -841,8 +841,7 @@ public partial class MainWindow : Window
             }
 
             var targetLane = elements
-                .Select(control => control.DataContext)
-                .OfType<LaneViewModel>()
+                .SelectMany(ResolveLaneFromControl)
                 .FirstOrDefault(lane => !lane.IsColumnHeader);
 
             if (targetLane is not null)
@@ -853,8 +852,7 @@ public partial class MainWindow : Window
         else if (_dragKind == DragKind.Lane)
         {
             var targetLane = elements
-                .Select(control => control.DataContext)
-                .OfType<LaneViewModel>()
+                .SelectMany(ResolveLaneFromControl)
                 .FirstOrDefault(lane => lane.IsColumnHeader && lane.Id != _draggingId);
 
             if (targetLane is not null)
@@ -1387,24 +1385,30 @@ public partial class MainWindow : Window
 
     private static CardViewModel? GetCardFromSender(object? sender)
     {
-        if (sender is StyledElement { DataContext: CardViewModel directCard })
-        {
-            return directCard;
-        }
+        return sender is Control control
+            ? ResolveCardFromControl(control).FirstOrDefault()
+            : null;
+    }
 
-        if (sender is not Visual visual)
+    private static IEnumerable<CardViewModel> ResolveCardFromControl(Control control)
+    {
+        foreach (var ancestor in control.GetSelfAndVisualAncestors().OfType<StyledElement>())
         {
-            return null;
-        }
-
-        foreach (var ancestor in visual.GetSelfAndVisualAncestors())
-        {
-            if (ancestor is StyledElement { DataContext: CardViewModel card })
+            if (ancestor.DataContext is CardViewModel card)
             {
-                return card;
+                yield return card;
             }
         }
+    }
 
-        return null;
+    private static IEnumerable<LaneViewModel> ResolveLaneFromControl(Control control)
+    {
+        foreach (var ancestor in control.GetSelfAndVisualAncestors().OfType<StyledElement>())
+        {
+            if (ancestor.DataContext is LaneViewModel lane)
+            {
+                yield return lane;
+            }
+        }
     }
 }
